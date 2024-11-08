@@ -15,10 +15,6 @@
  ********************************************************************************/
 #pragma once
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -28,8 +24,11 @@ extern "C" {
 #include "parser_txdef.h"
 #include "pb_common.h"
 #include "pb_decode.h"
-#include "protobuf/penumbra/core/transaction/v1/transaction.pb.h"
 #include "zxtypes.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 parser_error_t decode_spend_plan(const Bytes_t *input, spend_plan_t *spend_plan);
 

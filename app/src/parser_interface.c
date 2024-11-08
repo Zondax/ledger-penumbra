@@ -21,16 +21,16 @@
 #include "rslib.h"
 #include "zxformat.h"
 
-void print_buffer_interface(Bytes_t *buffer, const char *title) {
+void print_buffer_interface(uint8_t *buffer, size_t len, const char *title) {
 #if defined(LEDGER_SPECIFIC)
     ZEMU_LOGF(50, "%s\n", title);
     char print[700] = {0};
-    array_to_hexstr(print, sizeof(print), buffer->ptr, buffer->len);
+    array_to_hexstr(print, sizeof(print), buffer, len);
     ZEMU_LOGF(700, "%s\n", print);
 #else
     printf("%s: ", title);
-    for (uint16_t i = 0; i < buffer->len; i++) {
-        printf("%02x", buffer->ptr[i]);
+    for (size_t i = 0; i < len; i++) {
+        printf("%02x", buffer[i]);
     }
     printf("\n");
 #endif
@@ -45,10 +45,27 @@ parser_error_t compute_transaction_plan(transaction_plan_t *plan) {
     }
 
     // TODO: only for testing
-    Bytes_t output_bytes;
-    output_bytes.ptr = output;
-    output_bytes.len = 300;
-    print_buffer_interface(&output_bytes, "output_bytes");
+    print_buffer_interface(output, 300, "output_bytes");
+
+    return parser_ok;
+}
+
+parser_error_t compute_spend_action_hash(spend_plan_t *plan, action_hash_t *output) {
+    if (plan == NULL || output == NULL) 
+        return parser_unexpected_error;
+
+    // TODO: we need to get the spend key
+    spend_key_bytes_t sk_bytes = {
+        0xa1, 0xff, 0xba, 0x0c, 0x37, 0x93, 0x1f, 0x0a, 0x62, 0x61, 0x37, 0x52, 0x0d, 0xa6, 0x50, 0x63,
+        0x2d, 0x35, 0x85, 0x3b, 0xf5, 0x91, 0xb3, 0x6b, 0xb4, 0x28, 0x63, 0x0a, 0x4d, 0x87, 0xc4, 0xdc
+    };
+
+    if (rs_spend_action_hash(&sk_bytes, plan, (uint8_t *)output, 64) != parser_ok) {
+        return parser_unexpected_error;
+    }
+
+    // TODO: only for testing
+    print_buffer_interface((uint8_t *)output, 64, "spend action hash");
 
     return parser_ok;
 }

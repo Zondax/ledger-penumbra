@@ -1,56 +1,86 @@
-use core::{mem::MaybeUninit, ptr::addr_of_mut};
+use crate::address::Address;
+use crate::parser::{
+    address::AddressC,
+    bytes::BytesC,
+    plans::{rseed::Rseed, value::{Value, ValueC}},
+};
+use crate::ParserError;
+use decaf377::Fq;
 
-use arrayref::array_ref;
-use nom::bytes::complete::take;
-
-use crate::{utils::varint, FromBytes, ParserError};
-
-use super::{Address, Fq, Value};
-
-// proto:
-// message Note {
-//   asset.v1alpha1.Value value = 1;
-//   bytes rseed = 2;
-//   keys.v1alpha1.Address address = 3;
-// }
-
-#[cfg_attr(test, derive(Debug))]
-#[derive(Copy, PartialEq, Eq, Clone)]
-pub struct Note<'a> {
-    value: Value<'a>,
-    rseed: &'a [u8; 32],
-    address: Address<'a>,
-    transmission_key_s: Fq<'a>,
+pub struct Note {
+    /// The typed value recorded by this note.
+    value: Value,
+    /// A uniformly random 32-byte sequence used to derive an ephemeral secret key
+    /// and note blinding factor.
+    rseed: Rseed,
+    /// The address controlling this note.
+    address: Address,
+    /// The s-component of the transmission key of the destination address.
+    /// We store this separately to ensure that every `Note` is constructed
+    /// with a valid transmission key (the `ka::Public` does not validate
+    /// the curve point until it is used, since validation is not free).
+    transmission_key_s: Fq,
 }
 
-impl<'b> FromBytes<'b> for Note<'b> {
-    fn from_bytes_into(
-        input: &'b [u8],
-        out: &mut MaybeUninit<Self>,
-    ) -> Result<&'b [u8], nom::Err<ParserError>> {
-        let output = out.as_mut_ptr();
+#[repr(C)]
+#[derive(Clone)]
+#[cfg_attr(any(feature = "derive-debug", test), derive(Debug))]
+pub struct NoteC {
+    pub value: ValueC,
+    pub rseed: BytesC,
+    pub address: AddressC,
+}
 
-        // Parse the `Value`
-        let value = unsafe { &mut *addr_of_mut!((*output).value).cast() };
-        let input = Value::from_bytes_into(input, value)?;
+impl TryFrom<NoteC> for Note {
+    type Error = ParserError;
 
-        // Parse `rseed` as a 32-byte array
-        let (input, _) = varint(input)?;
-        let (input, rseed) = take(32usize)(input)?;
-        let rseed_ref = array_ref![rseed, 0, 32];
+    fn try_from(note_c: NoteC) -> Result<Self, Self::Error> {
+        let value = Value::try_from(note_c.value)?;
+        let rseed = Rseed::try_from(note_c.rseed)?;
+        let address = Address::try_from(note_c.address.inner.get_bytes()?)?;
+        let transmission_key_s = Fq::from_bytes_checked(&address.transmission_key().0).map_err(|_| ParserError::InvalidFvk).unwrap();
+    
+        Ok(Note {
+            value,
+            rseed,
+            address,
+            transmission_key_s,
+        })
+    }
+}
 
-        // Parse `Address`
-        let address = unsafe { &mut *addr_of_mut!((*output).address).cast() };
-        let input = Address::from_bytes_into(input, address)?;
+impl Note {
+    pub fn commit(&self) -> Result<Fq, ParserError> {
+        let commit = poseidon377::hash_6(
+            &Self::notecommit_domain_sep(),
+            (
+                self.note_blinding()?,
+                self.value.amount.clone().into(),
+                self.value.asset_id.0,
+                self.diversified_generator()?,
+                self.transmission_key_s,
+                self.clue_key()?,
+            ),
+        );
+        Ok(commit)
+    }
 
-        // Parse `transmission_key_s` (Fq type)
-        let transmission_key_s = unsafe { &mut *addr_of_mut!((*output).transmission_key_s).cast() };
-        let input = Fq::from_bytes_into(input, transmission_key_s)?;
+    pub fn note_blinding(&self) -> Result<Fq, ParserError> {
+        let rseed = self.rseed.derive_note_blinding()?;
+        Ok(rseed)
+    }
 
-        unsafe {
-            addr_of_mut!((*output).rseed).write(rseed_ref);
-        }
+    pub fn diversified_generator(&self) -> Result<Fq, ParserError> {
+        let diversifier_generator = self.address.diversifier().diversified_generator().vartime_compress_to_field();
+        Ok(diversifier_generator)
+    }
 
-        Ok(input)
+    pub fn clue_key(&self) -> Result<Fq, ParserError> {
+        let clue_key = self.address.clue_key();
+        Ok(Fq::from_le_bytes_mod_order(&clue_key.0[..]))
+    }
+
+    pub fn notecommit_domain_sep() -> Fq {
+        Fq::from_le_bytes_mod_order(blake2b_simd::blake2b(b"penumbra.notecommit").as_bytes())
     }
 }

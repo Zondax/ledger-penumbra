@@ -65,6 +65,9 @@ typedef enum {
     parser_detection_data_overflow,
     parser_actions_overflow,
     parser_spend_plan_error,
+    parser_output_plan_error,
+    parser_delegate_plan_error,
+    parser_undelegate_plan_error,
 } parser_error_t;
 
 typedef struct {

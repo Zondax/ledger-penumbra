@@ -67,7 +67,7 @@ impl MemoCiphertext {
         ciphertext[..memo_bytes.len()].copy_from_slice(memo_bytes);
 
         // Get memo key bytes
-        let memo_key_bytes = memo_key.get_bytes().ok_or(ParserError::UnexpectedError)?;
+        let memo_key_bytes = memo_key.get_bytes()?;
 
         // Create PayloadKey and encrypt
         let key = PayloadKey::from_bytes(memo_key_bytes);
