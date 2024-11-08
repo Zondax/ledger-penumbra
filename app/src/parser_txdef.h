@@ -32,7 +32,7 @@ extern "C" {
 #define ACTIONS_QTY 16
 
 #define ASSET_ID_LEN 32
-#define RSEED_LEN    32
+#define RSEED_LEN 32
 
 typedef struct {
     const uint8_t *ptr;
@@ -68,6 +68,15 @@ typedef struct {
 } note_t;
 
 typedef struct {
+    Bytes_t ik;
+} identity_key_t;
+
+typedef struct {
+    uint64_t index;
+    uint64_t start_height;
+} epoch_t;
+
+typedef struct {
     note_t note;
     uint64_t position;
     Bytes_t randomizer;
@@ -76,6 +85,36 @@ typedef struct {
     Bytes_t proof_blinding_s;
 } spend_plan_t;
 
+typedef struct {
+    value_t value;
+    address_plan_t dest_address;
+    Bytes_t rseed;
+    Bytes_t value_blinding;
+    Bytes_t proof_blinding_r;
+    Bytes_t proof_blinding_s;
+} output_plan_t;
+
+typedef struct {
+    bool has_validator_identity;
+    identity_key_t validator_identity;
+    uint64_t epoch_index;
+    bool has_unbonded_amount;
+    amount_t unbonded_amount;
+    bool has_delegation_amount;
+    amount_t delegation_amount;
+} delegate_plan_t;
+
+typedef struct {
+    bool has_validator_identity;
+    identity_key_t validator_identity;
+    uint64_t start_epoch_index;
+    bool has_unbonded_amount;
+    amount_t unbonded_amount;
+    bool has_delegation_amount;
+    amount_t delegation_amount;
+    bool has_from_epoch;
+    epoch_t from_epoch;
+} undelegate_plan_t;
 
 typedef struct {
     Bytes_t parameters;
@@ -103,11 +142,22 @@ typedef struct {
 
 typedef struct {
     uint8_t action_type;
-    Bytes_t action;
+    union {
+        spend_plan_t spend;
+        output_plan_t output;
+        delegate_plan_t delegate;
+        undelegate_plan_t undelegate;
+    } action;
 } action_t;
 
+typedef uint8_t action_hash_t[64];
 typedef struct {
-    action_t actions[ACTIONS_QTY];
+    uint8_t qty;
+    action_hash_t hashes[ACTIONS_QTY];
+} actions_hash_t;
+
+typedef struct {
+    actions_hash_t actions;
     transaction_parameters_t transaction_parameters;
     memo_plan_t memo;
     detection_data_t detection_data;

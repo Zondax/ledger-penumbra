@@ -13,7 +13,7 @@
 *  See the License for the specific language governing permissions and
 *  limitations under the License.
 ********************************************************************************/
-#![no_std]
+// #![no_std]
 #![no_builtins]
 #![allow(dead_code)]
 #![deny(unused_crate_dependencies)]
@@ -43,14 +43,14 @@ pub(crate) use utils::prf::{expand_fq, expand_fr};
 
 fn debug(_msg: &str) {}
 
-#[cfg(all(not(test), not(feature = "clippy"), not(feature = "fuzzing")))]
-use core::panic::PanicInfo;
+// #[cfg(all(not(test), not(feature = "clippy"), not(feature = "fuzzing")))]
+// use core::panic::PanicInfo;
 
-#[cfg(all(not(test), not(feature = "clippy"), not(feature = "fuzzing")))]
-#[panic_handler]
-fn panic(_info: &PanicInfo) -> ! {
-    loop {}
-}
+// #[cfg(all(not(test), not(feature = "clippy"), not(feature = "fuzzing")))]
+// #[panic_handler]
+// fn panic(_info: &PanicInfo) -> ! {
+//     loop {}
+// }
 
 extern "C" {
     fn check_app_canary();

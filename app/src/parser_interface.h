@@ -29,6 +29,7 @@ extern "C" {
 #include "zxmacros.h"
 
 parser_error_t compute_transaction_plan(transaction_plan_t *plan);
+parser_error_t compute_spend_action_hash(spend_plan_t *plan, action_hash_t *output);
 
 #ifdef __cplusplus
 }
