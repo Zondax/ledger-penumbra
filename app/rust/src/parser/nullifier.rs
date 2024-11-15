@@ -4,6 +4,9 @@ use crate::keys::nk::NullifierKey;
 pub struct Nullifier(pub Fq);
 
 impl Nullifier {
+    pub const LEN: usize = 32; 
+    pub const PROTO_LEN: usize = Self::LEN + 4;
+
     /// Derive the [`Nullifier`] for a positioned note or swap given its [`merkle::Position`]
     /// and [`Commitment`].
     pub fn derive(
@@ -19,5 +22,12 @@ impl Nullifier {
 
     fn nullifier_domain_sep() -> Fq {
         Fq::from_le_bytes_mod_order(blake2b_simd::blake2b(b"penumbra.nullifier").as_bytes())
+    }
+
+    pub fn to_proto(&self) -> [u8; Self::PROTO_LEN] {
+        let mut proto = [0u8; Self::PROTO_LEN];
+        proto[0..4].copy_from_slice(&[0x32, 0x22, 0x0a, 0x20]);
+        proto[4..].copy_from_slice(&self.0.to_bytes());
+        proto
     }
 }

@@ -24,8 +24,9 @@ extern crate no_std_compat as std;
 extern crate hex_literal;
 
 use poseidon377 as _;
+use educe as _;
+use arrayref as _;
 
-// pub(crate) mod addr;
 pub(crate) mod address;
 mod bolos;
 pub mod constants;
@@ -71,7 +72,7 @@ pub fn is_expert_mode() -> bool {
     unsafe { app_mode_expert() > 0 }
 }
 
-#[cfg(any(test, fuzzing))]
+#[cfg(any(test, feature = "fuzzing"))]
 pub fn is_expert_mode() -> bool {
     true
 }

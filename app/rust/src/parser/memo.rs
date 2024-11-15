@@ -45,6 +45,10 @@ impl MemoPlanC {
             && self.plaintext.text.len == 0
             && self.key.len == 0
     }
+
+    pub fn get_memo_key(&self) -> Result<&[u8], ParserError> {
+        self.key.get_bytes()
+    }
 }
 
 pub struct MemoCiphertext(pub [u8; MEMO_CIPHERTEXT_LEN_BYTES]);
@@ -71,7 +75,7 @@ impl MemoCiphertext {
 
         // Create PayloadKey and encrypt
         let key = PayloadKey::from_bytes(memo_key_bytes);
-        key.encrypt(&mut ciphertext, PayloadKind::Memo)
+        key.encrypt(&mut ciphertext, PayloadKind::Memo, MEMO_LEN_BYTES)
             .map_err(|_| ParserError::UnexpectedError)?;
 
         Ok(MemoCiphertext(ciphertext))

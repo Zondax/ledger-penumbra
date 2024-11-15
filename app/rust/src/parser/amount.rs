@@ -1,9 +1,18 @@
 use crate::ParserError;
 use decaf377::{Fq, Fr};
+use crate::constants::AMOUNT_LEN_BYTES;
 
 #[derive(Clone, Debug)]
 pub struct Amount {
     pub inner: u128,
+}
+
+impl Amount {
+    pub const LEN: usize = AMOUNT_LEN_BYTES;
+
+    pub fn to_le_bytes(&self) -> [u8; Self::LEN] {
+        self.inner.to_le_bytes()
+    }
 }
 
 impl TryFrom<AmountC> for Amount {
@@ -28,7 +37,7 @@ impl TryFrom<AmountC> for Amount {
         let inner = shifted + lo;
 
         Ok(Amount { inner })
-    }
+    }    
 }
 
 impl Into<Fq> for Amount {

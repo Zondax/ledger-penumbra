@@ -28,8 +28,8 @@ extern "C" {
 #include "zxerror.h"
 #include "zxmacros.h"
 
-parser_error_t compute_transaction_plan(transaction_plan_t *plan);
-parser_error_t compute_spend_action_hash(spend_plan_t *plan, action_hash_t *output);
+parser_error_t compute_transaction_plan(transaction_plan_t *plan, uint8_t *effect_hash, uint16_t effect_hash_len);
+parser_error_t compute_action_hash(spend_plan_t *plan, uint8_t action_type, action_hash_t *output);
 
 #ifdef __cplusplus
 }

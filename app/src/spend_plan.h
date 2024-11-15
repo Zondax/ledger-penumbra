@@ -30,7 +30,7 @@
 extern "C" {
 #endif
 
-parser_error_t decode_spend_plan(const Bytes_t *input, spend_plan_t *spend_plan);
+parser_error_t decode_spend_plan(const bytes_t *input, spend_plan_t *spend_plan);
 
 #ifdef __cplusplus
 }

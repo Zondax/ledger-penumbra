@@ -1,7 +1,7 @@
 use std::num::NonZeroU128;
 use crate::ParserError;
-use crate::parser::plans::id::Id;
-use crate::parser::plans::value::Value;
+use crate::parser::id::Id;
+use crate::parser::value::Value;
 
 // Define a constant for the maximum number of assets
 const MAX_ASSETS: usize = 10;
@@ -11,7 +11,6 @@ pub struct Balance {
     ids: [Id; MAX_ASSETS],
     balances: [NonZeroU128; MAX_ASSETS],
 }
-
 
 impl TryFrom<Value> for Balance {
     type Error = ParserError;

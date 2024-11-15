@@ -52,20 +52,20 @@ bool decode_variable_field(pb_istream_t *stream, const pb_field_t *field, void *
     return true;
 }
 
-void setup_decode_fixed_field(pb_callback_t *callback, fixed_size_field_t *arg, Bytes_t *bytes, uint16_t expected_size) {
+void setup_decode_fixed_field(pb_callback_t *callback, fixed_size_field_t *arg, bytes_t *bytes, uint16_t expected_size) {
     arg->bytes = bytes;
     arg->expected_size = expected_size;
     callback->funcs.decode = &decode_fixed_field;
     callback->arg = arg;
 }
 
-void setup_decode_variable_field(pb_callback_t *callback, variable_size_field_t *arg, Bytes_t *bytes) {
+void setup_decode_variable_field(pb_callback_t *callback, variable_size_field_t *arg, bytes_t *bytes) {
     arg->bytes = bytes;
     callback->funcs.decode = &decode_variable_field;
     callback->arg = arg;
 }
 
-parser_error_t extract_data_from_tag(Bytes_t *in, Bytes_t *out, uint32_t tag) {
+parser_error_t extract_data_from_tag(bytes_t *in, bytes_t *out, uint32_t tag) {
     const uint8_t *start = NULL;
     const uint8_t *end = NULL;
     bool eof = false;

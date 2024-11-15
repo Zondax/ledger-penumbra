@@ -14,14 +14,13 @@
 *  limitations under the License.
 ********************************************************************************/
 // use super::spend::SpendPlan;
-use crate::parser::bytes::BytesC;
 use crate::constants::ACTION_DATA_QTY;
-
 
 #[derive(Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
 pub enum ActionType {
     Spend = 0,
+    Output = 1,
 }
 
 #[repr(C)]
