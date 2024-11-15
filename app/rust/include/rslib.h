@@ -24,12 +24,10 @@ parser_error_t rs_compute_address(keys_t *keys, uint32_t account, uint8_t *rando
 // use to compute the full-viewing key
 parser_error_t rs_compute_keys(keys_t *keys);
 
-// use to compute the full-viewing key
-parser_error_t rs_compute_effect_hash();
-
 parser_error_t rs_compute_transaction_plan(transaction_plan_t *plan, uint8_t *output, size_t output_len);
 
 parser_error_t rs_spend_action_hash(spend_key_bytes_t *sk, spend_plan_t *plan, uint8_t *output, size_t output_len);
+parser_error_t rs_output_action_hash(spend_key_bytes_t *sk, output_plan_t *plan, bytes_t *memo_key, uint8_t *output, size_t output_len);
 
 int32_t rs_bech32_encode(const uint8_t *hrp_ptr, size_t hrp_len, const uint8_t *data_ptr, size_t data_len,
                          uint8_t *output_ptr, size_t output_len);

@@ -94,7 +94,7 @@ impl Address {
         &self.ck_d
     }
 
-    pub fn raw_bytes(&self) -> Result<[u8; Self::LEN], ParserError> {
+    pub fn to_bytes(&self) -> Result<[u8; Self::LEN], ParserError> {
         let mut bytes = [0; Self::LEN];
         bytes[0..16].copy_from_slice(self.diversifier().as_ref());
         bytes[16..48].copy_from_slice(&self.transmission_key().0);

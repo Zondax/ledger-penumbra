@@ -1,5 +1,3 @@
-use core::ptr::addr_of_mut;
-
 /*******************************************************************************
 *   (c) 2024 Zondax GmbH
 *
@@ -15,10 +13,7 @@ use core::ptr::addr_of_mut;
 *  See the License for the specific language governing permissions and
 *  limitations under the License.
 ********************************************************************************/
-use crate::{
-    effect_hash::{create_personalized_state, EffectHash},
-    ParserError,
-};
+use crate::effect_hash::{create_personalized_state, EffectHash};
 
 use super::bytes::BytesC;
 
@@ -30,12 +25,11 @@ pub struct TransactionParametersC {
 }
 
 impl TransactionParametersC {
-    pub fn effect_hash(&self) -> Result<EffectHash, ParserError> {
+    pub fn effect_hash(&self) -> EffectHash {
         let mut state =
             create_personalized_state("/penumbra.core.transaction.v1.TransactionParameters");
         let bytes = unsafe { core::slice::from_raw_parts(self.bytes.ptr, self.bytes.len as usize) };
         state.update(bytes);
-        let hash = state.finalize();
-        Ok(EffectHash(*hash.as_array()))
+        EffectHash(*state.finalize().as_array())
     }
 }

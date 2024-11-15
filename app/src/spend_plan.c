@@ -22,7 +22,7 @@
 #include "protobuf/penumbra/core/transaction/v1/transaction.pb.h"
 #include "zxformat.h"
 
-parser_error_t decode_spend_plan(const Bytes_t *data, spend_plan_t *output) {
+parser_error_t decode_spend_plan(const bytes_t *data, spend_plan_t *output) {
     penumbra_core_component_shielded_pool_v1_SpendPlan spend_plan =
         penumbra_core_component_shielded_pool_v1_SpendPlan_init_default;
 

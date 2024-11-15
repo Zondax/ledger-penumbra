@@ -17,42 +17,8 @@
 use crate::address::Address;
 use crate::constants::DETECTION_DATA_QTY;
 use crate::effect_hash::{create_personalized_state, EffectHash};
-use crate::keys::clue_key::Clue;
 use crate::parser::clue_plan::CluePlanC;
 use crate::ParserError;
-use core::{mem::MaybeUninit, ptr::addr_of_mut};
-
-use crate::{
-    parser::{CluePlan, ObjectList},
-    utils::varint,
-    FromBytes,
-};
-
-#[cfg_attr(test, derive(Debug))]
-#[derive(Copy, PartialEq, Eq, Clone)]
-pub struct DetectionDataPlan<'a>(ObjectList<'a, CluePlan<'a>>);
-
-impl<'a> FromBytes<'a> for DetectionDataPlan<'a> {
-    fn from_bytes_into(
-        input: &'a [u8],
-        out: &mut core::mem::MaybeUninit<Self>,
-    ) -> Result<&'a [u8], nom::Err<crate::ParserError>> {
-        let out = out.as_mut_ptr();
-
-        let (rem, size) = varint(input)?;
-
-        let detection: &mut MaybeUninit<ObjectList<'a, CluePlan<'a>>> =
-            unsafe { &mut *addr_of_mut!((*out).0).cast() };
-
-        let rem = ObjectList::new_into_with_len(rem, detection, size as usize)?;
-
-        Ok(rem)
-    }
-}
-
-pub struct DetectionData {
-    pub fmd_clues: [Clue; DETECTION_DATA_QTY],
-}
 
 #[repr(C)]
 #[cfg_attr(any(feature = "derive-debug", test), derive(Debug))]

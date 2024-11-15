@@ -20,6 +20,7 @@
 #include "keys_def.h"
 #include "rslib.h"
 #include "zxformat.h"
+#include "protobuf/penumbra/core/transaction/v1/transaction.pb.h"
 
 void print_buffer_interface(uint8_t *buffer, size_t len, const char *title) {
 #if defined(LEDGER_SPECIFIC)
@@ -36,21 +37,17 @@ void print_buffer_interface(uint8_t *buffer, size_t len, const char *title) {
 #endif
 }
 
-parser_error_t compute_transaction_plan(transaction_plan_t *plan) {
-    if (plan == NULL) return parser_unexpected_error;
+parser_error_t compute_transaction_plan(transaction_plan_t *plan, uint8_t *effect_hash, uint16_t effect_hash_len) {
+    if (plan == NULL || effect_hash == NULL) return parser_unexpected_error;
 
-    uint8_t output[300] = {0};
-    if (rs_compute_transaction_plan(plan, output, sizeof(output)) != parser_ok) {
+    if (rs_compute_transaction_plan(plan, effect_hash, effect_hash_len) != parser_ok) {
         return parser_unexpected_error;
     }
-
-    // TODO: only for testing
-    print_buffer_interface(output, 300, "output_bytes");
 
     return parser_ok;
 }
 
-parser_error_t compute_spend_action_hash(spend_plan_t *plan, action_hash_t *output) {
+parser_error_t compute_action_hash(spend_plan_t *plan, uint8_t action_type, action_hash_t *output) {
     if (plan == NULL || output == NULL) 
         return parser_unexpected_error;
 
@@ -60,8 +57,20 @@ parser_error_t compute_spend_action_hash(spend_plan_t *plan, action_hash_t *outp
         0x2d, 0x35, 0x85, 0x3b, 0xf5, 0x91, 0xb3, 0x6b, 0xb4, 0x28, 0x63, 0x0a, 0x4d, 0x87, 0xc4, 0xdc
     };
 
-    if (rs_spend_action_hash(&sk_bytes, plan, (uint8_t *)output, 64) != parser_ok) {
-        return parser_unexpected_error;
+    bytes_t memo = {0};
+    switch (action_type) {
+        case penumbra_core_transaction_v1_ActionPlan_spend_tag:
+            if (rs_spend_action_hash(&sk_bytes, plan, (uint8_t *)output, 64) != parser_ok) {
+                return parser_unexpected_error;
+            }
+            break;
+        case penumbra_core_transaction_v1_ActionPlan_output_tag:
+            if (rs_output_action_hash(&sk_bytes, plan, &memo, (uint8_t *)output, 64) != parser_ok) {
+                return parser_unexpected_error;
+            }
+            break;
+        default:
+            return parser_unexpected_error;
     }
 
     // TODO: only for testing

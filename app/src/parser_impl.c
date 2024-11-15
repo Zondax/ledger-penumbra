@@ -30,7 +30,7 @@ static bool decode_detection_data(pb_istream_t *stream, const pb_field_t *field,
 static uint16_t actions_qty = 0;
 static uint16_t detection_data_qty = 0;
 
-void print_buffer(Bytes_t *buffer, const char *title) {
+void print_buffer(bytes_t *buffer, const char *title) {
 #if defined(LEDGER_SPECIFIC)
     ZEMU_LOGF(50, "%s\n", title);
     char print[1000] = {0};
@@ -53,7 +53,7 @@ void print_string(const char *str) {
 #endif
 }
 
-parser_error_t decode_output_plan(const Bytes_t *data, output_plan_t *output) {
+parser_error_t decode_output_plan(const bytes_t *data, output_plan_t *output) {
     penumbra_core_component_shielded_pool_v1_OutputPlan output_plan =
         penumbra_core_component_shielded_pool_v1_OutputPlan_init_default;
 
@@ -86,7 +86,7 @@ parser_error_t decode_output_plan(const Bytes_t *data, output_plan_t *output) {
     return parser_ok;
 }
 
-parser_error_t decode_delegate_plan(const Bytes_t *data, delegate_plan_t *delegate) {
+parser_error_t decode_delegate_plan(const bytes_t *data, delegate_plan_t *delegate) {
     penumbra_core_component_stake_v1_Delegate delegate_plan =
         penumbra_core_component_stake_v1_Delegate_init_default;
 
@@ -115,7 +115,7 @@ parser_error_t decode_delegate_plan(const Bytes_t *data, delegate_plan_t *delega
     return parser_ok;
 }
 
-parser_error_t decode_undelegate_plan(const Bytes_t *data, undelegate_plan_t *undelegate) {
+parser_error_t decode_undelegate_plan(const bytes_t *data, undelegate_plan_t *undelegate) {
     penumbra_core_component_stake_v1_Undelegate undelegate_plan =
         penumbra_core_component_stake_v1_Undelegate_init_default;
 
@@ -160,7 +160,7 @@ bool decode_action(pb_istream_t *stream, const pb_field_t *field, void **arg) {
         return false;
     }
 
-    Bytes_t action_data;
+    bytes_t action_data;
     action_data.ptr = stream->state + 3;
     action_data.len = stream->bytes_left - 3;
 
@@ -223,7 +223,7 @@ bool decode_detection_data(pb_istream_t *stream, const pb_field_t *field, void *
 }
 
 parser_error_t _read(parser_context_t *c, parser_tx_t *v) {
-    Bytes_t data;
+    bytes_t data;
     action_t actions_plan[ACTIONS_QTY];
     data.ptr = c->buffer;
     data.len = c->bufferLen;
@@ -285,6 +285,16 @@ parser_error_t _read(parser_context_t *c, parser_tx_t *v) {
                 // printf("amount hi: %lu\n", actions_plan[i].action.spend.note.value.amount.hi);
                 // printf("amount lo: %lu\n", actions_plan[i].action.spend.note.value.amount.lo);
                 break;
+            case penumbra_core_transaction_v1_ActionPlan_output_tag:
+                print_buffer(&actions_plan[i].action.output.value.asset_id.inner, "real output action note value asset id inner");
+                // printf("output value amount hi: %lu\n", actions_plan[i].action.output.value.amount.hi);
+                // printf("output value amount lo: %lu\n", actions_plan[i].action.output.value.amount.lo);
+                print_buffer(&actions_plan[i].action.output.dest_address.inner, "real output action note dest address inner");
+                print_buffer(&actions_plan[i].action.output.rseed, "real output action note rseed");
+                print_buffer(&actions_plan[i].action.output.value_blinding, "real output action note value_blinding");
+                print_buffer(&actions_plan[i].action.output.proof_blinding_r, "real output action note proof_blinding_r");
+                print_buffer(&actions_plan[i].action.output.proof_blinding_s, "real output action note proof_blinding_s");
+                break;
         }
     }
 
@@ -295,15 +305,19 @@ parser_error_t _read(parser_context_t *c, parser_tx_t *v) {
     print_buffer(&v->plan.memo.plaintext.return_address.alt_bech32m, "real memo return address alt bech32m");
 
     for (uint16_t i = 0; i < actions_qty; i++) {
-        if (actions_plan[i].action_type == penumbra_core_transaction_v1_ActionPlan_spend_tag) {
-            compute_spend_action_hash(&actions_plan[i].action.spend, &v->plan.actions.hashes[i]);
-        }
+        compute_action_hash(&actions_plan[i].action.spend, actions_plan[i].action_type, &v->plan.actions.hashes[i]);
     }
     v->plan.actions.qty = actions_qty;
 
-    compute_transaction_plan(&v->plan);
+    compute_transaction_plan(&v->plan, v->effect_hash, sizeof(v->effect_hash));
 
-    return parser_unexpected_error;
+    // TODO: only for testing
+    bytes_t effect_hash;
+    effect_hash.ptr = v->effect_hash;
+    effect_hash.len = sizeof(v->effect_hash);
+    print_buffer(&effect_hash, "effect_hash");
+
+    return parser_ok;
 }
 
 const char *parser_getErrorDescription(parser_error_t err) {
