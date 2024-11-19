@@ -13,7 +13,8 @@
 *  See the License for the specific language governing permissions and
 *  limitations under the License.
 ********************************************************************************/
-use crate::effect_hash::{create_personalized_state, EffectHash};
+
+use crate::parser::effect_hash::{create_personalized_state, EffectHash};
 
 use super::bytes::BytesC;
 

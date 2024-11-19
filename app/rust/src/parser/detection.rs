@@ -16,7 +16,7 @@
 
 use crate::address::Address;
 use crate::constants::DETECTION_DATA_QTY;
-use crate::effect_hash::{create_personalized_state, EffectHash};
+use crate::parser::effect_hash::{create_personalized_state, EffectHash};
 use crate::parser::clue_plan::CluePlanC;
 use crate::ParserError;
 

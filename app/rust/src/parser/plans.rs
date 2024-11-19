@@ -13,14 +13,16 @@
 *  See the License for the specific language governing permissions and
 *  limitations under the License.
 ********************************************************************************/
+
 use crate::parser::{
     detection::DetectionDataPlanC,
     memo::MemoPlanC,
     action::ActionsHashC,
+    action::ActionPlan,
 };
 
 use crate::keys::spend_key::SpendKeyBytes;
-use crate::effect_hash::EffectHash;
+use crate::parser::effect_hash::EffectHash;
 use crate::parser::bytes::BytesC;
 use crate::parser::parameters::TransactionParametersC;
 use crate::ParserError;
@@ -140,6 +142,45 @@ pub unsafe extern "C" fn rs_output_action_hash(
 
     if let Ok(body_hash_bytes) = body_hash_bytes {
         let body_hash_array = body_hash_bytes.as_array();
+        let copy_len: usize = core::cmp::min(output.len(), body_hash_array.len());
+        output[..copy_len].copy_from_slice(&body_hash_array[..copy_len]);
+    }
+
+    ParserError::Ok as u32
+}
+
+#[no_mangle]
+/// Use to compute an address and write it back into output
+/// argument.
+pub unsafe extern "C" fn rs_generic_action_hash(
+    data: &BytesC,
+    action_type: u8,
+    output: *mut u8,
+    output_len: usize,
+) -> u32 {
+    crate::zlog("rs_generic_action_hash\x00");
+    let output = std::slice::from_raw_parts_mut(output, output_len);
+
+    if output.len() < 64 {
+        return ParserError::Ok as u32;
+    }
+
+    let action_type = ActionPlan::from(action_type);
+    let effect_hash: EffectHash;
+    if let Ok(data_to_hash) = data.get_bytes() {
+        match action_type {
+            ActionPlan::Delegate => {
+                effect_hash = EffectHash::from_proto_effecting_data("/penumbra.core.component.stake.v1.Delegate", data_to_hash);
+            }
+            ActionPlan::Undelegate => {
+                effect_hash = EffectHash::from_proto_effecting_data("/penumbra.core.component.stake.v1.Undelegate", data_to_hash);
+            }
+            _ => {
+                return ParserError::UnexpectedData as u32;
+            }
+        }
+
+        let body_hash_array = effect_hash.as_bytes();
         let copy_len: usize = core::cmp::min(output.len(), body_hash_array.len());
         output[..copy_len].copy_from_slice(&body_hash_array[..copy_len]);
     }

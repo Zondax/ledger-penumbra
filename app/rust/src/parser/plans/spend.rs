@@ -1,4 +1,19 @@
-use crate::effect_hash::{create_personalized_state, EffectHash};
+/*******************************************************************************
+*   (c) 2024 Zondax GmbH
+*
+*  Licensed under the Apache License, Version 2.0 (the "License");
+*  you may not use this file except in compliance with the License.
+*  You may obtain a copy of the License at
+*
+*      http://www.apache.org/licenses/LICENSE-2.0
+*
+*  Unless required by applicable law or agreed to in writing, software
+*  distributed under the License is distributed on an "AS IS" BASIS,
+*  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+*  See the License for the specific language governing permissions and
+*  limitations under the License.
+********************************************************************************/
+
 use crate::keys::FullViewingKey;
 use crate::parser::{
     bytes::BytesC,
@@ -6,6 +21,7 @@ use crate::parser::{
     commitment::Commitment,
     nullifier::Nullifier,
     value::{Sign, Value},
+    effect_hash::{create_personalized_state, EffectHash},
 };
 use crate::ParserError;
 use decaf377::Fr;
@@ -31,7 +47,7 @@ pub struct SpendPlanC {
 
 impl SpendPlanC {
     pub fn effect_hash(&self, fvk: &FullViewingKey) -> Result<EffectHash, ParserError> {
-        let body = self.body(fvk);
+        let body = self.spend_body(fvk);
 
         if let Ok(body) = body {
             let mut state =
@@ -51,7 +67,7 @@ impl SpendPlanC {
         }
     }
 
-    pub fn body(&self, fvk: &FullViewingKey) -> Result<Body, ParserError> {
+    pub fn spend_body(&self, fvk: &FullViewingKey) -> Result<Body, ParserError> {
         Ok(Body {
             balance_commitment: self
                 .balance()?

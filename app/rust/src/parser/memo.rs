@@ -18,7 +18,8 @@ use super::memo_plain_text::MemoPlaintextC;
 use super::symmetric::{PayloadKey, PayloadKind};
 use crate::constants::{MEMO_CIPHERTEXT_LEN_BYTES, MEMO_LEN_BYTES};
 use crate::ParserError;
-use crate::{effect_hash::create_personalized_state, parser::bytes::BytesC, EffectHash};
+use crate::parser::effect_hash::{create_personalized_state, EffectHash};
+use crate::parser::bytes::BytesC;
 
 #[repr(C)]
 #[derive(Default)]
