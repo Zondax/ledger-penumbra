@@ -160,9 +160,12 @@ bool decode_action(pb_istream_t *stream, const pb_field_t *field, void **arg) {
         return false;
     }
 
-    bytes_t action_data;
-    action_data.ptr = stream->state + 3;
-    action_data.len = stream->bytes_left - 3;
+    bytes_t action_data = {
+        .ptr = stream->state + 3,
+        .len = stream->bytes_left - 3
+    };
+
+    decode_arg[actions_qty].action_data = action_data;
 
     if (!pb_decode(stream, penumbra_core_transaction_v1_ActionPlan_fields, &action)) {
         return false;
@@ -223,8 +226,7 @@ bool decode_detection_data(pb_istream_t *stream, const pb_field_t *field, void *
 }
 
 parser_error_t _read(parser_context_t *c, parser_tx_t *v) {
-    bytes_t data;
-    action_t actions_plan[ACTIONS_QTY];
+    bytes_t data = {0};
     data.ptr = c->buffer;
     data.len = c->bufferLen;
     actions_qty = 0;
@@ -244,7 +246,7 @@ parser_error_t _read(parser_context_t *c, parser_tx_t *v) {
 
     // actions callbacks
     request.actions.funcs.decode = &decode_action;
-    request.actions.arg = &actions_plan;
+    request.actions.arg = &v->actions_plan;
 
     // detection data callbacks
     request.detection_data.clue_plans.funcs.decode = &decode_detection_data;
@@ -267,33 +269,36 @@ parser_error_t _read(parser_context_t *c, parser_tx_t *v) {
     // get transaction parameters
     extract_data_from_tag(&data, &v->plan.transaction_parameters.parameters,
                           penumbra_core_transaction_v1_TransactionPlan_transaction_parameters_tag);
+    v->plan.actions.qty = actions_qty;
+
+    // print transaction parameters
     print_buffer(&v->plan.transaction_parameters.parameters, "real transaction parameters");
 
     // print actions
     for (uint16_t i = 0; i < ACTIONS_QTY; i++) {
-        switch (actions_plan[i].action_type) {
+        switch (v->actions_plan[i].action_type) {
             case penumbra_core_transaction_v1_ActionPlan_spend_tag:
-                print_buffer(&actions_plan[i].action.spend.note.address.inner, "real spend action note address inner");
-                print_buffer(&actions_plan[i].action.spend.note.value.asset_id.inner, "real spend action note value asset id inner");
-                print_buffer(&actions_plan[i].action.spend.note.rseed, "real spend action note rseed");
-                print_buffer(&actions_plan[i].action.spend.randomizer, "real spend action proof randomizer");
-                print_buffer(&actions_plan[i].action.spend.value_blinding, "real spend action proof value_blinding");
-                print_buffer(&actions_plan[i].action.spend.proof_blinding_r, "real spend action proof proof_blinding_r");
-                print_buffer(&actions_plan[i].action.spend.proof_blinding_s, "real spend action proof proof_blinding_s");
+                print_buffer(&v->actions_plan[i].action.spend.note.address.inner, "real spend action note address inner");
+                print_buffer(&v->actions_plan[i].action.spend.note.value.asset_id.inner, "real spend action note value asset id inner");
+                print_buffer(&v->actions_plan[i].action.spend.note.rseed, "real spend action note rseed");
+                print_buffer(&v->actions_plan[i].action.spend.randomizer, "real spend action proof randomizer");
+                print_buffer(&v->actions_plan[i].action.spend.value_blinding, "real spend action proof value_blinding");
+                print_buffer(&v->actions_plan[i].action.spend.proof_blinding_r, "real spend action proof proof_blinding_r");
+                print_buffer(&v->actions_plan[i].action.spend.proof_blinding_s, "real spend action proof proof_blinding_s");
 
                 // printf("position: %lu\n", actions_plan[i].action.spend.position);
                 // printf("amount hi: %lu\n", actions_plan[i].action.spend.note.value.amount.hi);
                 // printf("amount lo: %lu\n", actions_plan[i].action.spend.note.value.amount.lo);
                 break;
             case penumbra_core_transaction_v1_ActionPlan_output_tag:
-                print_buffer(&actions_plan[i].action.output.value.asset_id.inner, "real output action note value asset id inner");
+                print_buffer(&v->actions_plan[i].action.output.value.asset_id.inner, "real output action note value asset id inner");
                 // printf("output value amount hi: %lu\n", actions_plan[i].action.output.value.amount.hi);
                 // printf("output value amount lo: %lu\n", actions_plan[i].action.output.value.amount.lo);
-                print_buffer(&actions_plan[i].action.output.dest_address.inner, "real output action note dest address inner");
-                print_buffer(&actions_plan[i].action.output.rseed, "real output action note rseed");
-                print_buffer(&actions_plan[i].action.output.value_blinding, "real output action note value_blinding");
-                print_buffer(&actions_plan[i].action.output.proof_blinding_r, "real output action note proof_blinding_r");
-                print_buffer(&actions_plan[i].action.output.proof_blinding_s, "real output action note proof_blinding_s");
+                print_buffer(&v->actions_plan[i].action.output.dest_address.inner, "real output action note dest address inner");
+                print_buffer(&v->actions_plan[i].action.output.rseed, "real output action note rseed");
+                print_buffer(&v->actions_plan[i].action.output.value_blinding, "real output action note value_blinding");
+                print_buffer(&v->actions_plan[i].action.output.proof_blinding_r, "real output action note proof_blinding_r");
+                print_buffer(&v->actions_plan[i].action.output.proof_blinding_s, "real output action note proof_blinding_s");
                 break;
         }
     }
@@ -303,19 +308,6 @@ parser_error_t _read(parser_context_t *c, parser_tx_t *v) {
     print_buffer(&v->plan.memo.plaintext.text, "real memo plaintext text");
     print_buffer(&v->plan.memo.plaintext.return_address.inner, "real memo return address inner");
     print_buffer(&v->plan.memo.plaintext.return_address.alt_bech32m, "real memo return address alt bech32m");
-
-    for (uint16_t i = 0; i < actions_qty; i++) {
-        compute_action_hash(&actions_plan[i].action.spend, actions_plan[i].action_type, &v->plan.actions.hashes[i]);
-    }
-    v->plan.actions.qty = actions_qty;
-
-    compute_transaction_plan(&v->plan, v->effect_hash, sizeof(v->effect_hash));
-
-    // TODO: only for testing
-    bytes_t effect_hash;
-    effect_hash.ptr = v->effect_hash;
-    effect_hash.len = sizeof(v->effect_hash);
-    print_buffer(&effect_hash, "effect_hash");
 
     return parser_ok;
 }

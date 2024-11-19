@@ -23,6 +23,7 @@ extern "C" {
 #include <stdint.h>
 
 #include "parser_txdef.h"
+#include "keys_def.h"
 
 #define CHECK_ERROR(__CALL)                   \
     {                                         \
@@ -75,6 +76,7 @@ typedef struct {
     uint16_t bufferLen;
     uint16_t offset;
     parser_tx_t *tx_obj;
+    spend_key_bytes_t *sk_bytes;
 } parser_context_t;
 
 #ifdef __cplusplus

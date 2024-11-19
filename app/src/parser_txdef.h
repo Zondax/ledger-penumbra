@@ -142,6 +142,7 @@ typedef struct {
 
 typedef struct {
     uint8_t action_type;
+    bytes_t action_data;
     union {
         spend_plan_t spend;
         output_plan_t output;
@@ -165,6 +166,7 @@ typedef struct {
 
 typedef struct {
     transaction_plan_t plan;
+    action_t actions_plan[ACTIONS_QTY];
     uint8_t effect_hash[64];
 } parser_tx_t;
 

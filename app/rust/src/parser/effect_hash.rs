@@ -40,11 +40,16 @@ impl EffectHash {
     pub fn from_array(array: [u8; 64]) -> Self {
         EffectHash(array)
     }
-}
 
-impl EffectHash {
     pub fn as_bytes(&self) -> &[u8; 64] {
         &self.0
+    }
+
+    pub fn from_proto_effecting_data(personalization: &str, data: &[u8]) -> EffectHash {
+        let mut state = create_personalized_state(personalization);
+        state.update(data);
+
+        EffectHash(*state.finalize().as_array())
     }
 }
 

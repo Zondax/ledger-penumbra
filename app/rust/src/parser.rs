@@ -39,7 +39,7 @@ pub mod nullifier;
 pub mod rseed;
 pub mod symmetric;
 pub mod value;
-
+pub mod effect_hash;
 pub use error::ParserError;
 
 #[derive(Clone, Copy, PartialEq, Eq)]

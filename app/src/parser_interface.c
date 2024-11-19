@@ -37,44 +37,44 @@ void print_buffer_interface(uint8_t *buffer, size_t len, const char *title) {
 #endif
 }
 
-parser_error_t compute_transaction_plan(transaction_plan_t *plan, uint8_t *effect_hash, uint16_t effect_hash_len) {
-    if (plan == NULL || effect_hash == NULL) return parser_unexpected_error;
+zxerr_t compute_transaction_plan(transaction_plan_t *plan, uint8_t *effect_hash, uint16_t effect_hash_len) {
+    if (plan == NULL || effect_hash == NULL) return zxerr_unknown;
 
     if (rs_compute_transaction_plan(plan, effect_hash, effect_hash_len) != parser_ok) {
-        return parser_unexpected_error;
+        return zxerr_unknown;
     }
 
-    return parser_ok;
+    return zxerr_ok;
 }
 
-parser_error_t compute_action_hash(spend_plan_t *plan, uint8_t action_type, action_hash_t *output) {
-    if (plan == NULL || output == NULL) 
-        return parser_unexpected_error;
+zxerr_t compute_action_hash(action_t *action, spend_key_bytes_t *sk_bytes, bytes_t *memo_key,action_hash_t *output) {
+    if (action == NULL || output == NULL) 
+        return zxerr_unknown;
 
-    // TODO: we need to get the spend key
-    spend_key_bytes_t sk_bytes = {
-        0xa1, 0xff, 0xba, 0x0c, 0x37, 0x93, 0x1f, 0x0a, 0x62, 0x61, 0x37, 0x52, 0x0d, 0xa6, 0x50, 0x63,
-        0x2d, 0x35, 0x85, 0x3b, 0xf5, 0x91, 0xb3, 0x6b, 0xb4, 0x28, 0x63, 0x0a, 0x4d, 0x87, 0xc4, 0xdc
-    };
-
-    bytes_t memo = {0};
-    switch (action_type) {
+    switch (action->action_type) {
         case penumbra_core_transaction_v1_ActionPlan_spend_tag:
-            if (rs_spend_action_hash(&sk_bytes, plan, (uint8_t *)output, 64) != parser_ok) {
-                return parser_unexpected_error;
-            }
+            if (sk_bytes == NULL)
+                return zxerr_unknown;
+            if (rs_spend_action_hash(sk_bytes, &action->action.spend, (uint8_t *)output, 64) != parser_ok) 
+                return zxerr_encoding_failed;
             break;
         case penumbra_core_transaction_v1_ActionPlan_output_tag:
-            if (rs_output_action_hash(&sk_bytes, plan, &memo, (uint8_t *)output, 64) != parser_ok) {
-                return parser_unexpected_error;
-            }
+            if (sk_bytes == NULL)
+                return zxerr_unknown; 
+            if (rs_output_action_hash(sk_bytes, &action->action.output, memo_key, (uint8_t *)output, 64) != parser_ok)
+                return zxerr_encoding_failed;
+            break;
+        case penumbra_core_transaction_v1_ActionPlan_delegate_tag:
+        case penumbra_core_transaction_v1_ActionPlan_undelegate_tag:
+            if (rs_generic_action_hash(&action->action_data, action->action_type, (uint8_t *)output, 64) != parser_ok)
+                return zxerr_encoding_failed;
             break;
         default:
-            return parser_unexpected_error;
+            return zxerr_unknown;
     }
 
     // TODO: only for testing
     print_buffer_interface((uint8_t *)output, 64, "spend action hash");
 
-    return parser_ok;
+    return zxerr_ok;
 }
