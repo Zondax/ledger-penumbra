@@ -28,7 +28,7 @@ extern "C" {
 #include "zxerror.h"
 #include "zxmacros.h"
 
-zxerr_t compute_transaction_plan(transaction_plan_t *plan, uint8_t *effect_hash, uint16_t effect_hash_len);
+zxerr_t compute_effect_hash(transaction_plan_t *plan, uint8_t *effect_hash, uint16_t effect_hash_len);
 zxerr_t compute_action_hash(action_t *action, spend_key_bytes_t *sk_bytes, bytes_t *memo_key, action_hash_t *output);
 
 #ifdef __cplusplus

@@ -25,8 +25,8 @@ extern "C" {
 
 #include "coin.h"
 #include "keys_def.h"
-#include "zxerror.h"
 #include "parser_txdef.h"
+#include "zxerror.h"
 
 extern uint32_t hdPath[HDPATH_LEN_DEFAULT];
 

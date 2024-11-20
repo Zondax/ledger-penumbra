@@ -65,12 +65,12 @@ impl TransactionPlanC {
 #[no_mangle]
 /// Use to compute an address and write it back into output
 /// argument.
-pub unsafe extern "C" fn rs_compute_transaction_plan(
+pub unsafe extern "C" fn rs_compute_effect_hash(
     plan: &TransactionPlanC,
     output: *mut u8,
     output_len: usize,
 ) -> u32 {
-    crate::zlog("rs_compute_transaction_plan\x00");
+    crate::zlog("rs_compute_effect_hash\x00");
     let output = std::slice::from_raw_parts_mut(output, output_len);
 
     if output.len() < EFFECT_HASH_LEN {
