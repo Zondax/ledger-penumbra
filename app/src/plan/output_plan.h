@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  (c) 2018 - 2024 Zondax AG
+ *  (c) 2018 - 2023 Zondax AG
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,30 +13,25 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  ********************************************************************************/
-#include "crypto_helper.h"
-// #include "keys_personalizations.h"
-#include <string.h>
+#pragma once
 
-#include "keys_def.h"
-#include "rslib.h"
-#include "zxformat.h"
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <zxmacros.h>
 
-zxerr_t compute_address(keys_t *keys, uint32_t account, uint8_t *randomizer) {
-    if (keys == NULL) return zxerr_unknown;
+#include "parser_common.h"
+#include "parser_txdef.h"
+#include "pb_common.h"
+#include "pb_decode.h"
+#include "zxtypes.h"
 
-    if (rs_compute_address(keys, account, randomizer) != parser_ok) {
-        return zxerr_unknown;
-    }
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-    return zxerr_ok;
+parser_error_t decode_output_plan(const bytes_t *data, output_plan_t *output);
+
+#ifdef __cplusplus
 }
-
-zxerr_t compute_keys(keys_t *keys) {
-    if (keys == NULL) return zxerr_unknown;
-
-    if (rs_compute_keys(keys) != parser_ok) {
-        return zxerr_unknown;
-    }
-
-    return zxerr_ok;
-}
+#endif

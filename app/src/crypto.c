@@ -20,9 +20,9 @@
 #include "crypto_helper.h"
 #include "cx.h"
 #include "keys_def.h"
-#include "zxmacros.h"
 #include "parser_interface.h"
 #include "zxformat.h"
+#include "zxmacros.h"
 
 uint32_t hdPath[HDPATH_LEN_DEFAULT];
 
@@ -143,16 +143,17 @@ zxerr_t crypto_sign(parser_tx_t *tx_obj, uint8_t *signature, uint16_t signatureM
     CATCH_ZX_ERROR(computeSpendKey(&keys));
 
     for (uint16_t i = 0; i < tx_obj->plan.actions.qty; i++) {
-        CATCH_ZX_ERROR(compute_action_hash(&tx_obj->actions_plan[i], &keys.skb, &tx_obj->plan.memo.key, &tx_obj->plan.actions.hashes[i]));
+        CATCH_ZX_ERROR(compute_action_hash(&tx_obj->actions_plan[i], &keys.skb, &tx_obj->plan.memo.key,
+                                           &tx_obj->plan.actions.hashes[i]));
     }
 
-    CATCH_ZX_ERROR(compute_transaction_plan(&tx_obj->plan, tx_obj->effect_hash, sizeof(tx_obj->effect_hash)));
+    CATCH_ZX_ERROR(compute_effect_hash(&tx_obj->plan, tx_obj->effect_hash, sizeof(tx_obj->effect_hash)));
 
     MEMCPY(signature, tx_obj->effect_hash, EFFECT_HASH_LEN);
 
     return zxerr_ok;
 
-catch_zx_error: 
+catch_zx_error:
     MEMZERO(&keys, sizeof(keys));
     MEMZERO(signature, signatureMaxlen);
 

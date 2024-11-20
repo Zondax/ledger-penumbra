@@ -22,8 +22,8 @@ extern "C" {
 #include <stddef.h>
 #include <stdint.h>
 
-#include "parser_txdef.h"
 #include "keys_def.h"
+#include "parser_txdef.h"
 
 #define CHECK_ERROR(__CALL)                   \
     {                                         \

@@ -27,6 +27,7 @@
 #include "parser.h"
 #include "utils/common.h"
 #include "zxformat.h"
+#include "parser_interface.h"
 
 using ::testing::TestWithParam;
 
@@ -82,12 +83,12 @@ void check_testcase(const testcase_t &tc, bool expert_mode) {
 
     parser_context_t ctx = {0};
     parser_error_t err;
+    zxerr_t zxerr;
 
-   spend_key_bytes_t sk_bytes = {0};
-    std::array<uint8_t, 32> sk_bytes_raw = {
-        0xa1, 0xff, 0xba, 0x0c, 0x37, 0x93, 0x1f, 0x0a, 0x62, 0x61, 0x37, 0x52, 0x0d, 0xa6, 0x50, 0x63,
-        0x2d, 0x35, 0x85, 0x3b, 0xf5, 0x91, 0xb3, 0x6b, 0xb4, 0x28, 0x63, 0x0a, 0x4d, 0x87, 0xc4, 0xdc
-    };
+    spend_key_bytes_t sk_bytes = {0};
+    std::array<uint8_t, 32> sk_bytes_raw = {0xa1, 0xff, 0xba, 0x0c, 0x37, 0x93, 0x1f, 0x0a, 0x62, 0x61, 0x37,
+                                            0x52, 0x0d, 0xa6, 0x50, 0x63, 0x2d, 0x35, 0x85, 0x3b, 0xf5, 0x91,
+                                            0xb3, 0x6b, 0xb4, 0x28, 0x63, 0x0a, 0x4d, 0x87, 0xc4, 0xdc};
     std::copy(sk_bytes_raw.begin(), sk_bytes_raw.end(), sk_bytes);
     ctx.sk_bytes = &sk_bytes;
 
@@ -99,13 +100,21 @@ void check_testcase(const testcase_t &tc, bool expert_mode) {
     err = parser_parse(&ctx, buffer, bufferLen, &tx_obj);
     ASSERT_EQ(err, parser_ok) << parser_getErrorDescription(err);
 
+    for (uint16_t i = 0; i < tx_obj.plan.actions.qty; i++) {
+        zxerr = compute_action_hash(&tx_obj.actions_plan[i], &sk_bytes, &tx_obj.plan.memo.key,
+                                   &tx_obj.plan.actions.hashes[i]);
+        ASSERT_EQ(zxerr, zxerr_ok);
+    }
+
+    zxerr = compute_effect_hash(&tx_obj.plan, tx_obj.effect_hash, sizeof(tx_obj.effect_hash));
+    ASSERT_EQ(zxerr, zxerr_ok);
+
     std::string expected = tc.hash;
     char actual[129];
     array_to_hexstr(actual, sizeof(actual), tx_obj.effect_hash, sizeof(tx_obj.effect_hash));
-    
+
     EXPECT_EQ(std::string(actual), expected);
 }
-
 
 INSTANTIATE_TEST_SUITE_P
 

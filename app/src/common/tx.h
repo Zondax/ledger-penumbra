@@ -17,8 +17,8 @@
 
 #include "coin.h"
 #include "os.h"
-#include "zxerror.h"
 #include "parser_txdef.h"
+#include "zxerror.h"
 
 void tx_initialize();
 
@@ -26,7 +26,7 @@ void tx_initialize();
 void tx_reset();
 
 /// Returns the transaction object
-parser_tx_t* tx_get_txObject();
+parser_tx_t *tx_get_txObject();
 
 /// Appends buffer to the end of the current transaction buffer
 /// Transaction buffer will grow until it reaches the maximum allowed size
