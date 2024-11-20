@@ -141,7 +141,7 @@ describe('Standard', function () {
     }
   })
 
-  test.each(models)('$name showAddress', async function (m) {
+  test.concurrent.each(models)('$name showAddress', async function (m) {
     const sim = new Zemu(m.path)
     try {
       await sim.start({

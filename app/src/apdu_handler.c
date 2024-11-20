@@ -149,10 +149,6 @@ __Z_INLINE void handleGetFVK(volatile uint32_t *flags, volatile uint32_t *tx, ui
 
     extractHDPath(rx, OFFSET_DATA);
 
-    uint32_t account_offset = OFFSET_DATA + sizeof(uint32_t) * HDPATH_LEN_DEFAULT;
-    address_index_t address_index = {0};
-    extractAddressIndex(rx, account_offset, &address_index);
-
     zxerr_t zxerr = app_fill_keys();
     *tx = cmdResponseLen;
 
