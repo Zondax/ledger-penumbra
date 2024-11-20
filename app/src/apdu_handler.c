@@ -120,10 +120,6 @@ __Z_INLINE void handleGetAddr(volatile uint32_t *flags, volatile uint32_t *tx, u
     address_index_t address_index = {0};
     extractAddressIndex(rx, OFFSET_DATA + sizeof(uint32_t) * HDPATH_LEN_DEFAULT, &address_index);
 
-    // TODO: Check if this is correct
-    // generate hdPath with account
-    hdPath[2] = 0x80000000u | (uint32_t)address_index.account;
-
     zxerr_t zxerr = app_fill_address(address_index);
 
     if (zxerr != zxerr_ok) {
