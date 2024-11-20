@@ -43,11 +43,24 @@ void extractHDPath(uint32_t rx, uint32_t offset) {
     memcpy(hdPath, G_io_apdu_buffer + offset, sizeof(uint32_t) * HDPATH_LEN_DEFAULT);
 
     // #{TODO} --> testnet necessary?
-    const bool mainnet = hdPath[0] == HDPATH_0_DEFAULT && hdPath[1] == HDPATH_1_DEFAULT;
+    const bool mainnet = hdPath[0] == HDPATH_0_DEFAULT && hdPath[1] == HDPATH_1_DEFAULT && hdPath[2] == HDPATH_2_DEFAULT;
 
     if (!mainnet) {
         THROW(APDU_CODE_DATA_INVALID);
     }
+}
+
+void extractAddressIndex(uint32_t rx, uint32_t offset, address_index_t *address_index) {
+    if (address_index == NULL) {
+        THROW(APDU_CODE_DATA_INVALID);
+    }
+
+    // check for account data
+    if (rx < offset || (rx - offset) < sizeof(address_index_t)) {
+        THROW(APDU_CODE_WRONG_LENGTH);
+    }
+
+    memcpy(address_index, &G_io_apdu_buffer[offset], sizeof(address_index_t));
 }
 
 __Z_INLINE bool process_chunk(__Z_UNUSED volatile uint32_t *tx, uint32_t rx) {
@@ -104,30 +117,14 @@ __Z_INLINE void handleGetAddr(volatile uint32_t *flags, volatile uint32_t *tx, u
     const uint8_t requireConfirmation = G_io_apdu_buffer[OFFSET_P1];
 
     // go to the account + randomizer data
-    uint32_t account_offset = OFFSET_DATA + sizeof(uint32_t) * HDPATH_LEN_DEFAULT;
-    uint32_t rand_offset = account_offset + sizeof(uint32_t);
+    address_index_t address_index = {0};
+    extractAddressIndex(rx, OFFSET_DATA + sizeof(uint32_t) * HDPATH_LEN_DEFAULT, &address_index);
 
-    uint32_t account = 0;
+    // TODO: Check if this is correct
+    // generate hdPath with account
+    hdPath[2] = 0x80000000u | (uint32_t)address_index.account;
 
-    // check for account data
-    if (rx < account_offset || (rx - account_offset) < sizeof(uint32_t)) {
-        THROW(APDU_CODE_WRONG_LENGTH);
-    }
-
-    U32_BE(&G_io_apdu_buffer[account_offset], account);
-
-    uint8_t *randomizer = NULL;
-    uint8_t rand_data[ADDR_RANDOMIZER_LEN] = {0};
-
-    // check if we received the randomizer, if so check also we received
-    // the expected amount of bytes for it.
-    if (rx > rand_offset && (rx - rand_offset) >= ADDR_RANDOMIZER_LEN) {
-        memcpy(rand_data, &G_io_apdu_buffer[rand_offset], ADDR_RANDOMIZER_LEN);
-        randomizer = &rand_data[0];
-    }
-
-    // TODO: I have to send 0 instead of account to get the same result as penumbra repo
-    zxerr_t zxerr = app_fill_address(0, randomizer);
+    zxerr_t zxerr = app_fill_address(address_index);
 
     if (zxerr != zxerr_ok) {
         *tx = 0;
@@ -155,6 +152,10 @@ __Z_INLINE void handleGetFVK(volatile uint32_t *flags, volatile uint32_t *tx, ui
 #endif
 
     extractHDPath(rx, OFFSET_DATA);
+
+    uint32_t account_offset = OFFSET_DATA + sizeof(uint32_t) * HDPATH_LEN_DEFAULT;
+    address_index_t address_index = {0};
+    extractAddressIndex(rx, account_offset, &address_index);
 
     zxerr_t zxerr = app_fill_keys();
     *tx = cmdResponseLen;

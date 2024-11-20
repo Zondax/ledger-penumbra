@@ -3,7 +3,7 @@ import { IDeviceModel, DEFAULT_START_OPTIONS } from '@zondax/zemu'
 import { resolve } from 'path'
 
 export const APP_SEED = 'equip will roof matter pink blind book anxiety banner elbow sun young'
-export const PEN_PATH = "m/44'/6532'"
+export const PENUMBRA_PATH = "m/44'/6532'/0'"
 export const ACCOUNT_ID = 1
 export const ACCOUNT_ID2 = 2
 
@@ -15,10 +15,10 @@ const APP_PATH_FL = resolve('../app/output/app_flex.elf')
 
 export const models: IDeviceModel[] = [
   // { name: 'nanos', prefix: 'S', path: APP_PATH_S },
-  { name: 'nanox', prefix: 'X', path: APP_PATH_X },
+  // { name: 'nanox', prefix: 'X', path: APP_PATH_X },
   { name: 'nanosp', prefix: 'SP', path: APP_PATH_SP },
-  { name: 'stax', prefix: 'ST', path: APP_PATH_ST },
-  { name: 'flex', prefix: 'FL', path: APP_PATH_FL },
+  // { name: 'stax', prefix: 'ST', path: APP_PATH_ST },
+  // { name: 'flex', prefix: 'FL', path: APP_PATH_FL },
 ]
 
 export const defaultOptions = {
