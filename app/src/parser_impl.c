@@ -125,6 +125,12 @@ parser_error_t _read(parser_context_t *c, parser_tx_t *v) {
     request.actions.funcs.decode = &decode_action;
     request.actions.arg = &v->actions_plan;
 
+    // parameters callbacks
+    fixed_size_field_t parameter_asset_id_arg;
+    variable_size_field_t parameter_chain_id_arg;
+    setup_decode_variable_field(&request.transaction_parameters.chain_id, &parameter_chain_id_arg, &v->parameters_plan.chain_id);
+    setup_decode_fixed_field(&request.transaction_parameters.fee.asset_id.inner, &parameter_asset_id_arg, &v->parameters_plan.fee.asset_id.inner, ASSET_ID_LEN);
+
     // detection data callbacks
     request.detection_data.clue_plans.funcs.decode = &decode_detection_data;
     request.detection_data.clue_plans.arg = &v->plan.detection_data.clue_plans;
@@ -144,9 +150,21 @@ parser_error_t _read(parser_context_t *c, parser_tx_t *v) {
     }
 
     // get transaction parameters
-    extract_data_from_tag(&data, &v->plan.transaction_parameters.parameters,
+    extract_data_from_tag(&data, &v->parameters_plan.data_bytes,
                           penumbra_core_transaction_v1_TransactionPlan_transaction_parameters_tag);
     v->plan.actions.qty = actions_qty;
+
+    // copy parameters
+    v->parameters_plan.expiry_height = request.transaction_parameters.expiry_height;
+    v->parameters_plan.has_fee = request.transaction_parameters.has_fee;
+    if (v->parameters_plan.has_fee) {
+        v->parameters_plan.fee.has_amount = request.transaction_parameters.fee.has_amount;
+        if (v->parameters_plan.fee.has_amount) {
+            v->parameters_plan.fee.amount.lo = request.transaction_parameters.fee.amount.lo;
+            v->parameters_plan.fee.amount.hi = request.transaction_parameters.fee.amount.hi;
+        }
+        v->parameters_plan.fee.has_asset_id = request.transaction_parameters.fee.has_asset_id;
+    }
 
     return parser_ok;
 }
