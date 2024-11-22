@@ -298,22 +298,18 @@ void handleApdu(volatile uint32_t *flags, volatile uint32_t *tx, uint32_t rx) {
             if (rx < APDU_MIN_LENGTH) {
                 THROW(APDU_CODE_WRONG_LENGTH);
             }
-
-            switch (G_io_apdu_buffer[OFFSET_INS]) {
-                case INS_GET_VERSION: {
-                    handle_getversion(flags, tx);
-                    break;
-                }
+            if (G_io_apdu_buffer[OFFSET_INS] == INS_GET_VERSION) {
+                handle_getversion(flags, tx);
+            }
 #if defined(APP_TESTING)
-                case INS_TEST: {
-                    handleTest(flags, tx, rx);
-                    THROW(APDU_CODE_OK);
-                    break;
-                }
+            else if (G_io_apdu_buffer[OFFSET_INS] == INS_TEST) {
+                handleTest(flags, tx, rx);
+                THROW(APDU_CODE_OK);
+            }
 #endif
-                default:
-                    zemu_log("ins_not_supported**\n");
-                    THROW(APDU_CODE_INS_NOT_SUPPORTED);
+            else {
+                zemu_log("ins_not_supported**\n");
+                THROW(APDU_CODE_INS_NOT_SUPPORTED);
             }
         }
         CATCH(EXCEPTION_IO_RESET) { THROW(EXCEPTION_IO_RESET); }
