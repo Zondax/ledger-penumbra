@@ -32,7 +32,17 @@ zxerr_t compute_effect_hash(transaction_plan_t *plan, uint8_t *effect_hash, uint
     return zxerr_ok;
 }
 
-zxerr_t compute_action_hash(action_t *action, spend_key_bytes_t *sk_bytes, bytes_t *memo_key, action_hash_t *output) {
+zxerr_t compute_parameters_hash(bytes_t *parameters_bytes, hash_t *output) {
+    if (parameters_bytes == NULL || output == NULL) return zxerr_unknown;
+
+    if (rs_parameter_hash(parameters_bytes, (uint8_t *)output, 64) != parser_ok) {
+        return zxerr_unknown;
+    }
+
+    return zxerr_ok;
+}
+
+zxerr_t compute_action_hash(action_t *action, spend_key_bytes_t *sk_bytes, bytes_t *memo_key, hash_t *output) {
     if (action == NULL || output == NULL) return zxerr_unknown;
 
     switch (action->action_type) {

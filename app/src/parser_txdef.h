@@ -33,6 +33,7 @@ extern "C" {
 
 #define ASSET_ID_LEN 32
 #define RSEED_LEN 32
+#define CHAIN_ID_LEN 32
 
 typedef struct {
     const uint8_t *ptr;
@@ -77,6 +78,13 @@ typedef struct {
 } epoch_t;
 
 typedef struct {
+    bool has_amount;
+    amount_t amount;
+    bool has_asset_id;
+    asset_id_t asset_id;
+} fee_t;
+
+typedef struct {
     note_t note;
     uint64_t position;
     bytes_t randomizer;
@@ -115,11 +123,6 @@ typedef struct {
     bool has_from_epoch;
     epoch_t from_epoch;
 } undelegate_plan_t;
-
-typedef struct {
-    bytes_t parameters;
-} transaction_parameters_t;
-
 typedef struct {
     address_plan_t return_address;
     bytes_t text;
@@ -151,15 +154,24 @@ typedef struct {
     } action;
 } action_t;
 
-typedef uint8_t action_hash_t[64];
+typedef uint8_t hash_t[64];
 typedef struct {
     uint8_t qty;
-    action_hash_t hashes[ACTIONS_QTY];
+    hash_t hashes[ACTIONS_QTY];
 } actions_hash_t;
 
 typedef struct {
+    uint64_t expiry_height;
+    bytes_t chain_id;
+    bool has_fee;
+    fee_t fee;
+    bytes_t data_bytes;
+} parameters_t;
+
+
+typedef struct {
     actions_hash_t actions;
-    transaction_parameters_t transaction_parameters;
+    hash_t parameters_hash;
     memo_plan_t memo;
     detection_data_t detection_data;
 } transaction_plan_t;
@@ -167,6 +179,7 @@ typedef struct {
 typedef struct {
     transaction_plan_t plan;
     action_t actions_plan[ACTIONS_QTY];
+    parameters_t parameters_plan;
     uint8_t effect_hash[64];
 } parser_tx_t;
 

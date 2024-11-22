@@ -100,6 +100,10 @@ void check_testcase(const testcase_t &tc, bool expert_mode) {
     err = parser_parse(&ctx, buffer, bufferLen, &tx_obj);
     ASSERT_EQ(err, parser_ok) << parser_getErrorDescription(err);
 
+    // compute parameters hash
+    zxerr = compute_parameters_hash(&tx_obj.parameters_plan.data_bytes, &tx_obj.plan.parameters_hash);
+    ASSERT_EQ(zxerr, zxerr_ok);
+    
     for (uint16_t i = 0; i < tx_obj.plan.actions.qty; i++) {
         zxerr = compute_action_hash(&tx_obj.actions_plan[i], &sk_bytes, &tx_obj.plan.memo.key,
                                    &tx_obj.plan.actions.hashes[i]);

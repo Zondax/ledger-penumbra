@@ -19,6 +19,11 @@ use crate::parser::effect_hash::{create_personalized_state, EffectHash};
 use super::bytes::BytesC;
 
 #[repr(C)]
+#[derive(Copy, Clone)]
+#[cfg_attr(any(feature = "derive-debug", test), derive(Debug))]
+pub struct ParametersHash(pub [u8; 64]);
+
+#[repr(C)]
 #[derive(Clone)]
 #[cfg_attr(any(feature = "derive-debug", test), derive(Debug))]
 pub struct TransactionParametersC {

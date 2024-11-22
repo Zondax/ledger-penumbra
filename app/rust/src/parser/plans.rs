@@ -24,9 +24,9 @@ use crate::parser::{
 use crate::keys::spend_key::SpendKeyBytes;
 use crate::parser::effect_hash::EffectHash;
 use crate::parser::bytes::BytesC;
-use crate::parser::parameters::TransactionParametersC;
 use crate::ParserError;
 use crate::constants::EFFECT_HASH_LEN;
+use crate::parser::parameters::ParametersHash;
 
 pub mod output;
 pub mod spend;
@@ -35,7 +35,7 @@ pub mod spend;
 #[cfg_attr(any(feature = "derive-debug", test), derive(Debug))]
 pub struct TransactionPlanC {
     pub actions_hashes: ActionsHashC,
-    pub transaction_parameters: TransactionParametersC,
+    pub parameters_hash: ParametersHash,
     pub memo: MemoPlanC,
     pub detection_data: DetectionDataPlanC,
 }
@@ -46,7 +46,7 @@ impl TransactionPlanC {
         .personal(b"PenumbraEfHs")
         .to_state();
 
-        state.update(self.transaction_parameters.effect_hash().as_array());
+        state.update(&self.parameters_hash.0);
         state.update(self.memo.effect_hash()?.as_array());
         state.update(self.detection_data.effect_hash()?.as_array());
 
@@ -82,6 +82,33 @@ pub unsafe extern "C" fn rs_compute_effect_hash(
         let plan_hash_array = plan_hash.as_array();
         let copy_len: usize = core::cmp::min(output.len(), plan_hash_array.len());
         output[..copy_len].copy_from_slice(&plan_hash_array[..copy_len]);
+    }
+
+    ParserError::Ok as u32
+}
+
+#[no_mangle]
+/// Use to compute an address and write it back into output
+/// argument.
+pub unsafe extern "C" fn rs_parameter_hash(
+    data: &BytesC,
+    output: *mut u8,
+    output_len: usize,
+) -> u32 {
+    crate::zlog("rs_parameter_hash\x00");
+    let output = std::slice::from_raw_parts_mut(output, output_len);
+
+    if output.len() < 64 {
+        return ParserError::Ok as u32;
+    }
+
+    let effect_hash: EffectHash;
+    if let Ok(data_to_hash) = data.get_bytes() {
+        effect_hash = EffectHash::from_proto_effecting_data("/penumbra.core.transaction.v1.TransactionParameters", data_to_hash);
+
+        let body_hash_array = effect_hash.as_bytes();
+        let copy_len: usize = core::cmp::min(output.len(), body_hash_array.len());
+        output[..copy_len].copy_from_slice(&body_hash_array[..copy_len]);
     }
 
     ParserError::Ok as u32
@@ -203,20 +230,12 @@ mod tests {
     use crate::parser::memo::MemoPlanC;
     use crate::parser::memo_plain_text::MemoPlaintextC;
     use crate::parser::value::ValueC;
-    use crate::parser::parameters::TransactionParametersC;
     use crate::parser::action::ActionHash;
     #[test]
     fn test_transaction_plan_hash() {
         let dummy_action_hashes = ActionsHashC {
             qty: 1,
             hashes: core::array::from_fn(|_| ActionHash([0u8; 64])),
-        };
-
-        // Create dummy TransactionParametersC
-        let transaction_parameters_bytes =
-            hex::decode("120d70656e756d6272612d746573741a020a00").unwrap();
-        let dummy_transaction_parameters = TransactionParametersC {
-            bytes: BytesC::from_slice(&transaction_parameters_bytes),
         };
 
         // Create dummy MemoPlanC
@@ -268,16 +287,10 @@ mod tests {
         // Create TransactionPlanC with dummy data
         let transaction_plan = TransactionPlanC {
             actions_hashes: dummy_action_hashes,
-            transaction_parameters: dummy_transaction_parameters,
+            parameters_hash: ParametersHash([0u8; 64]),
             memo: dummy_memo_plan,
             detection_data: dummy_detection_data,
         };
-
-        let transaction_parameters_effect_hash =
-            transaction_plan.transaction_parameters.effect_hash();
-        let expected_hash = "e2b552c4c11e0bc5df75f22945c39d2c5acb6c38582716a1dd7d87e1cfa4043b9c32b350d927a9ae39f18b45b25f638947fa82e405a3c6ca7ea91248f9fa5ab7";
-        let computed_hash = hex::encode(transaction_parameters_effect_hash.as_array());
-        assert_eq!(computed_hash, expected_hash);
 
 
         let memo_effect_hash = transaction_plan.memo.effect_hash();
