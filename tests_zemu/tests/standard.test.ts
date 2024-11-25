@@ -15,7 +15,7 @@
  ******************************************************************************* */
 
 import Zemu, { ButtonKind, zondaxMainmenuNavigation, isTouchDevice } from '@zondax/zemu'
-import { ACCOUNT_ID, PEN_PATH, defaultOptions, models, txBlobExample } from './common'
+import { ACCOUNT_ID, PEN_PATH, defaultOptions, models /*, txBlobExample*/ } from './common'
 import { PenumbraApp } from '@zondax/ledger-penumbra'
 
 jest.setTimeout(60000)
@@ -177,8 +177,8 @@ describe('Standard', function () {
       const resp2 = await resp
 
       console.log(resp2)
-
     } finally {
       await sim.close()
     }
   })
+})
