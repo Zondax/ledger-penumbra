@@ -63,3 +63,56 @@ parser_error_t printAssetId(uint8_t *asset, uint16_t asset_len, char *out, uint1
                               asset, asset_len, ASSET_ID_LEN,
                               out, out_len);
 }
+
+parser_error_t uint128_to_str(char *data, int dataLen, uint64_t high, uint64_t low) {
+    if (data == NULL) return parser_no_data;
+    if (dataLen < U128_STR_MAX_LEN) return parser_value_out_of_range;
+
+    MEMZERO(data, dataLen);
+    char *p = data;
+
+    if (high == 0 && low == 0) {
+        *(p++) = '0';
+        return parser_ok;
+    }
+
+    uint64_t temp_high = high;
+    uint64_t temp_low = low;
+
+    while (temp_high != 0 || temp_low != 0) {
+        if (p - data >= (dataLen - 1)) return parser_value_out_of_range;
+
+        uint64_t quotient_high = 0;
+        uint64_t quotient_low = 0;
+        uint64_t remainder = 0;
+        uint64_t current;
+
+        current = temp_high;
+        quotient_high = current / 10;
+        remainder = current % 10;
+
+        current = (remainder << 32) | (temp_low >> 32);
+        uint64_t q = current / 10;
+        remainder = current % 10;
+        quotient_low = (q << 32);
+
+        current = (remainder << 32) | (temp_low & 0xFFFFFFFF);
+        q = current / 10;
+        remainder = current % 10;
+        quotient_low |= q;
+
+        *(p++) = (char)('0' + remainder);
+        temp_high = quotient_high;
+        temp_low = quotient_low;
+    }
+
+    while (p > data) {
+        p--;
+        char z = *data;
+        *data = *p;
+        *p = z;
+        data++;
+    }
+
+    return parser_ok;
+}
