@@ -41,3 +41,19 @@ parser_error_t printBech32Encoded(const char *prefix, uint16_t prefix_len, uint8
 
 parser_error_t printAddress(uint8_t *address, uint16_t address_len, char *out, uint16_t out_len);
 parser_error_t printAssetId(uint8_t *asset, uint16_t asset_len, char *out, uint16_t out_len);
+
+/**
+ * Converts a 128-bit unsigned integer to its decimal string representation.
+ * Output buffer will be null terminated and cleared using MEMZERO.
+ *
+ * @param[out] data    Output buffer for the resulting string
+ * @param[in]  dataLen Size of the output buffer
+ * @param[in]  high    Upper 64 bits of the 128-bit number
+ * @param[in]  low     Lower 64 bits of the 128-bit number
+ *
+ * @return parser_error_t:
+ *         - parser_ok on success
+ *         - parser_no_data if data is NULL
+ *         - parser_value_out_of_range if buffer too small (< U128_STR_MAX_LEN)
+ */
+parser_error_t uint128_to_str(char *data, int dataLen, uint64_t high, uint64_t low);

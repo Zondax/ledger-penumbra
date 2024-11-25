@@ -45,3 +45,13 @@
 #define ENCODED_ADDR_LEN (ADDR_HRP_LENGTH + SEPARATOR_LENGTH + ENCODED_DATA_LENGTH)
 
 #define ENCODED_ADDR_BUFFER_SIZE (ENCODED_ADDR_LEN + 2)
+
+
+// MEMO transaction constants
+#define MEMO_CIPHERTEXT_LEN_BYTES 528
+
+// This is the `MEMO_CIPHERTEXT_LEN_BYTES` - MAC size (16 bytes).
+#define MEMO_LEN_BYTES 512
+
+// This is the largest text length we can support
+#define MAX_TEXT_LEN MEMO_LEN_BYTES - ADDRESS_LEN_BYTES
