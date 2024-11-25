@@ -15,8 +15,8 @@
  ******************************************************************************* */
 
 import Zemu from '@zondax/zemu'
-import { PEN_PATH, defaultOptions, models } from './common'
-import { PenumbraApp } from '@zondax/ledger-penumbra'
+import { PENUMBRA_PATH, defaultOptions, models, ACCOUNT_ID } from './common'
+import { PenumbraApp, AddressIndex } from '@zondax/ledger-penumbra'
 import { ACTIONS_TESTCASES } from './testscases/actions'
 
 jest.setTimeout(60000)
@@ -40,8 +40,12 @@ describe('Standard', function () {
 
       const messageToSign = Buffer.from(data.blob, 'hex')
 
+      const addressIndex: AddressIndex = {
+        account: ACCOUNT_ID,
+        randomizer: undefined,
+      }
       // do not wait here... we need to navigate
-      const signatureRequest = app.sign(PEN_PATH, 0, messageToSign)
+      const signatureRequest = app.sign(PENUMBRA_PATH, addressIndex, messageToSign)
 
       // Wait until we are not in the main menu
       await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot())
