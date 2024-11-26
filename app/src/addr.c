@@ -63,7 +63,7 @@ zxerr_t addr_getItem(int8_t displayIdx, char *outKey, uint16_t outKeyLen, char *
         case 1:
             snprintf(outKey, outKeyLen, "Address");
 
-            if (printAddress(G_io_apdu_buffer, ADDRESS_LEN_BYTES, encoded_addr, ENCODED_ADDR_BUFFER_SIZE) != parser_ok) {
+            if (printShortAddress(G_io_apdu_buffer, ADDRESS_LEN_BYTES, encoded_addr, ENCODED_ADDR_BUFFER_SIZE) != parser_ok) {
                 return zxerr_unknown;
             }
 
