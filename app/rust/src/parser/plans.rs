@@ -202,6 +202,9 @@ pub unsafe extern "C" fn rs_generic_action_hash(
             ActionPlan::Undelegate => {
                 effect_hash = EffectHash::from_proto_effecting_data("/penumbra.core.component.stake.v1.Undelegate", data_to_hash);
             }
+            ActionPlan::Ics20Withdrawal => {
+                effect_hash = EffectHash::from_proto_effecting_data("/penumbra.core.component.ibc.v1.Ics20Withdrawal", data_to_hash);
+            }
             _ => {
                 return ParserError::UnexpectedData as u32;
             }

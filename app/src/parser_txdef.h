@@ -85,6 +85,15 @@ typedef struct {
 } fee_t;
 
 typedef struct {
+    bytes_t inner;
+} denom_t;
+
+typedef struct {
+    uint64_t revision_number;
+    uint64_t revision_height;
+} height_t;
+
+typedef struct {
     note_t note;
     uint64_t position;
     bytes_t randomizer;
@@ -123,6 +132,22 @@ typedef struct {
     bool has_from_epoch;
     epoch_t from_epoch;
 } undelegate_plan_t;
+
+typedef struct {
+    bool has_amount;
+    amount_t amount;
+    bool has_denom;
+    denom_t denom;
+    bytes_t destination_chain_address;
+    bool has_return_address;
+    address_plan_t return_address;
+    bool has_timeout_height;
+    height_t timeout_height;
+    uint64_t timeout_time;
+    bytes_t source_channel;
+    bool use_compat_address;
+} ics20_withdrawal_plan_t;
+
 typedef struct {
     address_plan_t return_address;
     bytes_t text;
@@ -151,6 +176,7 @@ typedef struct {
         output_plan_t output;
         delegate_plan_t delegate;
         undelegate_plan_t undelegate;
+        ics20_withdrawal_plan_t ics20_withdrawal;
     } action;
 } action_t;
 
