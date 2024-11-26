@@ -46,34 +46,32 @@ zxerr_t addr_getItem(int8_t displayIdx, char *outKey, uint16_t outKeyLen, char *
     char encoded_addr[ENCODED_ADDR_BUFFER_SIZE + 1] = {'\0'};
 
     switch (displayIdx) {
-        case 0:
+        case 0: {
+            snprintf(outKey, outKeyLen, "Address Index");
+            if (address_idx_account == 0) {
+                pageString(outVal, outValLen, "Main Account", pageIdx, pageCount);
+                return zxerr_ok;
+            } else {
+                char buffer[200] = {0};
+                snprintf(buffer, sizeof(buffer), "Sub-Account #%d\n", address_idx_account);
+
+                pageString(outVal, outValLen, buffer, pageIdx, pageCount);
+            }
+
+            return zxerr_ok;
+        }
+        case 1:
             snprintf(outKey, outKeyLen, "Address");
 
-            if (printAddress(G_io_apdu_buffer, ADDRESS_LEN_BYTES, encoded_addr, ENCODED_ADDR_BUFFER_SIZE) != parser_ok) {
+            if (printShortAddress(G_io_apdu_buffer, ADDRESS_LEN_BYTES, encoded_addr, ENCODED_ADDR_BUFFER_SIZE) != parser_ok) {
                 return zxerr_unknown;
             }
 
             pageString(outVal, outValLen, encoded_addr, pageIdx, pageCount);
             return zxerr_ok;
 
-        case 1: {
-            snprintf(outKey, outKeyLen, "Account");
-            char buffer[100] = {0};
-            ZEMU_LOGF(50, "[Account****] %d\n", address_idx_account)
-
-            const char *err = NULL;
-            err = uint32_to_str(buffer, sizeof(buffer), address_idx_account);
-
-            if (err != NULL) {
-                return zxerr_unknown;
-            }
-
-            pageString(outVal, outValLen, buffer, pageIdx, pageCount);
-
-            return zxerr_ok;
-        }
         case 2: {
-            snprintf(outKey, outKeyLen, "Randomized");
+            snprintf(outKey, outKeyLen, "IBC Deposit Address:");
             const char *buffer = is_randomized ? "Yes" : "No";
             pageString(outVal, outValLen, buffer, pageIdx, pageCount);
 
