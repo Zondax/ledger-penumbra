@@ -51,12 +51,45 @@ parser_error_t printBech32Encoded(const char *prefix, uint16_t prefix_len, uint8
     return parser_ok;
 }
 
-
 parser_error_t printAddress(uint8_t *address, uint16_t address_len, char *out, uint16_t out_len) {
+    // Validate input length
+    if (address_len != ADDRESS_LEN_BYTES) {
+        return parser_invalid_address;
+    }
     return printBech32Encoded(ADDR_BECH32_PREFIX, sizeof(ADDR_BECH32_PREFIX) - 1,
                               address, address_len, ADDRESS_LEN_BYTES,
                               out, out_len);
 }
+
+parser_error_t printShortAddress(uint8_t *address, uint16_t address_len, char *out, uint16_t out_len) {
+    // First get the full address encoded
+    char full_address[ENCODED_ADDR_BUFFER_SIZE] = {0};
+    // parser_error_t printAddress(uint8_t *address, uint16_t address_len, char *out, uint16_t out_len) {
+    parser_error_t err = printAddress(address, address_len, full_address, (uint16_t)sizeof(full_address));
+    if (err != parser_ok) {
+        return err;
+    }
+
+    // Calculate required length for short form
+    uint16_t prefix_and_sep_len = sizeof(ADDR_BECH32_PREFIX); // prefix + separator
+    uint16_t required_len = prefix_and_sep_len + SHORT_ADDRESS_VISIBLE_CHARS;
+
+    // + ellipsis + null
+    if (out_len < required_len + sizeof(ELLIPSIS)) {
+        return parser_unexpected_buffer_end;
+    }
+
+    // Copy prefix + separator + visible chars
+    uint16_t truncate_pos = prefix_and_sep_len + SHORT_ADDRESS_VISIBLE_CHARS;
+    MEMZERO(out, out_len);
+    MEMCPY(out, full_address, truncate_pos);
+
+    // Add ellipsis but omit the null character
+    MEMCPY(out + truncate_pos, ELLIPSIS, sizeof(ELLIPSIS) - 1);
+
+    return parser_ok;
+}
+
 
 parser_error_t printAssetId(uint8_t *asset, uint16_t asset_len, char *out, uint16_t out_len) {
     return printBech32Encoded(ASSET_BECH32_PREFIX, sizeof(ASSET_BECH32_PREFIX) - 1,

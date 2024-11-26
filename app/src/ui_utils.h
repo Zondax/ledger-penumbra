@@ -39,6 +39,19 @@ parser_error_t printBech32Encoded(const char *prefix, uint16_t prefix_len, uint8
                                          uint16_t data_len, uint16_t expected_len,
                                          char *out, uint16_t out_len);
 
+/**
+ * Formats a raw Penumbra address into its canonical short form with Bech32 encoding.
+ * Short form consists of: bech32 prefix + separator + first 24 chars + ellipsis
+ * Example output: "penumbra19pj4ykqqzm9dzlq4dard8yrg…"
+ *
+ * @param[in]  address      Raw address bytes to be encoded
+ * @param[in]  address_len  Length of the input address buffer
+ * @param[out] out         Output buffer for the formatted address
+ * @param[in]  out_len     Size of the output buffer
+ *
+ * @return parser_error_t   parser_ok on success, error code otherwise
+ */
+parser_error_t printShortAddress(uint8_t *address, uint16_t address_len, char *out, uint16_t out_len);
 parser_error_t printAddress(uint8_t *address, uint16_t address_len, char *out, uint16_t out_len);
 parser_error_t printAssetId(uint8_t *asset, uint16_t asset_len, char *out, uint16_t out_len);
 
