@@ -17,6 +17,9 @@
 
 // raw address len before encoding
 #define ADDRESS_LEN_BYTES 80
+// https://protocol.penumbra.zone/main/addresses_keys/addresses.html#short-address-form
+#define SHORT_ADDRESS_VISIBLE_CHARS 24
+#define ELLIPSIS "…"
 
 // Common BECH32m constants
 #define CHECKSUM_LENGTH 8
