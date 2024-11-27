@@ -26,6 +26,7 @@
 #include "delegate_plan.h"
 #include "undelegate_plan.h"
 #include "ics20_withdrawal.h"
+#include "swap.h"
 #include "zxformat.h"
 
 static bool decode_action(pb_istream_t *stream, const pb_field_t *field, void **arg);
@@ -77,6 +78,10 @@ bool decode_action(pb_istream_t *stream, const pb_field_t *field, void **arg) {
         case penumbra_core_transaction_v1_ActionPlan_ics20_withdrawal_tag:
             decode_arg[actions_qty].action_data = ics20_withdrawal_data;
             CHECK_ERROR(decode_ics20_withdrawal_plan(&ics20_withdrawal_data, &decode_arg[actions_qty].action.ics20_withdrawal));
+            break;
+        case penumbra_core_transaction_v1_ActionPlan_swap_tag:
+            decode_arg[actions_qty].action_data = action_data;
+            CHECK_ERROR(decode_swap_plan(&action_data, &decode_arg[actions_qty].action.swap));
             break;
         default:
             return false;

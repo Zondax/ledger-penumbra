@@ -39,7 +39,7 @@ parser_error_t decode_ics20_withdrawal_plan(const bytes_t *data, ics20_withdrawa
     setup_decode_variable_field(&withdrawal_plan.source_channel, &source_channel_arg, &withdrawal->source_channel);
 
     if (!pb_decode(&withdrawal_stream, penumbra_core_component_ibc_v1_Ics20Withdrawal_fields, &withdrawal_plan)) {
-        return parser_undelegate_plan_error;
+        return parser_ics20_withdrawal_plan_error;
     }
 
     withdrawal->has_amount = withdrawal_plan.has_amount;

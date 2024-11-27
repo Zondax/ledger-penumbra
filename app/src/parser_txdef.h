@@ -94,6 +94,41 @@ typedef struct {
 } height_t;
 
 typedef struct {
+    bool has_asset_1;
+    asset_id_t asset_1;
+    bool has_asset_2;
+    asset_id_t asset_2;
+} trading_pair_t;
+
+typedef struct {
+    bytes_t inner;
+} balance_commitment_t;
+
+typedef struct {
+    bytes_t inner;
+} state_commitment_t;
+
+typedef struct {
+    bool has_commitment;
+    state_commitment_t commitment;
+    bytes_t encrypted_swap;
+} swap_payload_t;
+
+typedef struct {
+    bool has_trading_pair;
+    trading_pair_t trading_pair;
+    bool has_delta_1_i;
+    amount_t delta_1_i;
+    bool has_delta_2_i;
+    amount_t delta_2_i;
+    bool has_claim_fee;
+    fee_t claim_fee;
+    bool has_claim_address;
+    address_plan_t claim_address;
+    bytes_t rseed;
+} swap_plaintext_t;
+
+typedef struct {
     note_t note;
     uint64_t position;
     bytes_t randomizer;
@@ -110,6 +145,14 @@ typedef struct {
     bytes_t proof_blinding_r;
     bytes_t proof_blinding_s;
 } output_plan_t;
+
+typedef struct {
+    bool has_swap_plaintext;
+    swap_plaintext_t swap_plaintext;
+    bytes_t fee_blinding;
+    bytes_t proof_blinding_r;
+    bytes_t proof_blinding_s;
+} swap_plan_t;
 
 typedef struct {
     bool has_validator_identity;
@@ -177,6 +220,7 @@ typedef struct {
         delegate_plan_t delegate;
         undelegate_plan_t undelegate;
         ics20_withdrawal_plan_t ics20_withdrawal;
+        swap_plan_t swap;
     } action;
 } action_t;
 
@@ -193,7 +237,6 @@ typedef struct {
     fee_t fee;
     bytes_t data_bytes;
 } parameters_t;
-
 
 typedef struct {
     actions_hash_t actions;
