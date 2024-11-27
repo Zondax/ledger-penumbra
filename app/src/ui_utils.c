@@ -64,7 +64,6 @@ parser_error_t printAddress(uint8_t *address, uint16_t address_len, char *out, u
 parser_error_t printShortAddress(uint8_t *address, uint16_t address_len, char *out, uint16_t out_len) {
     // First get the full address encoded
     char full_address[ENCODED_ADDR_BUFFER_SIZE] = {0};
-    // parser_error_t printAddress(uint8_t *address, uint16_t address_len, char *out, uint16_t out_len) {
     parser_error_t err = printAddress(address, address_len, full_address, (uint16_t)sizeof(full_address));
     if (err != parser_ok) {
         return err;
