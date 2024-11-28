@@ -14,6 +14,12 @@
  *  limitations under the License.
  ********************************************************************************/
 #define U128_STR_MAX_LEN 40
+// Constant to use to allocate a buffer on the stack
+// to hold the formatting of a value_t type, following
+// provided documentatio, we choose the worst case, where
+// a value contains an unknown token and we use a custom denom
+// U128 + space + denom + null terminator
+#define VALUE_DISPLAY_MAX_LEN (U128_STR_MAX_LEN + 1 + 120 + 1)  // = 162
 
 // raw address len before encoding
 #define ADDRESS_LEN_BYTES 80
