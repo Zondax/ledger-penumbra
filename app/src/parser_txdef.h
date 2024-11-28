@@ -36,6 +36,9 @@ extern "C" {
 #define RSEED_LEN 32
 #define CHAIN_ID_LEN 32
 
+#define MAX_SYMBOL_LEN 40
+#define MAX_ASSET_NAME_LEN 120
+
 typedef struct {
     const uint8_t *ptr;
     uint16_t len;
@@ -254,6 +257,14 @@ typedef struct {
     parameters_t parameters_plan;
     uint8_t effect_hash[64];
 } parser_tx_t;
+
+typedef struct {
+    uint8_t asset_id[ASSET_ID_LEN];
+    const char symbol[MAX_SYMBOL_LEN];
+    // TODO: is this too much for a asset name?
+    const char name[MAX_ASSET_NAME_LEN];
+    uint16_t decimals;
+} asset_info_t;
 
 #ifdef __cplusplus
 }
