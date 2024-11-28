@@ -79,6 +79,7 @@ typedef struct {
     uint16_t offset;
     parser_tx_t *tx_obj;
     spend_key_bytes_t *sk_bytes;
+    address_index_t address_index;
 } parser_context_t;
 
 #ifdef __cplusplus
