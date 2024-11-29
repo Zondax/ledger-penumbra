@@ -14,9 +14,10 @@
 *  limitations under the License.
 ********************************************************************************/
 
+use crate::constants::AMOUNT_LEN_BYTES;
 use crate::ParserError;
 use decaf377::{Fq, Fr};
-use crate::constants::AMOUNT_LEN_BYTES;
+use crate::utils::protobuf::encode_varint;
 
 #[derive(Clone, Debug)]
 pub struct Amount {
@@ -28,6 +29,34 @@ impl Amount {
 
     pub fn to_le_bytes(&self) -> [u8; Self::LEN] {
         self.inner.to_le_bytes()
+    }
+
+    pub fn to_proto(&self) -> ([u8; 22], usize) {
+        let mut encoded = [0u8; 22];
+        let mut pos = 1;
+
+        // Get low and high u64s from u128
+        let lo = self.inner as u64;
+        let hi = (self.inner >> 64) as u64;
+
+        // Only encode non-zero values
+        if lo != 0 {
+            encoded[pos] = 0x08; // (1 << 3) | 0 = 8
+            pos += 1;
+            pos += encode_varint(lo, &mut encoded[pos..]);
+        }
+
+        if hi != 0 {
+            // Field 2 (hi)
+            encoded[pos] = 0x10; // (2 << 3) | 0 = 16
+            pos += 1;
+            pos += encode_varint(hi, &mut encoded[pos..]);
+        }
+
+        // Add the value of pos to the first byte of encoded
+        encoded[0] = (pos - 1) as u8;
+
+        (encoded, pos)
     }
 }
 
@@ -53,7 +82,7 @@ impl TryFrom<AmountC> for Amount {
         let inner = shifted + lo;
 
         Ok(Amount { inner })
-    }    
+    }
 }
 
 impl Into<Fq> for Amount {

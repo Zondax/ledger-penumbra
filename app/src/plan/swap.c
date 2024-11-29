@@ -35,7 +35,7 @@ parser_error_t decode_swap_plan(const bytes_t *data, swap_plan_t *swap) {
     setup_decode_fixed_field(&swap_plan.proof_blinding_s, &proof_blinding_s_arg, &swap->proof_blinding_s, 32);
     setup_decode_fixed_field(&swap_plan.swap_plaintext.trading_pair.asset_1.inner, &asset_1_arg, &swap->swap_plaintext.trading_pair.asset_1.inner, 32);
     setup_decode_fixed_field(&swap_plan.swap_plaintext.trading_pair.asset_2.inner, &asset_2_arg, &swap->swap_plaintext.trading_pair.asset_2.inner, 32);
-    setup_decode_fixed_field(&swap_plan.swap_plaintext.claim_fee.asset_id.inner, &fee_asset_id_arg, &swap->swap_plaintext.claim_fee.asset_id.inner, 32);
+    setup_decode_fixed_field(&swap_plan.swap_plaintext.claim_fee.asset_id.alt_bech32m, &fee_asset_id_arg, &swap->swap_plaintext.claim_fee.asset_id.inner, 32);
     setup_decode_fixed_field(&swap_plan.swap_plaintext.claim_address.inner, &claim_address_arg, &swap->swap_plaintext.claim_address.inner, 80);
     setup_decode_fixed_field(&swap_plan.swap_plaintext.rseed, &rseed_arg, &swap->swap_plaintext.rseed, 32);
 
@@ -45,6 +45,10 @@ parser_error_t decode_swap_plan(const bytes_t *data, swap_plan_t *swap) {
 
     swap->has_swap_plaintext = swap_plan.has_swap_plaintext;
     swap->swap_plaintext.has_trading_pair = swap_plan.swap_plaintext.has_trading_pair;
+    if (swap->swap_plaintext.has_trading_pair) {
+        swap->swap_plaintext.trading_pair.has_asset_1 = swap_plan.swap_plaintext.trading_pair.has_asset_1;
+        swap->swap_plaintext.trading_pair.has_asset_2 = swap_plan.swap_plaintext.trading_pair.has_asset_2;
+    }
     swap->swap_plaintext.has_delta_1_i = swap_plan.swap_plaintext.has_delta_1_i;
     if (swap->swap_plaintext.has_delta_1_i) {
         swap->swap_plaintext.delta_1_i.lo = swap_plan.swap_plaintext.delta_1_i.lo;

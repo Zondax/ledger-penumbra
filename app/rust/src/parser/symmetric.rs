@@ -21,7 +21,7 @@ use chacha20poly1305::{ChaCha20Poly1305, Key, KeyInit};
 use crate::keys::ovk::Ovk;
 use decaf377::Fq;
 use crate::keys::ka;
-use crate::parser::commitment::Commitment;
+use crate::parser::commitment::{Commitment, StateCommitment};
 use rand::{CryptoRng, RngCore};
 
 pub const PAYLOAD_KEY_LEN_BYTES: usize = 32;
@@ -97,6 +97,38 @@ impl PayloadKey {
             .map_err(|_| ParserError::UnexpectedError)?;
 
         plaintext[plaintext_len - 16..].copy_from_slice(&tag);
+
+        Ok(())
+    }
+
+    /// Use Blake2b-256 to derive an encryption key from the OVK and public fields for swaps.
+    pub fn derive_swap(ovk: &Ovk, cm: StateCommitment) -> Self {
+        let cm_bytes: [u8; 32] = cm.0.to_bytes();
+    
+        let mut kdf_params = blake2b_simd::Params::new();
+        kdf_params.personal(b"Penumbra_Payswap");
+        kdf_params.hash_length(32);
+        let mut kdf = kdf_params.to_state();
+        kdf.update(&ovk.to_bytes());
+        kdf.update(&cm_bytes);
+    
+        let key = kdf.finalize();
+        Self(*Key::from_slice(key.as_bytes()))
+    }
+
+    /// Encrypt a swap using the `PayloadKey`.
+    pub fn encrypt_swap(&self, plaintext: &mut [u8], text_len: usize) -> Result<(), ParserError> {
+        let cipher = ChaCha20Poly1305::new(&self.0);
+        let nonce_bytes = PayloadKind::Swap.nonce();
+        let nonce = Nonce::<ChaCha20Poly1305>::from_slice(&nonce_bytes);
+
+        let plaintext_len = plaintext.len();
+
+        let tag = cipher
+            .encrypt_in_place_detached(nonce, b"", &mut plaintext[..text_len])
+            .map_err(|_| ParserError::UnexpectedError)?;
+
+            plaintext[plaintext_len - 16..].copy_from_slice(&tag);
 
         Ok(())
     }

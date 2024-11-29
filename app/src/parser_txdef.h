@@ -50,7 +50,9 @@ typedef struct {
 } asset_id_t;
 
 typedef struct {
+    bool has_amount;
     amount_t amount;
+    bool has_asset_id;
     asset_id_t asset_id;
 } value_t;
 
