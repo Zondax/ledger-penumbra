@@ -38,6 +38,7 @@ extern "C" {
 
 #define MAX_SYMBOL_LEN 40
 #define MAX_ASSET_NAME_LEN 120
+#define MAX_DENOM_LEN 120
 
 typedef struct {
     const uint8_t *ptr;
@@ -265,6 +266,15 @@ typedef struct {
     const char name[MAX_ASSET_NAME_LEN];
     uint16_t decimals;
 } asset_info_t;
+
+// This struct defines
+// the metadata used to handle assets
+// that are not listed in our internal table
+// but that the user provide when signing a transaction
+typedef struct {
+    const char denoms[MAX_DENOM_LEN];
+    uint8_t denom_len;
+} tx_metadata_t;
 
 #ifdef __cplusplus
 }

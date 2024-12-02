@@ -24,6 +24,7 @@ extern "C" {
 
 #include "keys_def.h"
 #include "parser_txdef.h"
+#include "constants.h"
 
 #define CHECK_ERROR(__CALL)                   \
     {                                         \
@@ -80,6 +81,7 @@ typedef struct {
     parser_tx_t *tx_obj;
     spend_key_bytes_t *sk_bytes;
     address_index_t address_index;
+    tx_metadata_t tx_metadata[MAX_TX_METADATA_LEN]
 } parser_context_t;
 
 #ifdef __cplusplus
