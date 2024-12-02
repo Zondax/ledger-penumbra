@@ -1,6 +1,7 @@
 #include "parser_common.h"
 #include "constants.h"
 #include "known_assets.h"
+#include "zxmacros.h"
 
 // TODO: A place holder for known assets in penumbra
 // bellow dummy values
@@ -23,7 +24,7 @@ const asset_info_t *asset_info_from_table(const uint8_t asset_id[ASSET_ID_LEN]) 
     unsigned int i;
     unsigned int info_len = sizeof(supported_assets) / sizeof(asset_info_t);
     for (i = 0; i < info_len; i++) {
-        if (memcmp(supported_assets[i].asset_id, asset_id, ASSET_ID_LEN) == 0) {
+        if (MEMCMP(supported_assets[i].asset_id, asset_id, ASSET_ID_LEN) == 0) {
             return &supported_assets[i];
         }
     }
