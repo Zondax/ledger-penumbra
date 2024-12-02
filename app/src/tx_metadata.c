@@ -17,6 +17,7 @@
 #include <zxmacros.h>
 #include "parser_txdef.h"
 #include "tx_metadata.h"
+#include "rslib.h"
 
 
 parser_error_t metadata_parse(const uint8_t *data, size_t dataLen, tx_metadata_t *metadata, uint8_t metadataLen) {
@@ -76,6 +77,11 @@ parser_error_t metadata_parse(const uint8_t *data, size_t dataLen, tx_metadata_t
         // There are extra bytes in data, which might be unexpected
         return parser_unexpected_value;
     }
+
+    return parser_ok;
+}
+
+parser_error_t metadata_toAssetId(const tx_metadata_t *metadata, uint8_t *assetId, uint16_t assetIdLen) {
 
     return parser_ok;
 }

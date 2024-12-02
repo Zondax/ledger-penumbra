@@ -22,6 +22,8 @@ extern "C" {
 
 parser_error_t metadata_parse(const uint8_t *data, size_t dataLen, tx_metadata_t *metadata, uint8_t metadataLen);
 
+parser_error_t metadata_toAssetId(const tx_metadata_t *metadata, uint8_t *assetId, uint16_t assetIdLen);
+
 
 #ifdef __cplusplus
 }
