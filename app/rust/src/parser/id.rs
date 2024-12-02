@@ -14,10 +14,13 @@
 *  limitations under the License.
 ********************************************************************************/
 
+use crate::constants::ID_LEN_BYTES;
 use crate::parser::bytes::BytesC;
 use crate::ParserError;
 use decaf377::Fq;
-use crate::constants::ID_LEN_BYTES;
+
+pub const ASSET_ID_PERSONAL: &[u8; 16] = b"Penumbra_AssetID";
+
 #[derive(Clone, Debug)]
 pub struct Id(pub Fq);
 
