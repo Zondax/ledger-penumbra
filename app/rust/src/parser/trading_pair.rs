@@ -61,8 +61,8 @@ impl TradingPair {
 
     pub fn to_bytes(&self) -> Result<[u8; 64], ParserError> {
         let mut bytes = [0u8; 64];
-        let asset_1_bytes = self.asset_1.to_bytes().expect("asset_1 conversion failed");
-        let asset_2_bytes = self.asset_2.to_bytes().expect("asset_2 conversion failed");
+        let asset_1_bytes = self.asset_1.to_bytes()?;
+        let asset_2_bytes = self.asset_2.to_bytes()?;
 
         bytes[..32].copy_from_slice(&asset_1_bytes);
         bytes[32..].copy_from_slice(&asset_2_bytes);
@@ -70,14 +70,14 @@ impl TradingPair {
         Ok(bytes)
     }
 
-    pub fn to_proto(&self) -> [u8; Self::PROTO_LEN] {
+    pub fn to_proto(&self) -> Result<[u8; Self::PROTO_LEN], ParserError> {
         let mut proto = [0u8; Self::PROTO_LEN];
 
         proto[0..6].copy_from_slice(&[0x0a, 0x48, 0x0a, 0x22, 0x0a, 0x20]);
-        proto[6..38].copy_from_slice(&self.asset_1.to_bytes().expect("asset_1 conversion failed"));
+        proto[6..38].copy_from_slice(&self.asset_1.to_bytes()?);
         proto[38..42].copy_from_slice(&[0x12, 0x22, 0x0a, 0x20]); 
-        proto[42..74].copy_from_slice(&self.asset_2.to_bytes().expect("asset_2 conversion failed"));
+        proto[42..74].copy_from_slice(&self.asset_2.to_bytes()?);
 
-        proto
+        Ok(proto)
     }
 }

@@ -93,7 +93,7 @@ impl SwapPlaintext {
 
         let ciphertext: [u8; SWAP_CIPHERTEXT_BYTES] = encryption_result
             .try_into()
-            .expect("swap encryption result fits in ciphertext len");
+            .map_err(|_| ParserError::InvalidLength)?;
 
         Ok(SwapPayload {
             encrypted_swap: SwapCiphertext(ciphertext),

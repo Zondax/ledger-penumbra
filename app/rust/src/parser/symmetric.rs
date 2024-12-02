@@ -220,12 +220,12 @@ impl WrappedMemoKey {
         esk: ka::Secret,
         transmission_key: &ka::Public,
         diversified_generator: &decaf377::Element,
-    ) -> Self {
+    ) -> Result<Self, ParserError> {
         // 1. Construct the per-action PayloadKey.
         let epk = esk.diversified_public(diversified_generator);
         let shared_secret = esk
             .key_agreement_with(transmission_key)
-            .expect("key agreement succeeded");
+            .map_err(|_| ParserError::UnexpectedError)?;
 
         let action_key = PayloadKey::derive(&shared_secret, &epk);
 
@@ -236,9 +236,9 @@ impl WrappedMemoKey {
         action_key.encrypt(&mut encryption_result, PayloadKind::MemoKey, 32).map_err(|_| ParserError::UnexpectedError).unwrap();
         let wrapped_memo_key_bytes: [u8; MEMOKEY_WRAPPED_LEN_BYTES] = encryption_result
             .try_into()
-            .expect("memo key must fit in wrapped memo key field");
+            .map_err(|_| ParserError::UnexpectedError)?;
 
-        WrappedMemoKey(wrapped_memo_key_bytes)
+        Ok(WrappedMemoKey(wrapped_memo_key_bytes))
     }
 
     pub fn to_proto(&self) -> [u8; Self::PROTO_LEN] {

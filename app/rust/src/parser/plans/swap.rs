@@ -56,7 +56,7 @@ impl SwapPlanC {
             let mut state =
                 create_personalized_state("/penumbra.core.component.dex.v1.SwapBody");
 
-            state.update(&body.trading_pair.to_proto());
+            state.update(&body.trading_pair.to_proto()?);
             state.update(&[0x12]); // encode tag
             let (asset_1, len_1) = body.delta_1_i.to_proto();
             state.update(&asset_1[..len_1]);
