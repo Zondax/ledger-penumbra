@@ -38,7 +38,8 @@ extern "C" {
 
 #define MAX_SYMBOL_LEN 40
 #define MAX_ASSET_NAME_LEN 120
-#define MAX_DENOM_LEN 120
+// plus null terminator
+#define MAX_DENOM_LEN 120 + 1
 
 typedef struct {
     const uint8_t *ptr;
@@ -272,7 +273,7 @@ typedef struct {
 // that are not listed in our internal table
 // but that the user provide when signing a transaction
 typedef struct {
-    const char denoms[MAX_DENOM_LEN];
+    char denoms[MAX_DENOM_LEN];
     uint8_t denom_len;
 } tx_metadata_t;
 

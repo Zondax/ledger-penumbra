@@ -72,6 +72,7 @@ typedef enum {
     parser_undelegate_plan_error,
     parser_ics20_withdrawal_plan_error,
     parser_swap_plan_error,
+    parser_invalid_metadata,
 } parser_error_t;
 
 typedef struct {
@@ -81,7 +82,8 @@ typedef struct {
     parser_tx_t *tx_obj;
     spend_key_bytes_t *sk_bytes;
     address_index_t address_index;
-    tx_metadata_t tx_metadata[MAX_TX_METADATA_LEN]
+    tx_metadata_t tx_metadata[MAX_TX_METADATA_LEN];
+    uint8_t tx_metadata_len;
 } parser_context_t;
 
 #ifdef __cplusplus

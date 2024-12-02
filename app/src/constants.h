@@ -61,4 +61,4 @@
 #define MAX_TEXT_LEN MEMO_LEN_BYTES - ADDRESS_LEN_BYTES
 // The number of metadata we can handle in RAM during
 // transaction signing
-#define MAX_TX_METADATA_LEN 2
+#define MAX_TX_METADATA_LEN 5
