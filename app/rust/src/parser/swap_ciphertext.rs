@@ -21,11 +21,12 @@ pub struct SwapCiphertext(pub [u8; SWAP_CIPHERTEXT_BYTES]);
 
 impl SwapCiphertext {
     pub const PROTO_LEN: usize = SWAP_CIPHERTEXT_BYTES + 3;
+    pub const PROTO_PREFIX: [u8; 3] = [0x12, 0x90, 0x02];
 
     pub fn to_proto(&self) -> [u8; Self::PROTO_LEN] {
         let mut proto = [0u8; Self::PROTO_LEN];
 
-        proto[0..3].copy_from_slice(&[0x12, 0x90, 0x02]);
+        proto[0..3].copy_from_slice(&Self::PROTO_PREFIX);
         proto[3..].copy_from_slice(&self.0);
 
         proto

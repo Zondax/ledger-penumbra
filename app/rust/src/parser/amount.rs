@@ -26,6 +26,8 @@ pub struct Amount {
 
 impl Amount {
     pub const LEN: usize = AMOUNT_LEN_BYTES;
+    pub const PROTO_PREFIX_LO: [u8; 1] = [0x08]; // (1 << 3) | 0 = 8
+    pub const PROTO_PREFIX_HI: [u8; 1] = [0x10]; // (2 << 3) | 0 = 16
 
     pub fn to_le_bytes(&self) -> [u8; Self::LEN] {
         self.inner.to_le_bytes()
@@ -41,14 +43,13 @@ impl Amount {
 
         // Only encode non-zero values
         if lo != 0 {
-            encoded[pos] = 0x08; // (1 << 3) | 0 = 8
+            encoded[pos] = Self::PROTO_PREFIX_LO[0];
             pos += 1;
             pos += encode_varint(lo, &mut encoded[pos..]);
         }
 
         if hi != 0 {
-            // Field 2 (hi)
-            encoded[pos] = 0x10; // (2 << 3) | 0 = 16
+            encoded[pos] = Self::PROTO_PREFIX_HI[0];
             pos += 1;
             pos += encode_varint(hi, &mut encoded[pos..]);
         }

@@ -141,10 +141,11 @@ pub struct OvkWrappedKey(pub [u8; OVK_WRAPPED_LEN_BYTES]);
 
 impl OvkWrappedKey {
     pub const PROTO_LEN: usize = OVK_WRAPPED_LEN_BYTES + 2;
+    pub const PROTO_PREFIX: [u8; 2] = [0x22, 0x30];
 
     pub fn to_proto(&self) -> [u8; Self::PROTO_LEN] {
         let mut proto = [0u8; Self::PROTO_LEN];
-        proto[0..2].copy_from_slice(&[0x22, 0x30]);
+        proto[0..2].copy_from_slice(&Self::PROTO_PREFIX);
         proto[2..].copy_from_slice(&self.0);
         proto
     }
@@ -214,6 +215,8 @@ pub struct WrappedMemoKey(pub [u8; MEMOKEY_WRAPPED_LEN_BYTES]);
 
 impl WrappedMemoKey {
     pub const PROTO_LEN: usize = MEMOKEY_WRAPPED_LEN_BYTES + 2;
+    pub const PROTO_PREFIX: [u8; 2] = [0x1a, 0x30];
+
     /// Encrypt a memo key using the action-specific `PayloadKey`.
     pub fn encrypt(
         memo_key: &PayloadKey,
@@ -243,7 +246,7 @@ impl WrappedMemoKey {
 
     pub fn to_proto(&self) -> [u8; Self::PROTO_LEN] {
         let mut proto = [0u8; Self::PROTO_LEN];
-        proto[0..2].copy_from_slice(&[0x1a, 0x30]);
+        proto[0..2].copy_from_slice(&Self::PROTO_PREFIX);
         proto[2..].copy_from_slice(&self.0);
         proto
     }

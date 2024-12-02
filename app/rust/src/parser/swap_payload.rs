@@ -26,11 +26,12 @@ pub struct SwapPayload {
 
 impl SwapPayload {
     pub const PROTO_LEN: usize = SwapCiphertext::PROTO_LEN + Commitment::PROTO_LEN + 3;
+    pub const PROTO_PREFIX: [u8; 3] = [0x2a, 0xb7, 0x02];
 
     pub fn to_proto(&self) -> [u8; Self::PROTO_LEN] {
         let mut proto = [0u8; Self::PROTO_LEN];
 
-        proto[0..3].copy_from_slice(&[0x2a, 0xb7, 0x02]); 
+        proto[0..3].copy_from_slice(&Self::PROTO_PREFIX); 
         proto[3..Commitment::PROTO_LEN + 3].copy_from_slice(&self.commitment.to_proto_swap());
         proto[Commitment::PROTO_LEN + 3..Self::PROTO_LEN].copy_from_slice(&self.encrypted_swap.to_proto());
 

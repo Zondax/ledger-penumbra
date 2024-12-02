@@ -50,6 +50,8 @@ impl TryFrom<TradingPairC> for TradingPair {
 
 impl TradingPair {
     pub const PROTO_LEN: usize = 2 * Id::LEN + 10;
+    pub const PROTO_PREFIX_ASSET_1: [u8; 6] = [0x0a, 0x48, 0x0a, 0x22, 0x0a, 0x20];
+    pub const PROTO_PREFIX_ASSET_2: [u8; 4] = [0x12, 0x22, 0x0a, 0x20];
 
     pub fn asset_1(&self) -> &Id {
         &self.asset_1
@@ -73,9 +75,9 @@ impl TradingPair {
     pub fn to_proto(&self) -> Result<[u8; Self::PROTO_LEN], ParserError> {
         let mut proto = [0u8; Self::PROTO_LEN];
 
-        proto[0..6].copy_from_slice(&[0x0a, 0x48, 0x0a, 0x22, 0x0a, 0x20]);
+        proto[0..6].copy_from_slice(&Self::PROTO_PREFIX_ASSET_1);
         proto[6..38].copy_from_slice(&self.asset_1.to_bytes()?);
-        proto[38..42].copy_from_slice(&[0x12, 0x22, 0x0a, 0x20]); 
+        proto[38..42].copy_from_slice(&Self::PROTO_PREFIX_ASSET_2); 
         proto[42..74].copy_from_slice(&self.asset_2.to_bytes()?);
 
         Ok(proto)
