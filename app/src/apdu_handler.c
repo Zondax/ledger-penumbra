@@ -180,9 +180,7 @@ __Z_INLINE void handleTxMetadata(volatile uint32_t *flags, volatile uint32_t *tx
         THROW(APDU_CODE_DATA_INVALID);
     }
 
-    view_review_init(tx_getItem, tx_getNumItems, app_sign);
-    view_review_show(REVIEW_TXN);
-    *flags |= IO_ASYNCH_REPLY;
+    THROW(APDU_CODE_OK);
 }
 
 __Z_INLINE void handleSign(volatile uint32_t *flags, volatile uint32_t *tx, uint32_t rx) {
