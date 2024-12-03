@@ -22,6 +22,7 @@ extern "C" {
 #include <stddef.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include "constants.h"
 
 #define MEMO_KEY_SIZE 32
 #define MEMO_ADDRESS_INNER_SIZE 80
@@ -38,8 +39,6 @@ extern "C" {
 
 #define MAX_SYMBOL_LEN 40
 #define MAX_ASSET_NAME_LEN 120
-// plus null terminator
-#define MAX_DENOM_LEN 120 + 1
 
 typedef struct {
     const uint8_t *ptr;
@@ -273,8 +272,8 @@ typedef struct {
 // that are not listed in our internal table
 // but that the user provide when signing a transaction
 typedef struct {
-    char denoms[MAX_DENOM_LEN];
-    uint8_t denom_len;
+    char denom[MAX_DENOM_LEN];
+    uint8_t len;
 } tx_metadata_t;
 
 #ifdef __cplusplus

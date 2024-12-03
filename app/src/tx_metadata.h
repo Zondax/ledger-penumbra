@@ -24,6 +24,21 @@ parser_error_t metadata_parse(const uint8_t *data, size_t dataLen, tx_metadata_t
 
 parser_error_t metadata_toAssetId(const tx_metadata_t *metadata, uint8_t *assetId, uint16_t assetIdLen);
 
+/**
+ * @brief Retrieves denomination string for a given asset from metadata array
+ * @param metadata Array of transaction metadata entries
+ * @param metadataLen Length of the metadata array
+ * @param asset Target asset ID to search for
+ * @param denom Buffer to store the denomination string
+ * @param len Length of the denomination buffer
+ * @return Length of denomination copied, 0 if not found or error
+ */
+uint8_t metadata_getDenom(const tx_metadata_t *metadata,
+                         uint8_t metadataLen,
+                         const asset_id_t *asset,
+                         char *denom,
+                         uint8_t len);
+
 
 #ifdef __cplusplus
 }

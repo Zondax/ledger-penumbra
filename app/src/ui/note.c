@@ -4,6 +4,7 @@
 #include "note.h"
 #include "constants.h"
 #include "ui_utils.h"
+#include "tx_metadata.h"
 
 parser_error_t printValue(const parser_context_t *ctx, const value_t *value,
                           char *outVal, uint16_t outValLen) {
@@ -50,12 +51,34 @@ parser_error_t printValue(const parser_context_t *ctx, const value_t *value,
         return parser_ok;
     }
 
-    // TODO: Case 2: Base denom (integer + space + denom) taken from transaction
+    // Case 2: Base denom (integer + space + denom) taken from transaction
     // for this we use the parser_context_t to access the transaction metadata
-    // here it is likely we need to call rust to compute the asset id
-    // and check it matches spend.note.asset_id, otherwise a fallback(case3) is used
+    // if not found, we default to case 3
+    char denom[MAX_DENOM_LEN + 1] = {0};
 
+    uint8_t trace_len = metadata_getDenom(&ctx->tx_metadata[0], MAX_TX_METADATA_LEN, &value->asset_id, denom, MAX_DENOM_LEN + 1);
 
+    if (trace_len != 0) {
+        // We found denom trace in provided transaction metadata
+        int written = snprintf(outVal, outValLen - 1, "%s", amount_str);
+        if (written < 0 || written >= outValLen - 1) {
+            return parser_unexpected_buffer_end;
+        }
+
+        // Space
+        outVal[written] = ' ';
+        written += 1;
+        // check we have space for denomination path
+        if (written + trace_len >= outValLen - 1) {
+            return parser_unexpected_buffer_end;
+        }
+
+        MEMCPY(&outVal[written], denom, trace_len);
+        written += trace_len;
+        outVal[written] = '\0';
+
+        return parser_ok;
+    }
 
     // Case 3: Bech32 fallback (integer + space + bech32 of asset_id)
     int written = snprintf(outVal, outValLen - 1, "%s", amount_str);
@@ -64,8 +87,9 @@ parser_error_t printValue(const parser_context_t *ctx, const value_t *value,
     }
     // Space
     outVal[written] = ' ';
+    written += 1;
 
-    CHECK_ERROR(printAssetId(value->asset_id.inner.ptr, value->asset_id.inner.len, outVal + written + 1, outValLen - written - 1));
+    CHECK_ERROR(printAssetId(value->asset_id.inner.ptr, value->asset_id.inner.len, outVal + written, outValLen - written - 1));
 
     return err;
 }

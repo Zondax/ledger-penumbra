@@ -18,7 +18,7 @@
 #include "parser_txdef.h"
 #include "tx_metadata.h"
 #include "rslib.h"
-
+#include "constants.h"
 
 parser_error_t metadata_parse(const uint8_t *data, size_t dataLen, tx_metadata_t *metadata, uint8_t metadataLen) {
     if (metadata == NULL) {
@@ -66,8 +66,8 @@ parser_error_t metadata_parse(const uint8_t *data, size_t dataLen, tx_metadata_t
         }
 
         // Copy the string data into the metadata array
-        MEMCPY(metadata[i].denoms, &data[data_offset], len);
-        metadata[i].denom_len = len;
+        MEMCPY(metadata[i].denom, &data[data_offset], len);
+        metadata[i].len = len;
 
         data_offset += len;
     }
@@ -81,7 +81,39 @@ parser_error_t metadata_parse(const uint8_t *data, size_t dataLen, tx_metadata_t
     return parser_ok;
 }
 
-parser_error_t metadata_toAssetId(const tx_metadata_t *metadata, uint8_t *assetId, uint16_t assetIdLen) {
+parser_error_t metadata_toAssetId(const tx_metadata_t *metadata, uint8_t *asset, uint16_t asset_len) {
+    bytes_t data = {0};
+    data.ptr = (uint8_t *)&metadata->denom[0];
+    data.len = metadata->len;
+
+    CHECK_ERROR(rs_get_asset_id_from_metadata(&data, asset, asset_len));
 
     return parser_ok;
+}
+
+uint8_t metadata_getDenom(const tx_metadata_t *metadata,
+                         uint8_t metadataLen,
+                         const asset_id_t *asset,
+                         char *denom,
+                         uint8_t len) {
+    if (metadataLen == 0 || metadata == NULL ||
+        asset == NULL || denom == NULL || len == 0) {
+        return 0;
+    }
+
+    uint8_t computed_asset[ASSET_ID_LEN] = {0};
+    const tx_metadata_t *found = NULL;
+
+    for(uint8_t i = 0; i < metadataLen; ++i) {
+        found = &metadata[i];
+        CHECK_ERROR(metadata_toAssetId(found, computed_asset, ASSET_ID_LEN));
+
+        if (MEMCMP(computed_asset, asset->inner.ptr, ASSET_ID_LEN) == 0) {
+            if (found->len <= len) {
+                MEMCPY(denom, found->denom, found->len);
+                return found->len;
+            }
+        }
+    }
+    return 0;  // Asset not found
 }
