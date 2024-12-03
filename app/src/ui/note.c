@@ -1,18 +1,15 @@
-#include "parser_common.h"
-#include "zxformat.h"
-#include "known_assets.h"
 #include "note.h"
+
 #include "constants.h"
-#include "ui_utils.h"
+#include "known_assets.h"
+#include "parser_common.h"
 #include "tx_metadata.h"
+#include "ui_utils.h"
+#include "zxformat.h"
 
-parser_error_t printValue(const parser_context_t *ctx, const value_t *value,
-                          char *outVal, uint16_t outValLen) {
-
-    parser_error_t err = parser_no_data;
-
-    if (ctx == NULL || value == NULL || outVal == NULL ) {
-        return err;
+parser_error_t printValue(const parser_context_t *ctx, const value_t *value, char *outVal, uint16_t outValLen) {
+    if (ctx == NULL || value == NULL || outVal == NULL) {
+        return parser_no_data;
     }
 
     if (outValLen < VALUE_DISPLAY_MAX_LEN) {
@@ -27,7 +24,10 @@ parser_error_t printValue(const parser_context_t *ctx, const value_t *value,
     CHECK_ERROR(uint128_to_str(amount_str, U128_STR_MAX_LEN, value->amount.hi, value->amount.lo))
 
     // lookup at asset table
-    const asset_info_t *known_asset = asset_info_from_table(value->asset_id.inner.ptr);
+    const asset_info_t *known_asset = NULL;
+    if (value->has_asset_id) {
+        known_asset = asset_info_from_table(value->asset_id.inner.ptr);
+    }
 
     // There are three cases:
     // Case 1: Known assets (decimal + space + symbol)
@@ -56,7 +56,10 @@ parser_error_t printValue(const parser_context_t *ctx, const value_t *value,
     // if not found, we default to case 3
     char denom[MAX_DENOM_LEN + 1] = {0};
 
-    uint8_t trace_len = metadata_getDenom(&ctx->tx_metadata[0], MAX_TX_METADATA_LEN, &value->asset_id, denom, MAX_DENOM_LEN + 1);
+    uint8_t trace_len = 0;
+    if (value->has_asset_id) {
+        trace_len = metadata_getDenom(&ctx->tx_metadata[0], MAX_TX_METADATA_LEN, &value->asset_id, denom, MAX_DENOM_LEN + 1);
+    }
 
     if (trace_len != 0) {
         // We found denom trace in provided transaction metadata
@@ -89,7 +92,16 @@ parser_error_t printValue(const parser_context_t *ctx, const value_t *value,
     outVal[written] = ' ';
     written += 1;
 
-    CHECK_ERROR(printAssetId(value->asset_id.inner.ptr, value->asset_id.inner.len, outVal + written, outValLen - written - 1));
+    bytes_t asset_id = {0};
+    if (value->has_asset_id) {
+        asset_id = value->asset_id.inner;
+    } else {
+        static const uint8_t default_asset_id[ASSET_ID_LEN] = STAKING_TOKEN_ASSET_ID_BYTES;
+        asset_id.ptr = default_asset_id;
+        asset_id.len = ASSET_ID_LEN;
+    }   
 
-    return err;
+    CHECK_ERROR(printAssetId(asset_id.ptr, asset_id.len, outVal + written, outValLen - written - 1));
+
+    return parser_ok;
 }
