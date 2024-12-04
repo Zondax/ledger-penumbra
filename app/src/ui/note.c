@@ -2,7 +2,6 @@
 
 #include "constants.h"
 #include "known_assets.h"
-#include "parser_common.h"
 #include "tx_metadata.h"
 #include "ui_utils.h"
 #include "zxformat.h"
@@ -99,7 +98,7 @@ parser_error_t printValue(const parser_context_t *ctx, const value_t *value, cha
         static const uint8_t default_asset_id[ASSET_ID_LEN] = STAKING_TOKEN_ASSET_ID_BYTES;
         asset_id.ptr = default_asset_id;
         asset_id.len = ASSET_ID_LEN;
-    }   
+    }
 
     CHECK_ERROR(printAssetId(asset_id.ptr, asset_id.len, outVal + written, outValLen - written - 1));
 
