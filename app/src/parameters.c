@@ -58,7 +58,7 @@ parser_error_t parameters_getItem(const parser_context_t *ctx, uint8_t displayId
         return err;
     }
     
-    char bufferUI[200] = {0};
+    char bufferUI[VALUE_DISPLAY_MAX_LEN] = {0};
     switch (displayIdx) {
         case 0:
             snprintf(outKey, outKeyLen, "Chain ID");
