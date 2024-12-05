@@ -23,6 +23,8 @@
 #include "zxformat.h"
 #include "known_assets.h"
 #include "note.h"
+#include "crypto_helper.h"
+#include "ui_utils.h"
 
 parser_error_t decode_spend_plan(const bytes_t *data, spend_plan_t *output) {
     penumbra_core_component_shielded_pool_v1_SpendPlan spend_plan =
@@ -81,19 +83,56 @@ parser_error_t spend_getItem(const parser_context_t *ctx, const spend_plan_t *sp
         return err;
     }
 
+    zxerr_t error = zxerr_invalid_crypto_settings;
+    keys_t keys = {0};
 
     switch ( displayIdx ) {
         case 0:
             snprintf(outKey, outKeyLen, "Spend");
-            return printValue(ctx, &spend->note.value, outVal, outValLen);
-            break;
+            char value[VALUE_DISPLAY_MAX_LEN] = {0};
+            CHECK_ERROR(printValue(ctx, &spend->note.value, value, VALUE_DISPLAY_MAX_LEN));
+
+            pageString(outVal, outValLen, value, pageIdx, pageCount);
+
+            return parser_ok;
         case 1:
             snprintf(outKey, outKeyLen, "From");
-            snprintf(outVal, outValLen, "Main Account");
-            break;
+            // Worse scenario where address is not controlled by the user
+            char addr_ui[ENCODED_ADDR_LEN] = {0};
+            uint8_t randomizer[ADDR_RANDOMIZER_LEN] = {0};
+            if (ctx->address_index.has_randomizer) {
+                MEMCPY(randomizer, ctx->address_index.randomizer, ADDR_RANDOMIZER_LEN);
+            }
+
+            CATCH_ZX_ERROR(compute_keys(&keys));
+            CATCH_ZX_ERROR(compute_address(&keys, ctx->address_index.account, randomizer));
+
+            // compare the addresses
+            if (MEMCMP(keys.address, spend->note.address.inner.ptr, ADDRESS_LEN_BYTES) == 0 ) {
+                if (ctx->address_index.account == 0) {
+                    snprintf(outVal, outValLen, "Main-Account");
+                } else {
+                    // We can use %d, because account is an uint32_t
+                    // otherwise u64_to_str or any other alternative
+                    // must be used
+                    snprintf(addr_ui, ENCODED_ADDR_LEN, "Sub-Account %d", ctx->address_index.account);
+                    pageString(outVal, outValLen, addr_ui, pageIdx, pageCount);
+                }
+            } else {
+                // render encoded address in shorter form
+                if (printShortAddress(&keys.address[0], ADDRESS_LEN_BYTES, addr_ui, ENCODED_ADDR_LEN) != parser_ok) {
+                    MEMZERO(&keys, sizeof(keys));
+                    return parser_no_data;
+                }
+                pageString(outVal, outValLen, addr_ui, pageIdx, pageCount);
+            }
+            return parser_ok;
         default:
             return parser_no_data;
     }
-    return parser_ok;
 
+catch_zx_error:
+    MEMZERO(&keys, sizeof(keys));
+
+    return parser_no_data;
 }
