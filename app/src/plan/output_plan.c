@@ -117,9 +117,7 @@ parser_error_t output_printValue(const parser_context_t *ctx, const output_plan_
     written_local = snprintf(outVal + written_value, outValLen - written_value, " to ");
 
     // add address
-    char address[100] = {0};
-    memcpy(address, output->dest_address.inner.ptr, output->dest_address.inner.len);
-    CHECK_ERROR(printShortAddress((uint8_t *)address, output->dest_address.inner.len, outVal + written_local + written_value, outValLen - written_local - written_value));
+    CHECK_ERROR(printShortAddress((uint8_t *)output->dest_address.inner.ptr, output->dest_address.inner.len, outVal + written_local + written_value, outValLen - written_local - written_value));
 
     return parser_ok;
 }
