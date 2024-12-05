@@ -131,3 +131,10 @@ zxerr_t tx_getItem(int8_t displayIdx, char *outKey, uint16_t outKeyLen, char *ou
 
     return zxerr_ok;
 }
+
+void tx_setAddressIndex(address_index_t *addr_idx) {
+    parser_setAddressIndex(&ctx_parsed_tx, addr_idx);
+}
+address_index_t *tx_addressIndex() {
+    return &ctx_parsed_tx.address_index;
+}

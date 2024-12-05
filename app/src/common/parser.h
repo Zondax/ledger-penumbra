@@ -27,6 +27,7 @@ const char *parser_getMsgPackTypeDescription(uint8_t type);
 
 //// parses a tx buffer
 parser_error_t parser_parse(parser_context_t *ctx, const uint8_t *data, size_t dataLen, parser_tx_t *tx_obj);
+void parser_setAddressIndex(parser_context_t *ctx, address_index_t *addr_idx);
 
 //// verifies tx fields
 parser_error_t parser_validate(parser_context_t *ctx);

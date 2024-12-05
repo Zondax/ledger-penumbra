@@ -63,6 +63,14 @@ parser_error_t parser_validate(parser_context_t *ctx) {
     return parser_ok;
 }
 
+
+void parser_setAddressIndex(parser_context_t *ctx, address_index_t *addr_idx) {
+    if (ctx == NULL || addr_idx == NULL) {
+        return;
+    }
+    MEMCPY(&ctx->address_index, addr_idx, sizeof(address_index_t));
+}
+
 parser_error_t parser_getNumItems(const parser_context_t *ctx, uint8_t *num_items) {
     // #{TODO} --> function to retrieve num Items
     // *num_items = _getNumItems();

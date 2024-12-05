@@ -18,6 +18,7 @@
 #include "coin.h"
 #include "os.h"
 #include "parser_txdef.h"
+#include "keys_def.h"
 #include "zxerror.h"
 
 void tx_initialize();
@@ -56,6 +57,9 @@ const char *tx_parse_metadata();
 
 /// Return the number of items in the transaction
 zxerr_t tx_getNumItems(uint8_t *num_items);
+
+void tx_setAddressIndex(address_index_t *addr_idx);
+address_index_t *tx_addressIndex();
 
 /// Gets an specific item from the transaction (including paging)
 zxerr_t tx_getItem(int8_t displayIdx, char *outKey, uint16_t outKeyLen, char *outValue, uint16_t outValueLen,

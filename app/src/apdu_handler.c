@@ -190,7 +190,15 @@ __Z_INLINE void handleSign(volatile uint32_t *flags, volatile uint32_t *tx, uint
         THROW(APDU_CODE_OK);
     }
 
+    // go to the account + randomizer data
+    address_index_t address_index = {0};
+    extractAddressIndex(rx, OFFSET_DATA + sizeof(uint32_t) * HDPATH_LEN_DEFAULT, &address_index);
+
+    // set address index to be used during review
+    tx_setAddressIndex(&address_index);
+
     __Z_UNUSED const char *error_msg = tx_parse();
+
     CHECK_APP_CANARY()
     if (error_msg != NULL) {
         const int error_msg_length = strnlen(error_msg, sizeof(G_io_apdu_buffer));
