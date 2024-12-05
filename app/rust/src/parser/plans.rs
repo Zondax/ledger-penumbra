@@ -36,8 +36,11 @@ pub mod swap;
 #[cfg_attr(any(feature = "derive-debug", test), derive(Debug))]
 pub struct TransactionPlanC {
     pub actions_hashes: ActionsHashC,
+    pub has_parameters: bool,
     pub parameters_hash: ParametersHash,
+    pub has_memo: bool,
     pub memo: MemoPlanC,
+    pub has_detection_data: bool,
     pub detection_data: DetectionDataPlanC,
 }
 
