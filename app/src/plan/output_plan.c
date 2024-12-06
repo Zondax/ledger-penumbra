@@ -110,14 +110,14 @@ parser_error_t output_printValue(const parser_context_t *ctx, const output_plan_
     uint16_t written_local = snprintf(outVal, outValLen, "Output ");
 
     // add value
-    CHECK_ERROR(printValue(ctx, &output->value.amount, &ctx->tx_obj->parameters_plan.chain_id, outVal + written_local, outValLen - written_local));
+    CHECK_ERROR(printValue(ctx, &output->value, &ctx->tx_obj->parameters_plan.chain_id, outVal + written_local, outValLen - written_local));
     uint16_t written_value = strlen(outVal);
 
     // add "to"
     written_local = snprintf(outVal + written_value, outValLen - written_value, " to ");
 
     // add address
-    CHECK_ERROR(printShortAddress((uint8_t *)output->dest_address.inner.ptr, output->dest_address.inner.len, outVal + written_local + written_value, outValLen - written_local - written_value));
+    CHECK_ERROR(printAddress(ctx->sk_bytes, &output->dest_address.inner, outVal + written_local + written_value, outValLen - written_local - written_value));
 
     return parser_ok;
 }

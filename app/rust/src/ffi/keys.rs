@@ -2,6 +2,8 @@ use crate::address::{Address, AddressIndex};
 use crate::constants::KEY_LEN;
 use crate::keys::spend_key::SpendKeyBytes;
 use crate::ParserError;
+use crate::parser::bytes::BytesC;
+use crate::address::address_view::AddressView;
 
 #[repr(C)]
 pub struct Keys {
@@ -50,6 +52,41 @@ pub unsafe extern "C" fn rs_compute_address(
     ParserError::Ok as u32
 }
 
+#[no_mangle]
+/// Use to compute an address and write it back into output
+/// argument.
+pub unsafe extern "C" fn rs_is_address_visible(
+    sk: &SpendKeyBytes,
+    address: &BytesC,
+    is_visible: *mut bool,
+    index: *mut u32,
+) -> u32 {
+    crate::zlog("rs_is_address_visible\x00");
+
+    let fvk = sk.fvk().unwrap();
+    let address_bytes = address.get_bytes().unwrap();
+    let address = Address::try_from(address_bytes).unwrap();
+
+    let address_view = fvk.view_address(address.clone()).unwrap();
+
+    if is_visible.is_null() && index.is_null() {
+        return ParserError::InvalidLength as u32;
+    }
+
+    match address_view {
+        AddressView::Opaque { address: _ } => {
+            *is_visible = false;
+            *index = 0;
+        },
+        AddressView::Visible { index: idx, .. } => {
+            *is_visible = true;
+            *index = idx.account;
+        }
+    }
+
+    ParserError::Ok as u32
+}
+
 fn compute_address(keys: &mut Keys, addr_idx: AddressIndex) -> Result<(), ParserError> {
     let spk = SpendKeyBytes::from(keys.skb);
     let fvk = spk.fvk()?;
@@ -79,6 +116,7 @@ mod test {
     use crate::keys::spend_key::SpendKeyBytes;
 
     const SPEND_KEY: &str = "ff726c71bcec76abc6a88cba71df655b28de6580edbd33c7415fdfded2e422e7";
+    const SPEND_ZEMU_KEY: &str = "a1ffba0c37931f0a626137520da650632d35853bf591b36bb428630a4d87c4dc";
     const ACCOUNT_IDX: u32 = 1;
     const EXPECTED_ADDR: &str = "70c4d192ddf3c4cdf97fddc4c4aa07d112b5a7bf6d0810da37ae777990913737babcaa57fd4031d19260d88f1ec0c357a375c289f9943e7efa242ae963abcce749543a22039d687d8a027cb05b33438c";
     const EXPECTED_DIV: &str = "fe8f546c0172716f9efd52eba9074148";
@@ -130,5 +168,39 @@ mod test {
         let s = hex::encode(keys.fvk);
 
         assert_eq!(s, EXPECTED_FVK);
+    }
+
+    #[test]
+    fn print_address() {
+        let key_bytes = hex::decode(SPEND_ZEMU_KEY).unwrap();
+        let mut key_bytes_array = [0u8; 32];
+        key_bytes_array.copy_from_slice(&key_bytes);
+        let spend_key = SpendKeyBytes::from(key_bytes_array);
+
+        let dummy_address =
+        hex::decode("cefe3931877df56e2eb50626ae0d54c2d44791c154a2b8f056daf11c378116c1a924f91862da10b8b39ecd045062f04dcb345041b0001471d97d73136d424f64239804708ff3d78d645c084ec3ee0315")
+            .unwrap();
+        let address = Address::try_from(dummy_address.as_slice()).unwrap();
+
+        let fvk = spend_key.fvk().unwrap();
+
+        let address_view = fvk.view_address(address).unwrap();
+
+        let account_str = match address_view {
+            AddressView::Opaque { address: _ } => "Opaque".to_string(),
+            AddressView::Visible {
+                address: _,
+                index,
+                wallet_id: _,
+            } => {
+                if index.account == 0 {
+                    "Main Account".to_string()
+                } else {
+                    format!("Sub-account #{}", index.account)
+                }
+            }
+        };
+
+        assert_eq!(account_str, "Sub-account #90");
     }
 }

@@ -6,8 +6,8 @@
 #include "ui_utils.h"
 #include "zxformat.h"
 
-parser_error_t printValue(const parser_context_t *ctx, const amount_t *amount, const bytes_t *asset_id, char *outVal, uint16_t outValLen) {
-    if (ctx == NULL || amount == NULL || outVal == NULL || asset_id == NULL) {
+parser_error_t printValue(const parser_context_t *ctx, const value_t *value, const bytes_t *chain_id, char *outVal, uint16_t outValLen) {
+    if (ctx == NULL || value == NULL || outVal == NULL || chain_id == NULL) {
         return parser_no_data;
     }
 
@@ -20,14 +20,14 @@ parser_error_t printValue(const parser_context_t *ctx, const amount_t *amount, c
     char amount_str[U128_STR_MAX_LEN] = {0};
 
     // convert to string note.amount
-    CHECK_ERROR(uint128_to_str(amount_str, U128_STR_MAX_LEN, amount->hi, amount->lo))
+    CHECK_ERROR(uint128_to_str(amount_str, U128_STR_MAX_LEN, value->amount.hi, value->amount.lo))
 
     // lookup at asset table
-    uint8_t chain_id[32] = {0};
-    MEMCPY(chain_id, asset_id->ptr, asset_id->len);
+    uint8_t chain_id_local[100] = {0};
+    MEMCPY(chain_id_local, chain_id->ptr, chain_id->len);
     const asset_info_t *known_asset = NULL;
-    if (asset_id != NULL && asset_id->len != 0) {
-        known_asset = asset_info_from_table(chain_id);
+    if (chain_id->ptr != NULL && chain_id->len != 0) {
+        known_asset = asset_info_from_table(chain_id_local);
     }
 
     // There are three cases:
@@ -39,22 +39,16 @@ parser_error_t printValue(const parser_context_t *ctx, const amount_t *amount, c
     // Case 1: Known assets
     if (known_asset != NULL) {
         uint8_t decimals = (uint8_t)known_asset->decimals;
-        snprintf(outVal, outValLen, "%s", amount_str);
-
-        if (intstr_to_fpstr_inplace(outVal, outValLen, decimals) == 0) {
-            return parser_unexpected_value;
-        }
-
-        // add space
-        const size_t len = strlen(outVal);
-        outVal[len] = ' ';
-        outValLen -= 1;
-
-        if (z_str3join(outVal, outValLen, "", known_asset->symbol) != zxerr_ok) {
+        uint8_t err = fpstr_to_str(outVal, outValLen, amount_str, decimals);
+        // Check we are not out of bounds
+        if (err != 0) {
             return parser_unexpected_buffer_end;
         }
-
-        number_inplace_trimming(outVal, 1);
+        size_t fpstr_len = strlen(outVal);
+        // copy space
+        outVal[fpstr_len] = ' ';
+        // now copy symbol
+        snprintf(outVal + fpstr_len + 1, outValLen - fpstr_len - 1, "%s", known_asset->symbol);
 
         return parser_ok;
     }
@@ -65,8 +59,8 @@ parser_error_t printValue(const parser_context_t *ctx, const amount_t *amount, c
     char denom[MAX_DENOM_LEN + 1] = {0};
 
     uint8_t trace_len = 0;
-    if (asset_id != NULL && asset_id->len != 0) {
-        trace_len = metadata_getDenom(&ctx->tx_metadata[0], MAX_TX_METADATA_LEN, asset_id, denom, MAX_DENOM_LEN + 1);
+    if (chain_id != NULL && chain_id->len != 0) {
+        trace_len = metadata_getDenom(&ctx->tx_metadata[0], MAX_TX_METADATA_LEN, chain_id, denom, MAX_DENOM_LEN + 1);
     }
 
     if (trace_len != 0) {
@@ -101,8 +95,8 @@ parser_error_t printValue(const parser_context_t *ctx, const amount_t *amount, c
     written += 1;
 
     bytes_t asset_id_local = {0};
-    if (asset_id != NULL && asset_id->len != 0) {
-        asset_id_local = *asset_id;
+    if (value->asset_id.inner.ptr != NULL && value->asset_id.inner.len != 0) {
+        asset_id_local = value->asset_id.inner;
     } else {
         static const uint8_t default_asset_id[ASSET_ID_LEN] = STAKING_TOKEN_ASSET_ID_BYTES;
         asset_id_local.ptr = default_asset_id;
