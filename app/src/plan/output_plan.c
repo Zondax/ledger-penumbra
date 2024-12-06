@@ -110,7 +110,7 @@ parser_error_t output_printValue(const parser_context_t *ctx, const output_plan_
     uint16_t written_local = snprintf(outVal, outValLen, "Output ");
 
     // add value
-    CHECK_ERROR(printValue(ctx, &output->value, outVal + written_local, outValLen - written_local));
+    CHECK_ERROR(printValue(ctx, &output->value.amount, &ctx->tx_obj->parameters_plan.chain_id, outVal + written_local, outValLen - written_local));
     uint16_t written_value = strlen(outVal);
 
     // add "to"
