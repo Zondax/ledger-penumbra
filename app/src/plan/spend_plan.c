@@ -102,6 +102,12 @@ parser_error_t spend_getItem(const parser_context_t *ctx, const spend_plan_t *sp
             uint8_t randomizer[ADDR_RANDOMIZER_LEN] = {0};
             if (ctx->address_index.has_randomizer) {
                 MEMCPY(randomizer, ctx->address_index.randomizer, ADDR_RANDOMIZER_LEN);
+            } else {
+                // regarless the randomizer was initialized with
+                // zeroes, we add this step to make it clear
+                // that in the absent of randomizer, SDK uses
+                // the default [0u8; 12] value
+                MEMZERO(randomizer, ADDR_RANDOMIZER_LEN);
             }
 
             CATCH_ZX_ERROR(compute_keys(&keys));
