@@ -50,7 +50,7 @@ parser_error_t printBech32Encoded(const char *prefix, uint16_t prefix_len, const
  *
  * @return parser_error_t   parser_ok on success, error code otherwise
  */
-parser_error_t printShortAddress(uint8_t *address, uint16_t address_len, char *out, uint16_t out_len);
+parser_error_t printShortAddress(const uint8_t *address, uint16_t address_len, char *out, uint16_t out_len);
 parser_error_t printAddress(const uint8_t *address, uint16_t address_len, char *out, uint16_t out_len);
 parser_error_t printAssetId(const uint8_t *asset, uint16_t asset_len, char *out, uint16_t out_len);
 
