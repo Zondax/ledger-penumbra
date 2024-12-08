@@ -46,6 +46,7 @@ extern "C" {
     } while (0)
 
 zxerr_t compute_address(keys_t *keys, uint32_t account, uint8_t *randomizer);
+zxerr_t compute_local_address(uint32_t account, uint8_t *randomizer, address_t out);
 zxerr_t compute_keys(keys_t *keys);
 
 #ifdef __cplusplus

@@ -17,7 +17,6 @@
 // #include "keys_personalizations.h"
 #include <string.h>
 
-#include "keys_def.h"
 #include "rslib.h"
 #include "zxformat.h"
 
@@ -29,6 +28,25 @@ zxerr_t compute_address(keys_t *keys, uint32_t account, uint8_t *randomizer) {
     }
 
     return zxerr_ok;
+}
+
+zxerr_t compute_local_address(uint32_t account, uint8_t *randomizer, address_t out) {
+    if (out == NULL || randomizer == NULL) return zxerr_unknown;
+
+    zxerr_t error = zxerr_invalid_crypto_settings;
+    keys_t keys = {0};
+
+    CATCH_ZX_ERROR(compute_keys(&keys));
+    CATCH_ZX_ERROR(compute_address(&keys, account, randomizer));
+
+    error = zxerr_ok;
+
+    // copy
+    MEMCPY(out, keys.address, ADDRESS_LEN_BYTES);
+
+catch_zx_error:
+    MEMZERO(&keys, sizeof(keys));
+    return error;
 }
 
 zxerr_t compute_keys(keys_t *keys) {
