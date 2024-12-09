@@ -110,7 +110,6 @@ typedef struct {
     uint16_t bufferLen;
     uint16_t offset;
     parser_tx_t *tx_obj;
-    spend_key_bytes_t *sk_bytes;
     address_index_t address_index;
     tx_metadata_t tx_metadata[MAX_TX_METADATA_LEN];
     uint8_t tx_metadata_len;
