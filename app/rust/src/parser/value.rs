@@ -29,7 +29,8 @@ pub enum Sign {
     Provided,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone)]
+#[cfg_attr(any(feature = "derive-debug", test), derive(Debug))]
 pub struct Value {
     pub amount: Amount,
     // The asset ID. 256 bits.
