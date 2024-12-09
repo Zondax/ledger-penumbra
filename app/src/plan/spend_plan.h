@@ -32,6 +32,8 @@ extern "C" {
 
 parser_error_t decode_spend_plan(const bytes_t *input, spend_plan_t *spend_plan);
 
+parser_error_t spend_printValue(const parser_context_t *ctx, const spend_plan_t *spend, char *outVal, uint16_t outValLen);
+
 parser_error_t spend_getNumItems(const parser_context_t *ctx, uint8_t *num_items);
 
 parser_error_t spend_getItem(const parser_context_t *ctx, const spend_plan_t *spend, const address_index_t *addr_index, uint8_t displayIdx, char *outKey, uint16_t outKeyLen,

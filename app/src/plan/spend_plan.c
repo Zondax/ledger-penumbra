@@ -23,6 +23,7 @@
 #include "zxformat.h"
 #include "known_assets.h"
 #include "note.h"
+#include "ui_utils.h"
 
 parser_error_t decode_spend_plan(const bytes_t *data, spend_plan_t *output) {
     penumbra_core_component_shielded_pool_v1_SpendPlan spend_plan =
@@ -62,12 +63,43 @@ parser_error_t decode_spend_plan(const bytes_t *data, spend_plan_t *output) {
     return parser_ok;
 }
 
+
+parser_error_t spend_printValue(const parser_context_t *ctx, const spend_plan_t *spend, char *outVal, uint16_t outValLen) {
+    if (ctx == NULL || spend == NULL || outVal == NULL) {
+        return parser_no_data;
+    }
+
+    if (outValLen < SPEND_DISPLAY_MAX_LEN) {
+        return parser_unexpected_buffer_end;
+    }
+
+    MEMZERO(outVal, outValLen);
+
+    // example: Spend 100 USDC to penumbra1k0zzug62gpz60sejdvu9q7mq…
+
+    // add action title
+    uint16_t written_local = snprintf(outVal, outValLen, "Spend ");
+
+    // add value
+    CHECK_ERROR(printValue(ctx, &spend->note.value, &ctx->tx_obj->parameters_plan.chain_id, outVal + written_local, outValLen - written_local));
+    uint16_t written_value = strlen(outVal);
+
+    // add "from"
+    written_local = snprintf(outVal + written_value, outValLen - written_value, " from ");
+
+    // add address
+    CHECK_ERROR(printTxAddress(&spend->note.address.inner, outVal + written_local + written_value, outValLen - written_local - written_value));
+
+    return parser_ok;
+}
+
 parser_error_t spend_getNumItems(const parser_context_t *ctx, uint8_t *num_items) {
     UNUSED(ctx);
     // from spends we display only two items:
     // - Spend 100 USDC
     // - From Main Account
-    *num_items = 2;
+    // all concatenated in a single string
+    *num_items = 1;
     return parser_ok;
 }
 
@@ -82,18 +114,14 @@ parser_error_t spend_getItem(const parser_context_t *ctx, const spend_plan_t *sp
     }
 
 
-    switch ( displayIdx ) {
-        case 0:
-            snprintf(outKey, outKeyLen, "Spend");
-            return printValue(ctx, &spend->note.value, &spend->note.value.asset_id.inner, outVal, outValLen);
-            break;
-        case 1:
-            snprintf(outKey, outKeyLen, "From");
-            snprintf(outVal, outValLen, "Main Account");
-            break;
-        default:
-            return parser_no_data;
-    }
-    return parser_ok;
+    char bufferUI[OUTPUT_DISPLAY_MAX_LEN] = {0};
+    if (displayIdx == 0) {
+        snprintf(outKey, outKeyLen, "Action");
+        CHECK_ERROR(spend_printValue(ctx, spend, bufferUI, sizeof(bufferUI)));
+        pageString(outVal, outValLen, bufferUI, pageIdx, pageCount);
 
+        return parser_ok;
+    }
+
+    return parser_no_data;
 }

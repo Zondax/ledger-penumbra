@@ -76,3 +76,7 @@
 // Constant to use to allocate a buffer on the stack to hold the formatting of an output action
 #define OUTPUT_DISPLAY_MAX_LEN \
     (VALUE_DISPLAY_MAX_LEN + SHORT_ADDRESS_VISIBLE_CHARS + sizeof(ELLIPSIS) + sizeof(ADDR_BECH32_PREFIX) + 6)  // = 202
+
+// Constant to use to allocate a buffer on the stack to hold the formatting of an spend action
+#define SPEND_DISPLAY_MAX_LEN \
+    (VALUE_DISPLAY_MAX_LEN + SHORT_ADDRESS_VISIBLE_CHARS + sizeof(ELLIPSIS) + sizeof(ADDR_BECH32_PREFIX) + 10)  // = 202
