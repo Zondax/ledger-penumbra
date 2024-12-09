@@ -114,7 +114,7 @@ parser_error_t spend_getItem(const parser_context_t *ctx, const spend_plan_t *sp
     }
 
 
-    char bufferUI[OUTPUT_DISPLAY_MAX_LEN] = {0};
+    char bufferUI[SPEND_DISPLAY_MAX_LEN] = {0};
     if (displayIdx == 0) {
         snprintf(outKey, outKeyLen, "Action");
         CHECK_ERROR(spend_printValue(ctx, spend, bufferUI, sizeof(bufferUI)));
