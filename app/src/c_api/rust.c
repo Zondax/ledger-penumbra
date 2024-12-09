@@ -2,6 +2,7 @@
 #include <os.h>
 
 #include "crypto.h"
+#include "crypto_helper.h"
 #include "zxmacros.h"
 
 zxerr_t crypto_extractSpendingKeyBytes(uint8_t *key_bytes, uint32_t key_bytes_len);
@@ -20,6 +21,23 @@ zxerr_t blake2b_hash_with_personalization(const uint8_t *input, size_t input_len
     CATCH_CXERROR(cx_blake2b_init2_no_throw(&hash_context, output_len * 8, NULL, 0, (uint8_t *)label, label_len));
 
     CATCH_CXERROR(cx_hash_no_throw(&hash_context.header, CX_LAST, input, input_len, output, output_len));
+
+catch_cx_error:
+    return error;
+}
+
+zxerr_t crypto_getSpendKeyBytes(uint8_t *sk, uint16_t len) {
+    zxerr_t error = zxerr_invalid_crypto_settings;
+
+    if (len != KEY_LEN) {
+        return error;
+    }
+
+    keys_t keys = {0};
+    CATCH_CXERROR(compute_keys(&keys));
+
+    MEMCPY(sk, keys.skb, KEY_LEN);
+
 
 catch_cx_error:
     return error;
