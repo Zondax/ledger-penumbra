@@ -79,16 +79,16 @@ parser_error_t output_getItem(const parser_context_t *ctx, const output_plan_t *
     }
 
 
-    char bufferUI[OUTPUT_DISPLAY_MAX_LEN] = {0};
-    switch ( displayIdx ) {
-        case 0:
-            snprintf(outKey, outKeyLen, "Action");
-            CHECK_ERROR(output_printValue(ctx, output, bufferUI, sizeof(bufferUI)));
-            pageString(outVal, outValLen, bufferUI, pageIdx, pageCount);
-            break;
-        default:
-            return parser_no_data;
+    if (displayIdx != 0) {
+        return parser_no_data;
     }
+
+    char bufferUI[OUTPUT_DISPLAY_MAX_LEN] = {0};
+
+    snprintf(outKey, outKeyLen, "Action");
+    CHECK_ERROR(output_printValue(ctx, output, bufferUI, sizeof(bufferUI)));
+    pageString(outVal, outValLen, bufferUI, pageIdx, pageCount);
+
     return parser_ok;
 
 }

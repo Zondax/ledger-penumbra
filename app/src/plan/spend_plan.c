@@ -109,19 +109,21 @@ parser_error_t spend_getItem(const parser_context_t *ctx, const spend_plan_t *sp
                              uint8_t *pageCount) {
 
     parser_error_t err = parser_no_data;
+
     if (spend == NULL || outKey == NULL || outVal == NULL || outKeyLen == 0 || outValLen == 0) {
+        return err;
+    }
+
+    if (displayIdx != 0) {
         return err;
     }
 
 
     char bufferUI[SPEND_DISPLAY_MAX_LEN] = {0};
-    if (displayIdx == 0) {
-        snprintf(outKey, outKeyLen, "Action");
-        CHECK_ERROR(spend_printValue(ctx, spend, bufferUI, sizeof(bufferUI)));
-        pageString(outVal, outValLen, bufferUI, pageIdx, pageCount);
 
-        return parser_ok;
-    }
+    snprintf(outKey, outKeyLen, "Action");
+    CHECK_ERROR(spend_printValue(ctx, spend, bufferUI, sizeof(bufferUI)));
+    pageString(outVal, outValLen, bufferUI, pageIdx, pageCount);
 
-    return parser_no_data;
+    return parser_ok;
 }
