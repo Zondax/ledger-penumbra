@@ -1,9 +1,10 @@
+use crate::address::address_view::AddressView;
 use crate::address::{Address, AddressIndex};
 use crate::constants::KEY_LEN;
+use crate::ffi::c_api::c_spend_key_bytes;
 use crate::keys::spend_key::SpendKeyBytes;
-use crate::ParserError;
 use crate::parser::bytes::BytesC;
-use crate::address::address_view::AddressView;
+use crate::ParserError;
 
 #[repr(C)]
 pub struct Keys {
@@ -56,28 +57,41 @@ pub unsafe extern "C" fn rs_compute_address(
 /// Use to compute an address and write it back into output
 /// argument.
 pub unsafe extern "C" fn rs_is_address_visible(
-    sk: &SpendKeyBytes,
     address: &BytesC,
     is_visible: *mut bool,
     index: *mut u32,
 ) -> u32 {
     crate::zlog("rs_is_address_visible\x00");
 
-    let fvk = sk.fvk().unwrap();
-    let address_bytes = address.get_bytes().unwrap();
-    let address = Address::try_from(address_bytes).unwrap();
-
-    let address_view = fvk.view_address(address.clone()).unwrap();
-
-    if is_visible.is_null() && index.is_null() {
-        return ParserError::InvalidLength as u32;
+    if is_visible.is_null() || index.is_null() {
+        return ParserError::NoData as u32;
     }
 
+    let Ok(sk) = c_spend_key_bytes() else {
+        return ParserError::UnexpectedError as u32;
+    };
+
+    let Ok(fvk) = sk.fvk() else {
+        return ParserError::InvalidFvk as u32;
+    };
+
+    let Ok(address_bytes) = address.get_bytes() else {
+        return ParserError::InvalidAddress as u32;
+    };
+
+    let Ok(address) = Address::try_from(address_bytes) else {
+        return ParserError::InvalidAddress as u32;
+    };
+
+    let Ok(address_view) = fvk.view_address(address) else {
+        return ParserError::InvalidAddress as u32;
+    };
+
     match address_view {
-        AddressView::Opaque { address: _ } => {
+        AddressView::Opaque { .. } => {
             *is_visible = false;
             *index = 0;
-        },
+        }
         AddressView::Visible { index: idx, .. } => {
             *is_visible = true;
             *index = idx.account;
@@ -112,6 +126,9 @@ fn compute_keys(keys: &mut Keys) -> Result<(), ParserError> {
 
 #[cfg(test)]
 mod test {
+    use std::format;
+    use std::string::ToString;
+
     use super::*;
     use crate::keys::spend_key::SpendKeyBytes;
 
@@ -187,7 +204,7 @@ mod test {
         let address_view = fvk.view_address(address).unwrap();
 
         let account_str = match address_view {
-            AddressView::Opaque { address: _ } => "Opaque".to_string(),
+            AddressView::Opaque { address: _ } => panic!("Address is opaque"),
             AddressView::Visible {
                 address: _,
                 index,

@@ -49,7 +49,11 @@ parser_error_t printBech32Encoded(const char *prefix, uint16_t prefix_len, const
     return parser_ok;
 }
 
-parser_error_t printAddress(const spend_key_bytes_t *sk, const bytes_t *address, char *out, uint16_t out_len){
+
+/// Prints an address
+/// but a difference to the other formatting functions here, this method uses
+/// the device keys to check if the passed address is visible or not
+parser_error_t printTxAddress(const bytes_t *address, char *out, uint16_t out_len){
     if (out == NULL || out_len == 0 || address == NULL) {
         return parser_no_data;
     }
@@ -61,10 +65,7 @@ parser_error_t printAddress(const spend_key_bytes_t *sk, const bytes_t *address,
 
     bool is_visible = false;
     uint32_t index = 0;
-    int32_t ret = rs_is_address_visible(sk, address, &is_visible, &index);
-    if (ret < 0) {
-        return parser_unexpected_error;
-    }
+    CHECK_ERROR(rs_is_address_visible(address, &is_visible, &index));
 
     if (is_visible) {
         if (index == 0) {
@@ -76,9 +77,7 @@ parser_error_t printAddress(const spend_key_bytes_t *sk, const bytes_t *address,
             snprintf(out, out_len, "Sub-account #%d", index);
         }
     } else {
-        if (printShortAddress(address->ptr, address->len, out, out_len) != parser_ok) {
-            return parser_no_data;
-        }
+        return printShortAddress(address->ptr, address->len, out, out_len);
     }
 
     return parser_ok;
@@ -104,7 +103,7 @@ parser_error_t printShortAddress(const uint8_t *address, uint16_t address_len, c
     if (err != parser_ok) {
         return err;
     }
-    
+
     // Calculate required length for short form
     uint16_t prefix_and_sep_len = sizeof(ADDR_BECH32_PREFIX); // prefix + separator
     uint16_t required_len = prefix_and_sep_len + SHORT_ADDRESS_VISIBLE_CHARS;
