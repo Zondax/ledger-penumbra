@@ -35,13 +35,13 @@ parser_error_t memo_getItem(const parser_context_t *ctx, uint8_t displayIdx, cha
     if (ctx == NULL || outKey == NULL || outVal == NULL || outKeyLen == 0 || outValLen == 0) {
         return err;
     }
-    
+
     char short_address[100] = {0};
     switch (displayIdx) {
         case 0:
             if (ctx->tx_obj->plan.has_memo) {
                 snprintf(outKey, outKeyLen, "Memo Sender Address");
-                CHECK_ERROR(printAddress(ctx->sk_bytes, &ctx->tx_obj->plan.memo.plaintext.return_address.inner, short_address, sizeof(short_address)));
+                CHECK_ERROR(printTxAddress(&ctx->tx_obj->plan.memo.plaintext.return_address.inner, short_address, sizeof(short_address)));
                 pageString(outVal, outValLen, (char *)short_address, pageIdx, pageCount);
             } else {
                 snprintf(outKey, outKeyLen, "Memo");

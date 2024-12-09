@@ -105,7 +105,7 @@ parser_error_t output_printValue(const parser_context_t *ctx, const output_plan_
     MEMZERO(outVal, outValLen);
 
     // example: Output 100 USDC to penumbra1k0zzug62gpz60sejdvu9q7mq…
-    
+
     // add action title
     uint16_t written_local = snprintf(outVal, outValLen, "Output ");
 
@@ -117,7 +117,7 @@ parser_error_t output_printValue(const parser_context_t *ctx, const output_plan_
     written_local = snprintf(outVal + written_value, outValLen - written_value, " to ");
 
     // add address
-    CHECK_ERROR(printAddress(ctx->sk_bytes, &output->dest_address.inner, outVal + written_local + written_value, outValLen - written_local - written_value));
+    CHECK_ERROR(printTxAddress(&output->dest_address.inner, outVal + written_local + written_value, outValLen - written_local - written_value));
 
     return parser_ok;
 }
