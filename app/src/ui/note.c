@@ -59,8 +59,8 @@ parser_error_t printValue(const parser_context_t *ctx, const value_t *value, con
     char denom[MAX_DENOM_LEN + 1] = {0};
 
     uint8_t trace_len = 0;
-    if (chain_id != NULL && chain_id->len != 0) {
-        trace_len = metadata_getDenom(&ctx->tx_metadata[0], MAX_TX_METADATA_LEN, chain_id, denom, MAX_DENOM_LEN + 1);
+    if (value->asset_id.inner.ptr != NULL && value->asset_id.inner.len != 0) {
+        trace_len = metadata_getDenom(&ctx->tx_metadata[0], MAX_TX_METADATA_LEN, value->asset_id.inner.ptr, denom, MAX_DENOM_LEN + 1);
     }
 
     if (trace_len != 0) {
