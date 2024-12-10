@@ -71,7 +71,7 @@ parser_error_t parameters_getItem(const parser_context_t *ctx, uint8_t displayId
         case 1:
             if (ctx->tx_obj->parameters_plan.expiry_height == 0) {
                 snprintf(outKey, outKeyLen, "Fee");
-                CHECK_ERROR(printValue(ctx, &ctx->tx_obj->parameters_plan.fee, &ctx->tx_obj->parameters_plan.chain_id, bufferUI, sizeof(bufferUI)));
+                CHECK_ERROR(printFee(ctx, &ctx->tx_obj->parameters_plan.fee, &ctx->tx_obj->parameters_plan.chain_id, bufferUI, sizeof(bufferUI)));
             } else {
                 snprintf(outKey, outKeyLen, "Expiry Height");
                 if (uint64_to_str(bufferUI, sizeof(bufferUI), ctx->tx_obj->parameters_plan.expiry_height) != NULL) {
@@ -82,7 +82,7 @@ parser_error_t parameters_getItem(const parser_context_t *ctx, uint8_t displayId
             return parser_ok;
         case 2:
             snprintf(outKey, outKeyLen, "Fee");
-            CHECK_ERROR(printValue(ctx, &ctx->tx_obj->parameters_plan.fee, &ctx->tx_obj->parameters_plan.chain_id, bufferUI, sizeof(bufferUI)));
+            CHECK_ERROR(printFee(ctx, &ctx->tx_obj->parameters_plan.fee, &ctx->tx_obj->parameters_plan.chain_id, bufferUI, sizeof(bufferUI)));
             pageString(outVal, outValLen, bufferUI, pageIdx, pageCount);
             return parser_ok;
         default:

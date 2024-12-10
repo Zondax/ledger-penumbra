@@ -27,6 +27,12 @@ extern "C" {
 parser_error_t printValue(const parser_context_t *ctx, const value_t *value, const bytes_t *chain_id,
                           char *outVal, uint16_t outValLen);
 
+parser_error_t printFee(const parser_context_t *ctx, const value_t *value, const bytes_t *chain_id,
+                          char *outVal, uint16_t outValLen);
+
+parser_error_t tryPrintDenom(const parser_context_t *ctx, const value_t *value, const char *amount_str, char *outVal, uint16_t outValLen, bool *was_printed);
+parser_error_t printFallback(const value_t *value, const char *amount_str, char *outVal, uint16_t outValLen);
+parser_error_t printNumber(const char *amount, uint8_t decimalPlaces, const char *postfix, const char *prefix, char *outVal, uint16_t outValLen);
 #ifdef __cplusplus
 }
 #endif

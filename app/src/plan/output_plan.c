@@ -53,8 +53,12 @@ parser_error_t decode_output_plan(const bytes_t *data, output_plan_t *output) {
         return parser_output_plan_error;
     }
 
-    output->value.amount.lo = output_plan.value.amount.lo;
-    output->value.amount.hi = output_plan.value.amount.hi;
+    output->value.has_amount = output_plan.value.has_amount;
+    if (output->value.has_amount) {
+        output->value.amount.lo = output_plan.value.amount.lo;
+        output->value.amount.hi = output_plan.value.amount.hi;
+    }
+    output->value.has_asset_id = output_plan.value.has_asset_id;
 
     return parser_ok;
 }
