@@ -154,6 +154,8 @@ file(GLOB_RECURSE LIB_SRC
         ${CMAKE_CURRENT_SOURCE_DIR}/app/src/parameters.c
         ${CMAKE_CURRENT_SOURCE_DIR}/app/src/tx_metadata.c
         ${CMAKE_CURRENT_SOURCE_DIR}/app/src/memo.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/app/src/plan/swap.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/app/src/c_api/rust.c
         )
 
 add_library(app_lib STATIC ${LIB_SRC})
@@ -168,6 +170,7 @@ target_include_directories(app_lib PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/app/rust/include
         ${CMAKE_CURRENT_SOURCE_DIR}/app/src/plan
         ${CMAKE_CURRENT_SOURCE_DIR}/app/src/ui
+        ${CMAKE_CURRENT_SOURCE_DIR}/app/src/c_api
         )
 
 ##############################################################
