@@ -31,6 +31,7 @@
 #include "memo.h"
 #include "spend.h"
 #include "swap.h"
+#include "ics20_withdrawal.h"
 
 static uint8_t action_idx = 0;
 
@@ -93,6 +94,9 @@ parser_error_t parser_getNumItems(const parser_context_t *ctx, uint8_t *num_item
                 break;
             case penumbra_core_transaction_v1_ActionPlan_swap_tag:
                 CHECK_ERROR(swap_getNumItems(ctx, &action_num_items));
+                break;
+            case penumbra_core_transaction_v1_ActionPlan_ics20_withdrawal_tag:
+                CHECK_ERROR(ics20_withdrawal_getNumItems(ctx, &action_num_items));
                 break;
             default:
                 return parser_unexpected_error;
@@ -166,6 +170,10 @@ parser_error_t parser_getItem(const parser_context_t *ctx, uint8_t displayIdx, c
                 break;
             case penumbra_core_transaction_v1_ActionPlan_swap_tag:
                 CHECK_ERROR(swap_getItem(ctx, &ctx->tx_obj->actions_plan[action_idx].action.swap, 0, outKey, outKeyLen,
+                                           outVal, outValLen, pageIdx, pageCount))
+                break;
+            case penumbra_core_transaction_v1_ActionPlan_ics20_withdrawal_tag:
+                CHECK_ERROR(ics20_withdrawal_getItem(ctx, &ctx->tx_obj->actions_plan[action_idx].action.ics20_withdrawal, 0, outKey, outKeyLen,
                                            outVal, outValLen, pageIdx, pageCount))
                 break;
             default:

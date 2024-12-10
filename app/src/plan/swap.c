@@ -125,7 +125,7 @@ parser_error_t swap_printValue(const parser_context_t *ctx, const swap_plan_t *s
         return parser_no_data;
     }
 
-    if (outValLen < OUTPUT_DISPLAY_MAX_LEN) {
+    if (outValLen < SWAP_DISPLAY_MAX_LEN) {
         return parser_unexpected_buffer_end;
     }
 
