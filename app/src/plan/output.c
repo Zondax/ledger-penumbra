@@ -67,7 +67,7 @@ parser_error_t output_getNumItems(const parser_context_t *ctx, uint8_t *num_item
 }
 
 parser_error_t output_getItem(const parser_context_t *ctx, const output_plan_t *output,
-                             uint8_t displayIdx, char *outKey, uint16_t outKeyLen,
+                             uint8_t actionIdx, char *outKey, uint16_t outKeyLen,
                              char *outVal, uint16_t outValLen, uint8_t pageIdx,
                              uint8_t *pageCount) {
 
@@ -76,14 +76,9 @@ parser_error_t output_getItem(const parser_context_t *ctx, const output_plan_t *
         return err;
     }
 
-
-    if (displayIdx != 0) {
-        return parser_no_data;
-    }
-
     char bufferUI[OUTPUT_DISPLAY_MAX_LEN] = {0};
 
-    snprintf(outKey, outKeyLen, "Action");
+    snprintf(outKey, outKeyLen, "Action_%d", actionIdx);
     CHECK_ERROR(output_printValue(ctx, output, bufferUI, sizeof(bufferUI)));
     pageString(outVal, outValLen, bufferUI, pageIdx, pageCount);
 
@@ -105,17 +100,19 @@ parser_error_t output_printValue(const parser_context_t *ctx, const output_plan_
     // example: Output 100 USDC to penumbra1k0zzug62gpz60sejdvu9q7mq…
 
     // add action title
-    uint16_t written_local = snprintf(outVal, outValLen, "Output ");
-
-    // add value
-    CHECK_ERROR(printValue(ctx, &output->value, &ctx->tx_obj->parameters_plan.chain_id, outVal + written_local, outValLen - written_local));
+    snprintf(outVal, outValLen, "Output ");
     uint16_t written_value = strlen(outVal);
 
+    // add value
+    CHECK_ERROR(printValue(ctx, &output->value, &ctx->tx_obj->parameters_plan.chain_id, outVal + written_value, outValLen - written_value));
+    written_value = strlen(outVal);
+
     // add "to"
-    written_local = snprintf(outVal + written_value, outValLen - written_value, " to ");
+    snprintf(outVal + written_value, outValLen - written_value, " to ");
+    written_value = strlen(outVal);
 
     // add address
-    CHECK_ERROR(printTxAddress(&output->dest_address.inner, outVal + written_local + written_value, outValLen - written_local - written_value));
+    CHECK_ERROR(printTxAddress(&output->dest_address.inner, outVal + written_value, outValLen - written_value));
 
     return parser_ok;
 }
