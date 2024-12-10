@@ -7,6 +7,10 @@
 #include "zxformat.h"
 #include "coin.h"
 
+bool is_zero_amount(const value_t *value) {
+    return value->amount.hi == 0 && value->amount.lo == 0;
+}
+
 parser_error_t printValue(const parser_context_t *ctx, const value_t *value, const bytes_t *chain_id, char *outVal, uint16_t outValLen) {
     if (ctx == NULL || value == NULL || outVal == NULL || chain_id == NULL) {
         return parser_no_data;
@@ -147,19 +151,76 @@ parser_error_t printFallback(const value_t *value, const char *amount_str, char 
 
 parser_error_t printNumber(const char *amount, uint8_t decimalPlaces, const char *postfix, const char *prefix, char *outVal, uint16_t outValLen) {
 
-    if (fpstr_to_str(outVal, outValLen, amount, decimalPlaces) != 0) {
-        return parser_unexpected_value;
+    char amount_trimmed[VALUE_DISPLAY_MAX_LEN] = {0};
+    if (strcmp(amount, "0") == 0) {
+        snprintf(amount_trimmed, VALUE_DISPLAY_MAX_LEN, "%s", "0");
+    } else {
+        if (fpstr_to_str(amount_trimmed, VALUE_DISPLAY_MAX_LEN, amount, decimalPlaces) != 0) {
+            return parser_unexpected_value;
+        }
     }
 
-    // add space
-    size_t fpstr_len = strlen(outVal);
-    outVal[fpstr_len] = ' ';
+    number_inplace_trimming(amount_trimmed, 1);
 
-    if (z_str3join(outVal, outValLen, prefix, postfix) != zxerr_ok) {
+    // add space
+    size_t fpstr_len = strlen(amount_trimmed);
+    amount_trimmed[fpstr_len] = ' ';
+    
+    if (z_str3join(amount_trimmed, VALUE_DISPLAY_MAX_LEN, prefix, postfix) != zxerr_ok) {
         return parser_unexpected_buffer_end;
     }
 
-    number_inplace_trimming(outVal, 1);
+    snprintf(outVal, outValLen, "%s", amount_trimmed);
+
+    return parser_ok;
+}
+
+parser_error_t printAssetIdFromValue(const parser_context_t *ctx, const value_t *value, const bytes_t *chain_id, char *outVal, uint16_t outValLen) {
+    if (ctx == NULL || value == NULL || outVal == NULL || chain_id == NULL) {
+        return parser_no_data;
+    }
+
+    if (outValLen < ASSET_ID_LEN) {
+        return parser_unexpected_buffer_end;
+    }
+
+    MEMZERO(outVal, outValLen);
+
+    // lookup at asset table
+    const asset_info_t *known_asset = NULL;
+    if (value->has_asset_id) {
+        known_asset = asset_info_from_table(value->asset_id.inner.ptr);
+    }
+
+    // Case 1: Known assets
+    if (known_asset != NULL) {
+        // check if chain id is penumbra-1
+        if (strncmp((const char *)chain_id->ptr, DEFAULT_CHAIN_ID, chain_id->len) == 0) { 
+            snprintf(outVal, outValLen, "%s", known_asset->symbol);
+        } else {
+            CHECK_ERROR(printAssetId(value->asset_id.inner.ptr, value->asset_id.inner.len, outVal, outValLen));
+        }
+
+        return parser_ok;
+    }
+
+    // Case 2: Base denom 
+    char denom[MAX_DENOM_LEN + 1] = {0};
+
+    uint8_t trace_len = 0;
+    if (value->asset_id.inner.ptr != NULL && value->asset_id.inner.len != 0) {
+        trace_len = metadata_getDenom(&ctx->tx_metadata[0], MAX_TX_METADATA_LEN, &value->asset_id.inner, denom, MAX_DENOM_LEN + 1);
+    }
+
+    if (trace_len != 0) {
+        MEMCPY(&outVal, denom, trace_len);
+        outVal[trace_len] = '\0';
+
+        return parser_ok;
+    }
+
+    // Case 3: Bech32 fallback 
+    CHECK_ERROR(printAssetId(value->asset_id.inner.ptr, value->asset_id.inner.len, outVal, outValLen));
 
     return parser_ok;
 }
