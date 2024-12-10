@@ -18,7 +18,7 @@ use crate::parser::commitment::Commitment;
 use crate::parser::commitment::StateCommitment;
 use crate::parser::swap_ciphertext::SwapCiphertext;
 
-#[derive(Clone)]
+#[derive(Clone, PartialEq, Eq)]
 #[cfg_attr(any(feature = "derive-debug", test), derive(Debug))]
 pub struct SwapPayload {
     pub commitment: StateCommitment,

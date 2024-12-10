@@ -20,7 +20,7 @@ use decaf377::{Element, Fq};
 #[cfg_attr(any(feature = "derive-debug", test), derive(Debug))]
 pub struct Commitment(pub Element);
 
-#[derive(Clone)]
+#[derive(Clone, PartialEq, Eq)]
 #[cfg_attr(any(feature = "derive-debug", test), derive(Debug))]
 pub struct StateCommitment(pub Fq);
 
