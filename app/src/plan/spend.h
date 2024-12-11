@@ -29,7 +29,7 @@ parser_error_t spend_printValue(const parser_context_t *ctx, const spend_plan_t 
 parser_error_t spend_getNumItems(const parser_context_t *ctx, uint8_t *num_items);
 
 parser_error_t spend_getItem(const parser_context_t *ctx, const spend_plan_t *spend,
-                             uint8_t displayIdx, char *outKey, uint16_t outKeyLen,
+                             uint8_t actionIdx, char *outKey, uint16_t outKeyLen,
                              char *outVal, uint16_t outValLen, uint8_t pageIdx,
                              uint8_t *pageCount);
 

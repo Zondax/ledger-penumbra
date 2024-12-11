@@ -67,7 +67,7 @@ parser_error_t ics20_withdrawal_getNumItems(const parser_context_t *ctx, uint8_t
 }
 
 parser_error_t ics20_withdrawal_getItem(const parser_context_t *ctx, const ics20_withdrawal_plan_t *ics20_withdrawal,
-                             uint8_t displayIdx, char *outKey, uint16_t outKeyLen,
+                             uint8_t actionIdx, char *outKey, uint16_t outKeyLen,
                              char *outVal, uint16_t outValLen, uint8_t pageIdx,
                              uint8_t *pageCount) {
 
@@ -76,14 +76,9 @@ parser_error_t ics20_withdrawal_getItem(const parser_context_t *ctx, const ics20
         return err;
     }
 
-
-    if (displayIdx != 0) {
-        return parser_no_data;
-    }
-
     char bufferUI[ICS20_WITHDRAWAL_DISPLAY_MAX_LEN] = {0};
 
-    snprintf(outKey, outKeyLen, "Action");
+    snprintf(outKey, outKeyLen, "Action_%d", actionIdx);
     CHECK_ERROR(ics20_withdrawal_printValue(ctx, ics20_withdrawal, bufferUI, sizeof(bufferUI)));
     pageString(outVal, outValLen, bufferUI, pageIdx, pageCount);
 

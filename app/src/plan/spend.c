@@ -102,7 +102,7 @@ parser_error_t spend_getNumItems(const parser_context_t *ctx, uint8_t *num_items
 }
 
 parser_error_t spend_getItem(const parser_context_t *ctx, const spend_plan_t *spend,
-                             uint8_t displayIdx, char *outKey, uint16_t outKeyLen,
+                             uint8_t actionIdx, char *outKey, uint16_t outKeyLen,
                              char *outVal, uint16_t outValLen, uint8_t pageIdx,
                              uint8_t *pageCount) {
 
@@ -112,14 +112,9 @@ parser_error_t spend_getItem(const parser_context_t *ctx, const spend_plan_t *sp
         return err;
     }
 
-    if (displayIdx != 0) {
-        return err;
-    }
-
-
     char bufferUI[SPEND_DISPLAY_MAX_LEN] = {0};
 
-    snprintf(outKey, outKeyLen, "Action");
+    snprintf(outKey, outKeyLen, "Action_%d", actionIdx);
     CHECK_ERROR(spend_printValue(ctx, spend, bufferUI, sizeof(bufferUI)));
     pageString(outVal, outValLen, bufferUI, pageIdx, pageCount);
 

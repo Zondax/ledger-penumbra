@@ -161,19 +161,19 @@ parser_error_t parser_getItem(const parser_context_t *ctx, uint8_t displayIdx, c
         }
         switch (ctx->tx_obj->actions_plan[action_idx].action_type) {
             case penumbra_core_transaction_v1_ActionPlan_spend_tag:
-                CHECK_ERROR(spend_getItem(ctx, &ctx->tx_obj->actions_plan[action_idx].action.spend, 0, outKey, outKeyLen,
+                CHECK_ERROR(spend_getItem(ctx, &ctx->tx_obj->actions_plan[action_idx].action.spend, action_idx + 1, outKey, outKeyLen,
                                            outVal, outValLen, pageIdx, pageCount))
                 break;   
             case penumbra_core_transaction_v1_ActionPlan_output_tag:
-                CHECK_ERROR(output_getItem(ctx, &ctx->tx_obj->actions_plan[action_idx].action.output, 0, outKey, outKeyLen,
+                CHECK_ERROR(output_getItem(ctx, &ctx->tx_obj->actions_plan[action_idx].action.output, action_idx + 1, outKey, outKeyLen,
                                            outVal, outValLen, pageIdx, pageCount))
                 break;
             case penumbra_core_transaction_v1_ActionPlan_swap_tag:
-                CHECK_ERROR(swap_getItem(ctx, &ctx->tx_obj->actions_plan[action_idx].action.swap, 0, outKey, outKeyLen,
+                CHECK_ERROR(swap_getItem(ctx, &ctx->tx_obj->actions_plan[action_idx].action.swap, action_idx + 1, outKey, outKeyLen,
                                            outVal, outValLen, pageIdx, pageCount))
                 break;
             case penumbra_core_transaction_v1_ActionPlan_ics20_withdrawal_tag:
-                CHECK_ERROR(ics20_withdrawal_getItem(ctx, &ctx->tx_obj->actions_plan[action_idx].action.ics20_withdrawal, 0, outKey, outKeyLen,
+                CHECK_ERROR(ics20_withdrawal_getItem(ctx, &ctx->tx_obj->actions_plan[action_idx].action.ics20_withdrawal, action_idx + 1, outKey, outKeyLen,
                                            outVal, outValLen, pageIdx, pageCount))
                 break;
             default:

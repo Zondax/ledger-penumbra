@@ -96,7 +96,7 @@ parser_error_t swap_getNumItems(const parser_context_t *ctx, uint8_t *num_items)
 }
 
 parser_error_t swap_getItem(const parser_context_t *ctx, const swap_plan_t *swap,
-                             uint8_t displayIdx, char *outKey, uint16_t outKeyLen,
+                             uint8_t actionIdx, char *outKey, uint16_t outKeyLen,
                              char *outVal, uint16_t outValLen, uint8_t pageIdx,
                              uint8_t *pageCount) {
 
@@ -105,14 +105,9 @@ parser_error_t swap_getItem(const parser_context_t *ctx, const swap_plan_t *swap
         return err;
     }
 
-
-    if (displayIdx != 0) {
-        return parser_no_data;
-    }
-
     char bufferUI[SWAP_DISPLAY_MAX_LEN] = {0};
 
-    snprintf(outKey, outKeyLen, "Action");
+    snprintf(outKey, outKeyLen, "Action_%d", actionIdx);
     CHECK_ERROR(swap_printValue(ctx, swap, bufferUI, sizeof(bufferUI)));
     pageString(outVal, outValLen, bufferUI, pageIdx, pageCount);
 
