@@ -142,10 +142,10 @@ file(GLOB_RECURSE LIB_SRC
         ${CMAKE_CURRENT_SOURCE_DIR}/app/src/nanopb_tiny/pb_decode.c
         ${CMAKE_CURRENT_SOURCE_DIR}/app/src/parser_interface.c
         ${CMAKE_CURRENT_SOURCE_DIR}/app/src/parser_pb_utils.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/app/src/plan/spend_plan.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/app/src/plan/output_plan.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/app/src/plan/delegate_plan.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/app/src/plan/undelegate_plan.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/app/src/plan/spend.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/app/src/plan/output.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/app/src/plan/delegate.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/app/src/plan/undelegate.c
         ${CMAKE_CURRENT_SOURCE_DIR}/app/src/plan/ics20_withdrawal.c
         ${CMAKE_CURRENT_SOURCE_DIR}/app/src/plan/swap.c
         ${CMAKE_CURRENT_SOURCE_DIR}/app/src/ui/note.c

@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  ********************************************************************************/
-#include "output_plan.h"
+#include "output.h"
 
 #include "parser_pb_utils.h"
 #include "zxformat.h"

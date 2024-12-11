@@ -26,7 +26,7 @@
 #include "parameters.h"
 #include "parser_common.h"
 #include "parser_impl.h"
-#include "plan/output_plan.h"
+#include "output.h"
 #include "tx_metadata.h"
 #include "memo.h"
 
