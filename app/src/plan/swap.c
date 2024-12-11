@@ -14,12 +14,9 @@
  *  limitations under the License.
  ********************************************************************************/
 
-#include "parser_impl.h"
-#include "parser_interface.h"
+#include "swap.h"
+
 #include "parser_pb_utils.h"
-#include "pb_common.h"
-#include "pb_decode.h"
-#include "protobuf/penumbra/core/transaction/v1/transaction.pb.h"
 #include "zxformat.h"
 
 parser_error_t decode_swap_plan(const bytes_t *data, swap_plan_t *swap) {
