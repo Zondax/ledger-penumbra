@@ -103,6 +103,7 @@ static void cleanOutput(char *outKey, uint16_t outKeyLen, char *outVal, uint16_t
     MEMZERO(outVal, outValLen);
     snprintf(outKey, outKeyLen, "?");
     snprintf(outVal, outValLen, " ");
+    action_idx = 0;
 }
 
 static parser_error_t checkSanity(uint8_t numItems, uint8_t displayIdx) {
