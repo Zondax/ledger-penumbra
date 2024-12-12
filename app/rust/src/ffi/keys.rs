@@ -1,7 +1,7 @@
 use crate::address::address_view::AddressView;
 use crate::address::{Address, AddressIndex};
 use crate::constants::KEY_LEN;
-use crate::ffi::c_api::c_spend_key_bytes;
+use crate::ffi::c_api::c_fvk_bytes;
 use crate::keys::spend_key::SpendKeyBytes;
 use crate::parser::bytes::BytesC;
 use crate::ParserError;
@@ -67,12 +67,8 @@ pub unsafe extern "C" fn rs_is_address_visible(
         return ParserError::NoData as u32;
     }
 
-    let Ok(sk) = c_spend_key_bytes() else {
+    let Ok(fvk) = c_fvk_bytes() else {
         return ParserError::UnexpectedError as u32;
-    };
-
-    let Ok(fvk) = sk.fvk() else {
-        return ParserError::InvalidFvk as u32;
     };
 
     let Ok(address_bytes) = address.get_bytes() else {
@@ -131,7 +127,11 @@ mod test {
 
     use super::*;
     use crate::keys::spend_key::SpendKeyBytes;
-
+    use decaf377_rdsa::{SpendAuth, VerificationKey};
+    use std::println;
+    use crate::keys::nk::NullifierKey;
+    use decaf377::Fq;
+    use crate::keys::fvk::FullViewingKey;
     const SPEND_KEY: &str = "ff726c71bcec76abc6a88cba71df655b28de6580edbd33c7415fdfded2e422e7";
     const SPEND_ZEMU_KEY: &str = "a1ffba0c37931f0a626137520da650632d35853bf591b36bb428630a4d87c4dc";
     const ACCOUNT_IDX: u32 = 1;
@@ -219,5 +219,44 @@ mod test {
         };
 
         assert_eq!(account_str, "Sub-account #90");
+    }
+
+    #[test]
+    fn get_fvk_from_bytes() {
+        let key_bytes = hex::decode(SPEND_ZEMU_KEY).unwrap();
+        let mut key_bytes_array = [0u8; 32];
+        key_bytes_array.copy_from_slice(&key_bytes);
+        let spend_key = SpendKeyBytes::from(key_bytes_array);
+
+        let fvk = spend_key.fvk().unwrap();
+
+        let mut keys = Keys {
+            skb: [0; SpendKeyBytes::LEN],
+            fvk: [0; KEY_LEN * 2],
+            address: [0; Address::LEN],
+        };
+
+        fvk.to_bytes_into(&mut keys.fvk).unwrap();
+
+        let s = hex::encode(keys.fvk);
+
+        let ak_bytes: [u8; 32] = keys.fvk[0..32].try_into().unwrap();
+        let nk_bytes: [u8; 32] = keys.fvk[32..64].try_into().unwrap();
+        let ak = VerificationKey::<SpendAuth>::try_from(ak_bytes.as_ref()).unwrap();
+        let nk = NullifierKey(Fq::from_le_bytes_mod_order(nk_bytes.as_ref()));
+        let fvk_2 = FullViewingKey::from_components(ak, nk).unwrap();
+
+        let mut keys_2= Keys {
+            skb: [0; SpendKeyBytes::LEN],
+            fvk: [0; KEY_LEN * 2],
+            address: [0; Address::LEN],
+        };
+
+        fvk_2.to_bytes_into(&mut keys_2.fvk).unwrap();
+
+        let s_2 = hex::encode(keys_2.fvk);
+        println!("HOLA {}", s_2);
+
+        assert_eq!(s, s_2);
     }
 }
