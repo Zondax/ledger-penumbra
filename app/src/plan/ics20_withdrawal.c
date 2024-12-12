@@ -15,26 +15,29 @@
  ********************************************************************************/
 #include "ics20_withdrawal.h"
 
-#include "parser_pb_utils.h"
-#include "zxformat.h"
 #include "note.h"
-#include "ui_utils.h"
+#include "parser_pb_utils.h"
 #include "rslib.h"
+#include "ui_utils.h"
+#include "zxformat.h"
 
 parser_error_t decode_ics20_withdrawal_plan(const bytes_t *data, ics20_withdrawal_plan_t *withdrawal) {
-    penumbra_core_component_ibc_v1_Ics20Withdrawal withdrawal_plan = penumbra_core_component_ibc_v1_Ics20Withdrawal_init_default;
+    penumbra_core_component_ibc_v1_Ics20Withdrawal withdrawal_plan =
+        penumbra_core_component_ibc_v1_Ics20Withdrawal_init_default;
 
     pb_istream_t withdrawal_stream = pb_istream_from_buffer(data->ptr, data->len);
     CHECK_APP_CANARY()
 
     // Set up fixed size fields
     fixed_size_field_t return_address_arg;
-    setup_decode_fixed_field(&withdrawal_plan.return_address.inner, &return_address_arg, &withdrawal->return_address.inner, 80);
+    setup_decode_fixed_field(&withdrawal_plan.return_address.inner, &return_address_arg, &withdrawal->return_address.inner,
+                             80);
 
     // Set up variable size fields
     variable_size_field_t denom_arg, destination_chain_address_arg, source_channel_arg;
     setup_decode_variable_field(&withdrawal_plan.denom.denom, &denom_arg, &withdrawal->denom.inner);
-    setup_decode_variable_field(&withdrawal_plan.destination_chain_address, &destination_chain_address_arg, &withdrawal->destination_chain_address);
+    setup_decode_variable_field(&withdrawal_plan.destination_chain_address, &destination_chain_address_arg,
+                                &withdrawal->destination_chain_address);
     setup_decode_variable_field(&withdrawal_plan.source_channel, &source_channel_arg, &withdrawal->source_channel);
 
     if (!pb_decode(&withdrawal_stream, penumbra_core_component_ibc_v1_Ics20Withdrawal_fields, &withdrawal_plan)) {
@@ -59,7 +62,6 @@ parser_error_t decode_ics20_withdrawal_plan(const bytes_t *data, ics20_withdrawa
     return parser_ok;
 }
 
-
 parser_error_t ics20_withdrawal_getNumItems(const parser_context_t *ctx, uint8_t *num_items) {
     UNUSED(ctx);
     *num_items = 1;
@@ -67,10 +69,8 @@ parser_error_t ics20_withdrawal_getNumItems(const parser_context_t *ctx, uint8_t
 }
 
 parser_error_t ics20_withdrawal_getItem(const parser_context_t *ctx, const ics20_withdrawal_plan_t *ics20_withdrawal,
-                             uint8_t actionIdx, char *outKey, uint16_t outKeyLen,
-                             char *outVal, uint16_t outValLen, uint8_t pageIdx,
-                             uint8_t *pageCount) {
-
+                                        uint8_t actionIdx, char *outKey, uint16_t outKeyLen, char *outVal,
+                                        uint16_t outValLen, uint8_t pageIdx, uint8_t *pageCount) {
     parser_error_t err = parser_no_data;
     if (ics20_withdrawal == NULL || outKey == NULL || outVal == NULL || outKeyLen == 0 || outValLen == 0) {
         return err;
@@ -83,10 +83,10 @@ parser_error_t ics20_withdrawal_getItem(const parser_context_t *ctx, const ics20
     pageString(outVal, outValLen, bufferUI, pageIdx, pageCount);
 
     return parser_ok;
-
 }
 
-parser_error_t ics20_withdrawal_printValue(const parser_context_t *ctx, const ics20_withdrawal_plan_t *ics20_withdrawal, char *outVal, uint16_t outValLen) {
+parser_error_t ics20_withdrawal_printValue(const parser_context_t *ctx, const ics20_withdrawal_plan_t *ics20_withdrawal,
+                                           char *outVal, uint16_t outValLen) {
     if (ctx == NULL || ics20_withdrawal == NULL || outVal == NULL) {
         return parser_no_data;
     }
@@ -121,13 +121,15 @@ parser_error_t ics20_withdrawal_printValue(const parser_context_t *ctx, const ic
     ics20_withdrawal_value.asset_id.inner.len = ASSET_ID_LEN;
     ics20_withdrawal_value.has_amount = true;
     ics20_withdrawal_value.has_asset_id = true;
-    CHECK_ERROR(printValue(ctx, &ics20_withdrawal_value, &ctx->tx_obj->parameters_plan.chain_id, outVal + written_value, outValLen - written_value));
+    CHECK_ERROR(printValue(ctx, &ics20_withdrawal_value, &ctx->tx_obj->parameters_plan.chain_id, outVal + written_value,
+                           outValLen - written_value));
     written_value = strlen(outVal);
 
     snprintf(outVal + written_value, outValLen - written_value, " To ");
     written_value = strlen(outVal);
 
-    MEMCPY(outVal + written_value, ics20_withdrawal->destination_chain_address.ptr, ics20_withdrawal->destination_chain_address.len);
+    MEMCPY(outVal + written_value, ics20_withdrawal->destination_chain_address.ptr,
+           ics20_withdrawal->destination_chain_address.len);
 
     return parser_ok;
 }
