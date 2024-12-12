@@ -59,7 +59,7 @@ impl Value {
         let value_blinding_generator = Commitment::value_blinding_generator();
         commitment += blinding_factor * value_blinding_generator;
 
-        Ok(Commitment(commitment))
+        Ok(commitment.into())
     }
 
     pub fn to_bytes(&self) -> Result<[u8; Self::LEN], ParserError> {

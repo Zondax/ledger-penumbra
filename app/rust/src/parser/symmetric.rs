@@ -168,7 +168,7 @@ impl OutgoingCipherKey {
 
     /// Use Blake2b-256 to derive an encryption key `ock` from the OVK and public fields.
     pub fn derive(ovk: &Ovk, cv: Commitment, cm: &Fq, epk: &ka::Public) -> Self {
-        let cv_bytes: [u8; 32] = cv.0.vartime_compress().0;
+        let cv_bytes: [u8; 32] = cv.bytes_compress();
         let cm_bytes: [u8; 32] = cm.to_bytes();
 
         let mut kdf_params = blake2b_simd::Params::new();
@@ -252,4 +252,3 @@ impl WrappedMemoKey {
         proto
     }
 }
-

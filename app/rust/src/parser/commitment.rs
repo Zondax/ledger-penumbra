@@ -14,11 +14,18 @@
 *  limitations under the License.
 ********************************************************************************/
 
-use decaf377::{Element, Fq};
+use decaf377::{Element, Encoding, Fq};
 
 #[derive(Clone)]
 #[cfg_attr(any(feature = "derive-debug", test), derive(Debug))]
-pub struct Commitment(pub Element);
+// So instead of holding an Element
+// this one stores an Encoding
+// Element -> vartime_compress -> Encoding -> [u8; 32]
+// [u8; 32] -> Encoding -> vartime_decompress -> Element -> Commitment
+// so lets hold the compressed element to reduce
+// binary size
+pub struct Commitment(Encoding);
+// pub struct Commitment(pub Element);
 
 #[derive(Clone, PartialEq, Eq)]
 #[cfg_attr(any(feature = "derive-debug", test), derive(Debug))]
@@ -35,24 +42,38 @@ impl Commitment {
     }
 
     pub fn to_proto_spend(&self) -> [u8; Self::PROTO_LEN] {
+        // let x = self.0.to_bytes();
         let mut proto = [0u8; Self::PROTO_LEN];
         proto[0..4].copy_from_slice(&[0x0a, 0x22, 0x0a, 0x20]);
-        proto[4..].copy_from_slice(&self.0.vartime_compress().0);
+        proto[4..].copy_from_slice(&self.bytes_compress());
         proto
     }
 
     pub fn to_proto_output(&self) -> [u8; Self::PROTO_LEN] {
         let mut proto = [0u8; Self::PROTO_LEN];
         proto[0..4].copy_from_slice(&[0x12, 0x22, 0x0a, 0x20]);
-        proto[4..].copy_from_slice(&self.0.vartime_compress().0);
+        // proto[4..].copy_from_slice(&self.0.vartime_compress().0);
+        proto[4..].copy_from_slice(&self.bytes_compress());
         proto
     }
 
     pub fn to_proto_swap(&self) -> [u8; Self::PROTO_LEN] {
         let mut proto = [0u8; Self::PROTO_LEN];
         proto[0..4].copy_from_slice(&[0x22, 0x22, 0x0a, 0x20]);
-        proto[4..].copy_from_slice(&self.0.vartime_compress().0);
+        proto[4..].copy_from_slice(&self.0 .0);
         proto
+    }
+
+    /// Returns the vartime_compress byte representation
+    /// of the internal defac377::Element
+    pub fn bytes_compress(&self) -> [u8; Self::LEN] {
+        self.0 .0
+    }
+}
+
+impl From<Element> for Commitment {
+    fn from(e: Element) -> Self {
+        Commitment(e.vartime_compress())
     }
 }
 
