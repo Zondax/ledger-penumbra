@@ -76,17 +76,19 @@ parser_error_t spend_printValue(const parser_context_t *ctx, const spend_plan_t 
     // example: Spend 100 USDC to penumbra1k0zzug62gpz60sejdvu9q7mq…
 
     // add action title
-    uint16_t written_local = snprintf(outVal, outValLen, "Spend ");
-
-    // add value
-    CHECK_ERROR(printValue(ctx, &spend->note.value, &ctx->tx_obj->parameters_plan.chain_id, outVal + written_local, outValLen - written_local));
+    snprintf(outVal, outValLen, "%s", "Spend ");
     uint16_t written_value = strlen(outVal);
 
+    // add value
+    CHECK_ERROR(printValue(ctx, &spend->note.value, &ctx->tx_obj->parameters_plan.chain_id, outVal + written_value, outValLen - written_value));
+    written_value = strlen(outVal);
+
     // add "from"
-    written_local = snprintf(outVal + written_value, outValLen - written_value, " from ");
+    snprintf(outVal + written_value, outValLen - written_value, " from ");
+    written_value = strlen(outVal);
 
     // add address
-    CHECK_ERROR(printTxAddress(&spend->note.address.inner, outVal + written_local + written_value, outValLen - written_local - written_value));
+    CHECK_ERROR(printTxAddress(&spend->note.address.inner, outVal + written_value, outValLen - written_value));
 
     return parser_ok;
 }

@@ -129,7 +129,8 @@ parser_error_t swap_printValue(const parser_context_t *ctx, const swap_plan_t *s
     // example: Output 100 USDC to penumbra1k0zzug62gpz60sejdvu9q7mq…
 
     // add action title
-    uint16_t written_value = snprintf(outVal, outValLen, "Swap ");
+    snprintf(outVal, outValLen, "Swap ");
+    uint16_t written_value = strlen(outVal);
 
     // add value
     value_t output_value = {0};

@@ -98,7 +98,8 @@ parser_error_t ics20_withdrawal_printValue(const parser_context_t *ctx, const ic
     MEMZERO(outVal, outValLen);
 
     // add action title
-    uint16_t written_value = snprintf(outVal, outValLen, "ICS20Withdrawal ");
+    snprintf(outVal, outValLen, "ICS20Withdrawal ");
+    uint16_t written_value = strlen(outVal);
 
     // add "channel"
     snprintf(outVal + written_value, outValLen - written_value, "Channel ");
