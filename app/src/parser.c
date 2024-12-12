@@ -23,15 +23,15 @@
 
 #include "coin.h"
 #include "crypto.h"
+#include "ics20_withdrawal.h"
+#include "memo.h"
+#include "output.h"
 #include "parameters.h"
 #include "parser_common.h"
 #include "parser_impl.h"
-#include "output.h"
-#include "tx_metadata.h"
-#include "memo.h"
 #include "spend.h"
 #include "swap.h"
-#include "ics20_withdrawal.h"
+#include "tx_metadata.h"
 
 static uint8_t action_idx = 0;
 
@@ -147,7 +147,8 @@ parser_error_t parser_getItem(const parser_context_t *ctx, uint8_t displayIdx, c
     uint8_t memo_num_items = 0;
     CHECK_ERROR(memo_getNumItems(ctx, &memo_num_items))
     if (displayIdx >= parameters_num_items && displayIdx < (parameters_num_items + memo_num_items)) {
-        CHECK_ERROR(memo_getItem(ctx, displayIdx - parameters_num_items, outKey, outKeyLen, outVal, outValLen, pageIdx, pageCount))
+        CHECK_ERROR(
+            memo_getItem(ctx, displayIdx - parameters_num_items, outKey, outKeyLen, outVal, outValLen, pageIdx, pageCount))
     }
 
     // Print actions
@@ -161,20 +162,21 @@ parser_error_t parser_getItem(const parser_context_t *ctx, uint8_t displayIdx, c
         }
         switch (ctx->tx_obj->actions_plan[action_idx].action_type) {
             case penumbra_core_transaction_v1_ActionPlan_spend_tag:
-                CHECK_ERROR(spend_getItem(ctx, &ctx->tx_obj->actions_plan[action_idx].action.spend, action_idx + 1, outKey, outKeyLen,
-                                           outVal, outValLen, pageIdx, pageCount))
-                break;   
+                CHECK_ERROR(spend_getItem(ctx, &ctx->tx_obj->actions_plan[action_idx].action.spend, action_idx + 1, outKey,
+                                          outKeyLen, outVal, outValLen, pageIdx, pageCount))
+                break;
             case penumbra_core_transaction_v1_ActionPlan_output_tag:
-                CHECK_ERROR(output_getItem(ctx, &ctx->tx_obj->actions_plan[action_idx].action.output, action_idx + 1, outKey, outKeyLen,
-                                           outVal, outValLen, pageIdx, pageCount))
+                CHECK_ERROR(output_getItem(ctx, &ctx->tx_obj->actions_plan[action_idx].action.output, action_idx + 1, outKey,
+                                           outKeyLen, outVal, outValLen, pageIdx, pageCount))
                 break;
             case penumbra_core_transaction_v1_ActionPlan_swap_tag:
-                CHECK_ERROR(swap_getItem(ctx, &ctx->tx_obj->actions_plan[action_idx].action.swap, action_idx + 1, outKey, outKeyLen,
-                                           outVal, outValLen, pageIdx, pageCount))
+                CHECK_ERROR(swap_getItem(ctx, &ctx->tx_obj->actions_plan[action_idx].action.swap, action_idx + 1, outKey,
+                                         outKeyLen, outVal, outValLen, pageIdx, pageCount))
                 break;
             case penumbra_core_transaction_v1_ActionPlan_ics20_withdrawal_tag:
-                CHECK_ERROR(ics20_withdrawal_getItem(ctx, &ctx->tx_obj->actions_plan[action_idx].action.ics20_withdrawal, action_idx + 1, outKey, outKeyLen,
-                                           outVal, outValLen, pageIdx, pageCount))
+                CHECK_ERROR(ics20_withdrawal_getItem(ctx, &ctx->tx_obj->actions_plan[action_idx].action.ics20_withdrawal,
+                                                     action_idx + 1, outKey, outKeyLen, outVal, outValLen, pageIdx,
+                                                     pageCount))
                 break;
             default:
                 return parser_unexpected_error;

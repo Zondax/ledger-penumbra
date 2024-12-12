@@ -16,18 +16,18 @@
 
 #include "parser_impl.h"
 
+#include "delegate.h"
+#include "ics20_withdrawal.h"
+#include "output.h"
+#include "parameters.h"
 #include "parser_interface.h"
 #include "parser_pb_utils.h"
 #include "pb_common.h"
 #include "pb_decode.h"
 #include "protobuf/penumbra/core/transaction/v1/transaction.pb.h"
 #include "spend.h"
-#include "output.h"
-#include "delegate.h"
-#include "undelegate.h"
-#include "ics20_withdrawal.h"
-#include "parameters.h"
 #include "swap.h"
+#include "undelegate.h"
 #include "zxformat.h"
 
 static bool decode_action(pb_istream_t *stream, const pb_field_t *field, void **arg);
@@ -78,7 +78,8 @@ bool decode_action(pb_istream_t *stream, const pb_field_t *field, void **arg) {
             break;
         case penumbra_core_transaction_v1_ActionPlan_ics20_withdrawal_tag:
             decode_arg[actions_qty].action_data = ics20_withdrawal_data;
-            CHECK_ERROR(decode_ics20_withdrawal_plan(&ics20_withdrawal_data, &decode_arg[actions_qty].action.ics20_withdrawal));
+            CHECK_ERROR(
+                decode_ics20_withdrawal_plan(&ics20_withdrawal_data, &decode_arg[actions_qty].action.ics20_withdrawal));
             break;
         case penumbra_core_transaction_v1_ActionPlan_swap_tag:
             decode_arg[actions_qty].action_data = action_data;
@@ -146,8 +147,10 @@ parser_error_t _read(parser_context_t *c, parser_tx_t *v) {
     // parameters callbacks
     fixed_size_field_t parameter_asset_id_arg;
     variable_size_field_t parameter_chain_id_arg;
-    setup_decode_variable_field(&request.transaction_parameters.chain_id, &parameter_chain_id_arg, &v->parameters_plan.chain_id);
-    setup_decode_fixed_field(&request.transaction_parameters.fee.asset_id.inner, &parameter_asset_id_arg, &v->parameters_plan.fee.asset_id.inner, ASSET_ID_LEN);
+    setup_decode_variable_field(&request.transaction_parameters.chain_id, &parameter_chain_id_arg,
+                                &v->parameters_plan.chain_id);
+    setup_decode_fixed_field(&request.transaction_parameters.fee.asset_id.inner, &parameter_asset_id_arg,
+                             &v->parameters_plan.fee.asset_id.inner, ASSET_ID_LEN);
 
     // detection data callbacks
     request.detection_data.clue_plans.funcs.decode = &decode_detection_data;

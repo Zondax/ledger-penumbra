@@ -15,10 +15,10 @@
  ********************************************************************************/
 #include "output.h"
 
-#include "parser_pb_utils.h"
-#include "zxformat.h"
 #include "note.h"
+#include "parser_pb_utils.h"
 #include "ui_utils.h"
+#include "zxformat.h"
 
 parser_error_t decode_output_plan(const bytes_t *data, output_plan_t *output) {
     penumbra_core_component_shielded_pool_v1_OutputPlan output_plan =
@@ -66,11 +66,8 @@ parser_error_t output_getNumItems(const parser_context_t *ctx, uint8_t *num_item
     return parser_ok;
 }
 
-parser_error_t output_getItem(const parser_context_t *ctx, const output_plan_t *output,
-                             uint8_t actionIdx, char *outKey, uint16_t outKeyLen,
-                             char *outVal, uint16_t outValLen, uint8_t pageIdx,
-                             uint8_t *pageCount) {
-
+parser_error_t output_getItem(const parser_context_t *ctx, const output_plan_t *output, uint8_t actionIdx, char *outKey,
+                              uint16_t outKeyLen, char *outVal, uint16_t outValLen, uint8_t pageIdx, uint8_t *pageCount) {
     parser_error_t err = parser_no_data;
     if (output == NULL || outKey == NULL || outVal == NULL || outKeyLen == 0 || outValLen == 0) {
         return err;
@@ -83,10 +80,10 @@ parser_error_t output_getItem(const parser_context_t *ctx, const output_plan_t *
     pageString(outVal, outValLen, bufferUI, pageIdx, pageCount);
 
     return parser_ok;
-
 }
 
-parser_error_t output_printValue(const parser_context_t *ctx, const output_plan_t *output, char *outVal, uint16_t outValLen) {
+parser_error_t output_printValue(const parser_context_t *ctx, const output_plan_t *output, char *outVal,
+                                 uint16_t outValLen) {
     if (ctx == NULL || output == NULL || outVal == NULL) {
         return parser_no_data;
     }
@@ -104,7 +101,8 @@ parser_error_t output_printValue(const parser_context_t *ctx, const output_plan_
     uint16_t written_value = strlen(outVal);
 
     // add value
-    CHECK_ERROR(printValue(ctx, &output->value, &ctx->tx_obj->parameters_plan.chain_id, outVal + written_value, outValLen - written_value));
+    CHECK_ERROR(printValue(ctx, &output->value, &ctx->tx_obj->parameters_plan.chain_id, outVal + written_value,
+                           outValLen - written_value));
     written_value = strlen(outVal);
 
     // add "to"
