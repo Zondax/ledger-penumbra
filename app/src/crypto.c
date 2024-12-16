@@ -137,19 +137,15 @@ zxerr_t crypto_sign(parser_tx_t *tx_obj, uint8_t *signature, uint16_t signatureM
         return zxerr_invalid_crypto_settings;
     }
 
-    keys_t keys = {0};
     zxerr_t error = zxerr_invalid_crypto_settings;
 
     // compute parameters hash
     CATCH_ZX_ERROR(compute_parameters_hash(&tx_obj->parameters_plan.data_bytes, &tx_obj->plan.parameters_hash));
 
-    // compute spend key
-    CATCH_ZX_ERROR(computeSpendKey(&keys));
-
     // compute action hashes
     for (uint16_t i = 0; i < tx_obj->plan.actions.qty; i++) {
-        CATCH_ZX_ERROR(compute_action_hash(&tx_obj->actions_plan[i], &keys.skb, &tx_obj->plan.memo.key,
-                                           &tx_obj->plan.actions.hashes[i]));
+        CATCH_ZX_ERROR(
+            compute_action_hash(&tx_obj->actions_plan[i], &tx_obj->plan.memo.key, &tx_obj->plan.actions.hashes[i]));
     }
 
     // compute effect hash
@@ -160,7 +156,6 @@ zxerr_t crypto_sign(parser_tx_t *tx_obj, uint8_t *signature, uint16_t signatureM
     return zxerr_ok;
 
 catch_zx_error:
-    MEMZERO(&keys, sizeof(keys));
     MEMZERO(signature, signatureMaxlen);
 
     if (error != zxerr_ok) {

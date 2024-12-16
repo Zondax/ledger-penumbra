@@ -22,6 +22,7 @@
 #include "apdu_codes.h"
 #include "coin.h"
 #include "crypto.h"
+#include "parser_interface.h"
 #include "tx.h"
 #include "zxerror.h"
 #include "zxformat.h"
@@ -76,9 +77,27 @@ __Z_INLINE zxerr_t app_fill_keys() {
 }
 
 __Z_INLINE void app_sign() {
+    MEMZERO(G_io_apdu_buffer, IO_APDU_BUFFER_SIZE);
+
     parser_tx_t *tx = tx_get_txObject();
 
-    zxerr_t err = crypto_sign(tx, G_io_apdu_buffer, IO_APDU_BUFFER_SIZE - 3);
+    // TODO: Only for testing. The section from here to check_app_canary will be removed
+    zxerr_t err = zxerr_ok;
+
+    // compute parameters hash
+    compute_parameters_hash(&tx->parameters_plan.data_bytes, &tx->plan.parameters_hash);
+
+    // compute action hashes
+    for (uint16_t i = 0; i < tx->plan.actions.qty; i++) {
+        compute_action_hash(&tx->actions_plan[i], &tx->plan.memo.key, &tx->plan.actions.hashes[i]);
+    }
+
+    // compute effect hash
+    compute_effect_hash(&tx->plan, tx->effect_hash, sizeof(tx->effect_hash));
+
+    MEMCPY(G_io_apdu_buffer, tx->effect_hash, EFFECT_HASH_LEN);
+
+    check_app_canary();
 
     if (err != zxerr_ok) {
         set_code(G_io_apdu_buffer, 0, APDU_CODE_SIGN_VERIFY_ERROR);
