@@ -26,6 +26,18 @@ pub struct BytesC {
     pub len: u16,
 }
 
+impl From<BytesC> for &[u8] {
+    fn from(value: BytesC) -> Self {
+        unsafe {
+            if value.ptr.is_null() {
+                &[]
+            } else {
+                std::slice::from_raw_parts(value.ptr, value.len as usize)
+            }
+        }
+    }
+}
+
 #[cfg(any(feature = "derive-debug", test))]
 impl fmt::Debug for BytesC {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
