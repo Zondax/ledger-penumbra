@@ -24,6 +24,9 @@
 #include "zxformat.h"
 #include "zxmacros.h"
 
+// TODO: Maybe move this to crypto_helper
+#include "protobuf/penumbra/core/transaction/v1/transaction.pb.h"
+
 uint32_t hdPath[HDPATH_LEN_DEFAULT];
 full_viewing_key_t fvk_cached = {0};
 bool fvk_cached_set = false;
@@ -160,6 +163,22 @@ zxerr_t crypto_sign(parser_tx_t *tx_obj, uint8_t *signature, uint16_t signatureM
 
     // compute effect hash
     CATCH_ZX_ERROR(compute_effect_hash(&tx_obj->plan, tx_obj->effect_hash, sizeof(tx_obj->effect_hash)));
+
+    // Similar to what is done in:
+    // https://github.com/penumbra-zone/penumbra/blob/main/crates/core/transaction/src/plan/auth.rs#L12
+    uint8_t spend_signature[64] = {0};
+    bytes_t effect_hash = {.ptr = tx_obj->effect_hash, .len = 64};
+    for (uint16_t i = 0; i < tx_obj->plan.actions.qty; i++) {
+        if (tx_obj->actions_plan[i].action_type == penumbra_core_transaction_v1_ActionPlan_spend_tag){
+            // rs_sign_spend(const bytes_t *effect_hash, const bytes_t *randomizer, const spend_key_bytes_t *spend_key, uint8_t *signature, uint16_t len);
+            if (rs_sign_spend(&effect_hash, &tx_obj->actions_plan[i].action.spend.randomizer, &keys.skb, spend_signature, 64) != parser_ok) {
+                return zxerr_invalid_crypto_settings;
+            }
+            // TODO:
+            // Copy signature to flash either one by one
+            // or by chunks, to do so we need to use flash api from the sdk
+        }
+    }
 
     MEMCPY(signature, tx_obj->effect_hash, EFFECT_HASH_LEN);
 
