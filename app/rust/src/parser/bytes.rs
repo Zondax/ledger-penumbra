@@ -26,8 +26,15 @@ pub struct BytesC {
     pub len: u16,
 }
 
-impl From<BytesC> for &[u8] {
-    fn from(value: BytesC) -> Self {
+impl BytesC {
+    pub fn into_array<const L: usize>(&self) -> Result<[u8; L], ParserError> {
+        let slice: &[u8] = self.into();
+        slice.try_into().map_err(|_| ParserError::InvalidLength)
+    }
+}
+
+impl From<&BytesC> for &[u8] {
+    fn from(value: &BytesC) -> Self {
         unsafe {
             if value.ptr.is_null() {
                 &[]
