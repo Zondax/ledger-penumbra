@@ -1,5 +1,7 @@
 pub const ADDR_INDEX_LEN: usize = 16;
 
+pub const SIGNATURE_LEN: usize = 64;
+
 // Diversifier: 16 bytes
 // Transmission Key: 32 bytes
 // Clue Key: 32 bytes
@@ -46,5 +48,3 @@ pub const MAX_TEXT_LEN: usize = MEMO_LEN_BYTES - ADDRESS_LEN;
 pub const SWAP_CIPHERTEXT_BYTES: usize = 272;
 // Swap plaintext byte length.
 pub const SWAP_LEN_BYTES: usize = 256;
-
-pub const SIGNATURE_LEN: usize = 64;
