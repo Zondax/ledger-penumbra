@@ -148,7 +148,7 @@ catch_zx_error:
 }
 
 zxerr_t crypto_sign(parser_tx_t *tx_obj, uint8_t *signature, uint16_t signatureMaxlen) {
-    if (signature == NULL || tx_obj == NULL || signatureMaxlen < EFFECT_HASH_LEN) {
+    if (signature == NULL || tx_obj == NULL || signatureMaxlen < EFFECT_HASH_LEN + 2 * sizeof(uint16_t)) {
         return zxerr_invalid_crypto_settings;
     }
 
@@ -185,14 +185,23 @@ zxerr_t crypto_sign(parser_tx_t *tx_obj, uint8_t *signature, uint16_t signatureM
 
             // TODO:
             // Copy signature to flash either one by one
-            // or by chunks, to do so we need to use flash api from the sdk
+            // or by chunks.
             if (!nv_write_signature(spend_signature, Spend)) {
                 return zxerr_buffer_too_small;
             }
         }
     }
 
-    MEMCPY(signature, tx_obj->effect_hash, EFFECT_HASH_LEN);
+    uint8_t *current_ptr = signature;
+    uint16_t spend_signatures = (uint16_t)nv_num_signatures(Spend);
+    uint16_t delegator_signatures = 0;
+    MEMCPY(current_ptr, &spend_signatures, sizeof(uint16_t));
+    current_ptr += sizeof(uint16_t);
+
+    MEMCPY(current_ptr, &delegator_signatures, sizeof(uint16_t));
+    current_ptr += sizeof(uint16_t);
+
+    MEMCPY(current_ptr, tx_obj->effect_hash, EFFECT_HASH_LEN);
 
     return zxerr_ok;
 

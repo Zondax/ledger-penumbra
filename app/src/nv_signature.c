@@ -88,7 +88,7 @@ size_t nv_get_signature(uint16_t index, signature_t *signature, signature_type_t
     return len;
 }
 
-size_t num_signatures(signature_type_t type) {
+size_t nv_num_signatures(signature_type_t type) {
     // For now only Spend signature types are supported
     if (type != Spend) {
         return 0;
