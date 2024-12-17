@@ -36,11 +36,9 @@ pub fn randomized_signing_key(
 ) -> Result<SigningKey<SpendAuth>, ParserError> {
     let sk = spend_key.signing_key()?;
 
-    let rand: &[u8] = randomizer.into();
+    let randomizer: &[u8] = randomizer.into();
 
-    let randomizer = rand.try_into().map_err(|_| ParserError::InvalidLength)?;
-
-    let randomizer = Fr::from_bytes_checked(randomizer).map_err(|_| ParserError::InvalidLength)?;
+    let randomizer = Fr::from_le_bytes_mod_order(randomizer);
 
     Ok(sk.randomize(&randomizer))
 }
