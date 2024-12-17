@@ -23,6 +23,8 @@
 #include "parser_interface.h"
 #include "zxformat.h"
 #include "zxmacros.h"
+#include "nv_signature.h"
+#include "rslib.h"
 
 // TODO: Maybe move this to crypto_helper
 #include "protobuf/penumbra/core/transaction/v1/transaction.pb.h"
@@ -150,10 +152,16 @@ zxerr_t crypto_sign(parser_tx_t *tx_obj, uint8_t *signature, uint16_t signatureM
         return zxerr_invalid_crypto_settings;
     }
 
+    keys_t keys = {0};
+    nv_signature_init();
+
     zxerr_t error = zxerr_invalid_crypto_settings;
 
     // compute parameters hash
     CATCH_ZX_ERROR(compute_parameters_hash(&tx_obj->parameters_plan.data_bytes, &tx_obj->plan.parameters_hash));
+
+    // compute spend key
+    CATCH_ZX_ERROR(computeSpendKey(&keys));
 
     // compute action hashes
     for (uint16_t i = 0; i < tx_obj->plan.actions.qty; i++) {
@@ -174,9 +182,13 @@ zxerr_t crypto_sign(parser_tx_t *tx_obj, uint8_t *signature, uint16_t signatureM
             if (rs_sign_spend(&effect_hash, &tx_obj->actions_plan[i].action.spend.randomizer, &keys.skb, spend_signature, 64) != parser_ok) {
                 return zxerr_invalid_crypto_settings;
             }
+
             // TODO:
             // Copy signature to flash either one by one
             // or by chunks, to do so we need to use flash api from the sdk
+            if (!nv_write_signature(spend_signature, Spend)) {
+                return zxerr_buffer_too_small;
+            }
         }
     }
 
