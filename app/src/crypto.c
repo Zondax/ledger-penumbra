@@ -25,6 +25,8 @@
 #include "zxmacros.h"
 
 uint32_t hdPath[HDPATH_LEN_DEFAULT];
+full_viewing_key_t fvk_cached = {0};
+bool fvk_cached_set = false;
 
 __Z_INLINE zxerr_t copyKeys(keys_t *keys, key_kind_e req_type, uint8_t *output, uint16_t len, uint16_t *cmdResponseLen) {
     if (keys == NULL || output == NULL) {
@@ -88,14 +90,22 @@ zxerr_t crypto_fillKeys(uint8_t *output, uint16_t len, uint16_t *cmdResponseLen)
         return error;
     }
 
-    // Compute seed
-    CATCH_ZX_ERROR(computeSpendKey(&keys));
+    if (!fvk_cached_set) { 
+        // Compute seed
+        CATCH_ZX_ERROR(computeSpendKey(&keys));
 
-    // use seed to compute viewieng keys
-    CATCH_ZX_ERROR(compute_keys(&keys));
+        // use seed to compute viewieng keys
+        CATCH_ZX_ERROR(compute_keys(&keys));
+    
+        // Copy keys
+        CATCH_ZX_ERROR(copyKeys(&keys, Fvk, output, len, cmdResponseLen));
 
-    // Copy keys
-    CATCH_ZX_ERROR(copyKeys(&keys, Fvk, output, len, cmdResponseLen));
+        MEMCPY(fvk_cached, keys.fvk, FVK_LEN);
+
+        fvk_cached_set = true;
+    } else {
+        MEMCPY(output, fvk_cached, FVK_LEN);
+    }
 
     error = zxerr_ok;
 
