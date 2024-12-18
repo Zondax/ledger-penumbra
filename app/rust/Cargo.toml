@@ -53,7 +53,7 @@ panic = "abort"
 # lto = false
 # Settings below aimed to reduce
 # binary size due to code
-lto = "thin"
+lto = true
 overflow-checks = false
 strip = true
 
