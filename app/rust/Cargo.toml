@@ -53,9 +53,9 @@ panic = "abort"
 # lto = false
 # Settings below aimed to reduce
 # binary size due to code
-lto = true
+lto = "fat"
 overflow-checks = false
-strip = true
+strip = "symbols"
 
 [profile.dev]
 lto = false
