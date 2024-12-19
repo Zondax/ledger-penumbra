@@ -95,13 +95,13 @@ zxerr_t crypto_fillKeys(uint8_t *output, uint16_t len, uint16_t *cmdResponseLen)
         return error;
     }
 
-    if (!fvk_cached_set) { 
+    if (!fvk_cached_set) {
         // Compute seed
         CATCH_ZX_ERROR(computeSpendKey(&keys));
 
         // use seed to compute viewieng keys
         CATCH_ZX_ERROR(compute_keys(&keys));
-    
+
         // Copy keys
         CATCH_ZX_ERROR(copyKeys(&keys, Fvk, output, len, cmdResponseLen));
 
@@ -193,15 +193,14 @@ zxerr_t crypto_sign(parser_tx_t *tx_obj, uint8_t *signature, uint16_t signatureM
     }
 
     uint8_t *current_ptr = signature;
+    MEMCPY(current_ptr, tx_obj->effect_hash, EFFECT_HASH_LEN);
+    current_ptr += EFFECT_HASH_LEN;
     uint16_t spend_signatures = (uint16_t)nv_num_signatures(Spend);
     uint16_t delegator_signatures = 0;
     MEMCPY(current_ptr, &spend_signatures, sizeof(uint16_t));
     current_ptr += sizeof(uint16_t);
 
     MEMCPY(current_ptr, &delegator_signatures, sizeof(uint16_t));
-    current_ptr += sizeof(uint16_t);
-
-    MEMCPY(current_ptr, tx_obj->effect_hash, EFFECT_HASH_LEN);
 
     return zxerr_ok;
 
