@@ -45,7 +45,7 @@ describe('Standard', function () {
         randomizer: undefined,
       }
       // do not wait here... we need to navigate
-      const signatureRequest = app.sign(PENUMBRA_PATH, addressIndex, messageToSign)
+      const signatureRequest = app.sign(PENUMBRA_PATH, messageToSign)
 
       // Wait until we are not in the main menu
       await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot())
@@ -54,6 +54,11 @@ describe('Standard', function () {
       
       const signatureResponse = await signatureRequest
       console.log(signatureResponse.signature.toString('hex'))
+
+      for (let i = 0; i < signatureResponse.spendAuth_signature_qty; i++) {
+        const spendAuthSignature = await app.getSpendAuthSignatures(i)
+        console.log(`spendAuthSignature ${i}`, spendAuthSignature.spendAuth_signature.toString('hex'))
+      }
 
       // Now verify effect hash
       expect(signatureResponse.signature.toString('hex')).toEqual(data.expected_effect_hash)

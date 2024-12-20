@@ -231,6 +231,24 @@ __Z_INLINE void handle_getversion(__Z_UNUSED volatile uint32_t *flags, volatile 
     THROW(APDU_CODE_OK);
 }
 
+__Z_INLINE void handleGetSpendAuthSignatures(volatile uint32_t *flags, volatile uint32_t *tx, uint32_t rx) {
+    zemu_log("handleGetSpendAuthSignatures\n");
+    if (rx < OFFSET_DATA + sizeof(uint16_t)) {
+        THROW(APDU_CODE_WRONG_LENGTH);
+    }
+
+    uint16_t index = G_io_apdu_buffer[OFFSET_DATA];
+    zxerr_t zxerr = app_fill_spend_auth_signatures(index);
+    *tx = cmdResponseLen;
+
+    if (zxerr != zxerr_ok) {
+        *tx = 0;
+        THROW(APDU_CODE_DATA_INVALID);
+    }
+
+    THROW(APDU_CODE_OK);
+}
+
 #if defined(APP_TESTING)
 void handleTest(volatile uint32_t *flags, volatile uint32_t *tx, uint32_t rx) { THROW(APDU_CODE_OK); }
 #endif
@@ -277,6 +295,11 @@ void handleApdu(volatile uint32_t *flags, volatile uint32_t *tx, uint32_t rx) {
 
                 case INS_TX_METADATA: {
                     handleTxMetadata(flags, tx, rx);
+                    break;
+                }
+
+                case INS_GET_SPEND_AUTH_SIGNATURES: {
+                    handleGetSpendAuthSignatures(flags, tx, rx);
                     break;
                 }
 
