@@ -36,9 +36,6 @@ typedef struct {
 // SpendAuth signature buffer
 storage_t NV_CONST N_spend_data_impl __attribute__((aligned(64)));
 #define N_spend_data (*(NV_VOLATILE storage_t *)PIC(&N_spend_data_impl))
-// DelegatorVote signatures
-// storage_t NV_CONST N_delgator_data_impl __attribute__((aligned(64)));
-// #define N_appdata (*(NV_VOLATILE storage_t *)PIC(&N_appdata_impl))
 #endif
 
 flash_state_t spend_state;

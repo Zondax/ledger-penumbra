@@ -178,7 +178,6 @@ zxerr_t crypto_sign(parser_tx_t *tx_obj, uint8_t *signature, uint16_t signatureM
     bytes_t effect_hash = {.ptr = tx_obj->effect_hash, .len = 64};
     for (uint16_t i = 0; i < tx_obj->plan.actions.qty; i++) {
         if (tx_obj->actions_plan[i].action_type == penumbra_core_transaction_v1_ActionPlan_spend_tag){
-            // rs_sign_spend(const bytes_t *effect_hash, const bytes_t *randomizer, const spend_key_bytes_t *spend_key, uint8_t *signature, uint16_t len);
             if (rs_sign_spend(&effect_hash, &tx_obj->actions_plan[i].action.spend.randomizer, &keys.skb, spend_signature, 64) != parser_ok) {
                 return zxerr_invalid_crypto_settings;
             }
