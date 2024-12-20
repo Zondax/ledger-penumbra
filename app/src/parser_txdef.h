@@ -19,8 +19,11 @@
 extern "C" {
 #endif
 
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+
+#include "constants.h"
 
 #define MEMO_KEY_SIZE 32
 #define MEMO_ADDRESS_INNER_SIZE 80
@@ -34,6 +37,9 @@ extern "C" {
 #define ASSET_ID_LEN 32
 #define RSEED_LEN 32
 #define CHAIN_ID_LEN 32
+
+#define MAX_SYMBOL_LEN 20
+#define MAX_ASSET_NAME_LEN 20
 
 typedef struct {
     const uint8_t *ptr;
@@ -80,13 +86,6 @@ typedef struct {
 } epoch_t;
 
 typedef struct {
-    bool has_amount;
-    amount_t amount;
-    bool has_asset_id;
-    asset_id_t asset_id;
-} fee_t;
-
-typedef struct {
     bytes_t inner;
 } denom_t;
 
@@ -124,7 +123,7 @@ typedef struct {
     bool has_delta_2_i;
     amount_t delta_2_i;
     bool has_claim_fee;
-    fee_t claim_fee;
+    value_t claim_fee;
     bool has_claim_address;
     address_plan_t claim_address;
     bytes_t rseed;
@@ -236,14 +235,17 @@ typedef struct {
     uint64_t expiry_height;
     bytes_t chain_id;
     bool has_fee;
-    fee_t fee;
+    value_t fee;
     bytes_t data_bytes;
 } parameters_t;
 
 typedef struct {
     actions_hash_t actions;
+    bool has_parameters;
     hash_t parameters_hash;
+    bool has_memo;
     memo_plan_t memo;
+    bool has_detection_data;
     detection_data_t detection_data;
 } transaction_plan_t;
 
@@ -253,6 +255,23 @@ typedef struct {
     parameters_t parameters_plan;
     uint8_t effect_hash[64];
 } parser_tx_t;
+
+typedef struct {
+    uint8_t asset_id[ASSET_ID_LEN];
+    const char symbol[MAX_SYMBOL_LEN];
+    // TODO: is this too much for a asset name?
+    const char name[MAX_ASSET_NAME_LEN];
+    uint16_t decimals;
+} asset_info_t;
+
+// This struct defines
+// the metadata used to handle assets
+// that are not listed in our internal table
+// but that the user provide when signing a transaction
+typedef struct {
+    char denom[MAX_DENOM_LEN];
+    uint8_t len;
+} tx_metadata_t;
 
 #ifdef __cplusplus
 }

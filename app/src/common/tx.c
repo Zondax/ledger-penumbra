@@ -24,8 +24,8 @@
 #include "zxmacros.h"
 
 #if defined(TARGET_NANOX) || defined(TARGET_NANOS2) || defined(TARGET_STAX) || defined(TARGET_FLEX)
-#define RAM_BUFFER_SIZE 8192
-#define FLASH_BUFFER_SIZE 16384
+#define RAM_BUFFER_SIZE 4096
+#define FLASH_BUFFER_SIZE 14000
 #elif defined(TARGET_NANOS)
 #define RAM_BUFFER_SIZE 256
 #define FLASH_BUFFER_SIZE 8192
@@ -58,6 +58,21 @@ uint32_t tx_append(unsigned char *buffer, uint32_t length) { return buffering_ap
 uint32_t tx_get_buffer_length() { return buffering_get_buffer()->pos; }
 
 uint8_t *tx_get_buffer() { return buffering_get_buffer()->data; }
+
+const char *tx_parse_metadata() {
+    MEMZERO(ctx_parsed_tx.tx_metadata, sizeof(ctx_parsed_tx.tx_metadata));
+
+    uint8_t err =
+        parser_parseTxMetadata(tx_get_buffer(), tx_get_buffer_length(), ctx_parsed_tx.tx_metadata, MAX_TX_METADATA_LEN);
+
+    CHECK_APP_CANARY()
+
+    if (err != parser_ok) {
+        return parser_getErrorDescription(err);
+    }
+
+    return NULL;
+}
 
 const char *tx_parse() {
     MEMZERO(&tx_obj, sizeof(tx_obj));

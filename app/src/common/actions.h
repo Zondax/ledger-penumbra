@@ -22,6 +22,7 @@
 #include "apdu_codes.h"
 #include "coin.h"
 #include "crypto.h"
+#include "parser_interface.h"
 #include "tx.h"
 #include "zxerror.h"
 #include "zxformat.h"
@@ -45,7 +46,14 @@ __Z_INLINE zxerr_t app_fill_address(address_index_t address_index) {
 
     // Set flag to show in case of requireConfirmation
     // that the address is indeed being randomized
-    is_randomized = address_index.has_randomizer;
+    is_randomized = false;
+    for (uint8_t i = 0; i < ADDR_RANDOMIZER_LEN; i++) {
+        if (address_index.randomizer[i] != 0) {
+            is_randomized = true;
+            break;
+        }
+    }
+
     // Set the account in used to show it to the user
     // in case a review is enabled
     address_idx_account = address_index.account;
@@ -69,9 +77,13 @@ __Z_INLINE zxerr_t app_fill_keys() {
 }
 
 __Z_INLINE void app_sign() {
+    MEMZERO(G_io_apdu_buffer, IO_APDU_BUFFER_SIZE);
+
     parser_tx_t *tx = tx_get_txObject();
 
     zxerr_t err = crypto_sign(tx, G_io_apdu_buffer, IO_APDU_BUFFER_SIZE - 3);
+
+    check_app_canary();
 
     if (err != zxerr_ok) {
         set_code(G_io_apdu_buffer, 0, APDU_CODE_SIGN_VERIFY_ERROR);

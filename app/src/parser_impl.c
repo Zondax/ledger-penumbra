@@ -16,17 +16,18 @@
 
 #include "parser_impl.h"
 
+#include "delegate.h"
+#include "ics20_withdrawal.h"
+#include "output.h"
+#include "parameters.h"
 #include "parser_interface.h"
 #include "parser_pb_utils.h"
 #include "pb_common.h"
 #include "pb_decode.h"
 #include "protobuf/penumbra/core/transaction/v1/transaction.pb.h"
-#include "spend_plan.h"
-#include "output_plan.h"
-#include "delegate_plan.h"
-#include "undelegate_plan.h"
-#include "ics20_withdrawal.h"
+#include "spend.h"
 #include "swap.h"
+#include "undelegate.h"
 #include "zxformat.h"
 
 static bool decode_action(pb_istream_t *stream, const pb_field_t *field, void **arg);
@@ -34,6 +35,16 @@ static bool decode_detection_data(pb_istream_t *stream, const pb_field_t *field,
 
 static uint16_t actions_qty = 0;
 static uint16_t detection_data_qty = 0;
+static parser_error_t decode_error = parser_ok;
+
+#define CHECK_ACTION_ERROR(__CALL)       \
+    {                                    \
+        decode_error = __CALL;           \
+        CHECK_APP_CANARY()               \
+        if (decode_error != parser_ok) { \
+            return false;                \
+        }                                \
+    }
 
 bool decode_action(pb_istream_t *stream, const pb_field_t *field, void **arg) {
     if (arg == NULL || *arg == NULL) {
@@ -46,6 +57,7 @@ bool decode_action(pb_istream_t *stream, const pb_field_t *field, void **arg) {
     }
 
     if (actions_qty >= ACTIONS_QTY) {
+        decode_error = parser_actions_overflow;
         return false;
     }
 
@@ -61,27 +73,28 @@ bool decode_action(pb_istream_t *stream, const pb_field_t *field, void **arg) {
     switch (action.which_action) {
         case penumbra_core_transaction_v1_ActionPlan_spend_tag:
             decode_arg[actions_qty].action_data = action_data;
-            CHECK_ERROR(decode_spend_plan(&action_data, &decode_arg[actions_qty].action.spend));
+            CHECK_ACTION_ERROR(decode_spend_plan(&action_data, &decode_arg[actions_qty].action.spend));
             break;
         case penumbra_core_transaction_v1_ActionPlan_output_tag:
             decode_arg[actions_qty].action_data = action_data;
-            CHECK_ERROR(decode_output_plan(&action_data, &decode_arg[actions_qty].action.output));
+            CHECK_ACTION_ERROR(decode_output_plan(&action_data, &decode_arg[actions_qty].action.output));
             break;
         case penumbra_core_transaction_v1_ActionPlan_delegate_tag:
             decode_arg[actions_qty].action_data = action_data;
-            CHECK_ERROR(decode_delegate_plan(&action_data, &decode_arg[actions_qty].action.delegate));
+            CHECK_ACTION_ERROR(decode_delegate_plan(&action_data, &decode_arg[actions_qty].action.delegate));
             break;
         case penumbra_core_transaction_v1_ActionPlan_undelegate_tag:
             decode_arg[actions_qty].action_data = action_data;
-            CHECK_ERROR(decode_undelegate_plan(&action_data, &decode_arg[actions_qty].action.undelegate));
+            CHECK_ACTION_ERROR(decode_undelegate_plan(&action_data, &decode_arg[actions_qty].action.undelegate));
             break;
         case penumbra_core_transaction_v1_ActionPlan_ics20_withdrawal_tag:
             decode_arg[actions_qty].action_data = ics20_withdrawal_data;
-            CHECK_ERROR(decode_ics20_withdrawal_plan(&ics20_withdrawal_data, &decode_arg[actions_qty].action.ics20_withdrawal));
+            CHECK_ACTION_ERROR(
+                decode_ics20_withdrawal_plan(&ics20_withdrawal_data, &decode_arg[actions_qty].action.ics20_withdrawal));
             break;
         case penumbra_core_transaction_v1_ActionPlan_swap_tag:
             decode_arg[actions_qty].action_data = action_data;
-            CHECK_ERROR(decode_swap_plan(&action_data, &decode_arg[actions_qty].action.swap));
+            CHECK_ACTION_ERROR(decode_swap_plan(&action_data, &decode_arg[actions_qty].action.swap));
             break;
         default:
             return false;
@@ -95,6 +108,7 @@ bool decode_detection_data(pb_istream_t *stream, const pb_field_t *field, void *
     if (stream->bytes_left == 0 || arg == NULL) return false;
 
     if (detection_data_qty >= DETECTION_DATA_QTY) {
+        decode_error = parser_detection_data_overflow;
         return false;
     }
 
@@ -145,43 +159,35 @@ parser_error_t _read(parser_context_t *c, parser_tx_t *v) {
     // parameters callbacks
     fixed_size_field_t parameter_asset_id_arg;
     variable_size_field_t parameter_chain_id_arg;
-    setup_decode_variable_field(&request.transaction_parameters.chain_id, &parameter_chain_id_arg, &v->parameters_plan.chain_id);
-    setup_decode_fixed_field(&request.transaction_parameters.fee.asset_id.inner, &parameter_asset_id_arg, &v->parameters_plan.fee.asset_id.inner, ASSET_ID_LEN);
+    setup_decode_variable_field(&request.transaction_parameters.chain_id, &parameter_chain_id_arg,
+                                &v->parameters_plan.chain_id);
+    setup_decode_fixed_field(&request.transaction_parameters.fee.asset_id.inner, &parameter_asset_id_arg,
+                             &v->parameters_plan.fee.asset_id.inner, ASSET_ID_LEN);
 
     // detection data callbacks
     request.detection_data.clue_plans.funcs.decode = &decode_detection_data;
     request.detection_data.clue_plans.arg = &v->plan.detection_data.clue_plans;
 
+    // reset error
+    decode_error = parser_ok;
+
     pb_istream_t stream = pb_istream_from_buffer(c->buffer, c->bufferLen);
     CHECK_APP_CANARY()
     const bool status = pb_decode(&stream, penumbra_core_transaction_v1_TransactionPlan_fields, &request);
     if (!status) {
-        // TODO: improve handling errors from callbacks
-        if (actions_qty == ACTIONS_QTY) {
-            return parser_actions_overflow;
-        }
-        if (detection_data_qty == DETECTION_DATA_QTY) {
-            return parser_detection_data_overflow;
+        if (decode_error != parser_ok) {
+            return decode_error;
         }
         return parser_unexpected_error;
     }
 
-    // get transaction parameters
-    extract_data_from_tag(&data, &v->parameters_plan.data_bytes,
-                          penumbra_core_transaction_v1_TransactionPlan_transaction_parameters_tag);
-    v->plan.actions.qty = actions_qty;
-
-    // copy parameters
-    v->parameters_plan.expiry_height = request.transaction_parameters.expiry_height;
-    v->parameters_plan.has_fee = request.transaction_parameters.has_fee;
-    if (v->parameters_plan.has_fee) {
-        v->parameters_plan.fee.has_amount = request.transaction_parameters.fee.has_amount;
-        if (v->parameters_plan.fee.has_amount) {
-            v->parameters_plan.fee.amount.lo = request.transaction_parameters.fee.amount.lo;
-            v->parameters_plan.fee.amount.hi = request.transaction_parameters.fee.amount.hi;
-        }
-        v->parameters_plan.fee.has_asset_id = request.transaction_parameters.fee.has_asset_id;
+    v->plan.has_parameters = request.has_transaction_parameters;
+    if (request.has_transaction_parameters) {
+        CHECK_ERROR(decode_parameters(&data, &request.transaction_parameters, &v->parameters_plan));
     }
+    v->plan.has_memo = request.has_memo;
+    v->plan.has_detection_data = request.has_detection_data;
+    v->plan.actions.qty = actions_qty;
 
     return parser_ok;
 }
@@ -194,8 +200,82 @@ const char *parser_getErrorDescription(parser_error_t err) {
             return "No more data";
         case parser_init_context_empty:
             return "Initialized empty context";
+        case parser_display_idx_out_of_range:
+            return "Display index out of range";
+        case parser_display_page_out_of_range:
+            return "Display page out of range";
+        case parser_unexpected_error:
+            return "Unexpected error";
+        case parser_invalid_hash_mode:
+            return "Invalid hash mode";
+        case parser_invalid_signature:
+            return "Invalid signature";
+        case parser_invalid_pubkey_encoding:
+            return "Invalid public key encoding";
+        case parser_invalid_address_version:
+            return "Invalid address version";
+        case parser_invalid_address_length:
+            return "Invalid address length";
+        case parser_invalid_type_id:
+            return "Invalid type ID";
+        case parser_invalid_codec:
+            return "Invalid codec";
+        case parser_invalid_threshold:
+            return "Invalid threshold";
+        case parser_invalid_network_id:
+            return "Invalid network ID";
+        case parser_invalid_chain_id:
+            return "Invalid chain ID";
+        case parser_invalid_ascii_value:
+            return "Invalid ASCII value";
+        case parser_invalid_timestamp:
+            return "Invalid timestamp";
+        case parser_invalid_staking_amount:
+            return "Invalid staking amount";
+        case parser_operation_overflows:
+            return "Operation overflows";
+        case parser_invalid_path:
+            return "Invalid path";
+        case parser_invalid_length:
+            return "Invalid length";
+        case parser_too_many_outputs:
+            return "Too many outputs";
+        case parser_unexpected_data:
+            return "Unexpected data";
+        case parser_invalid_clue_key:
+            return "Invalid clue key";
+        case parser_invalid_tx_key:
+            return "Invalid transaction key";
+        case parser_invalid_fq:
+            return "Invalid Fq";
+        case parser_invalid_detection_key:
+            return "Invalid detection key";
+        case parser_invalid_fvk:
+            return "Invalid FVK";
+        case parser_invalid_ivk:
+            return "Invalid IVK";
+        case parser_invalid_key_len:
+            return "Invalid key length";
+        case parser_invalid_action_type:
+            return "Invalid action type";
+        case parser_invalid_precision:
+            return "Invalid precision";
+        case parser_precision_too_large:
+            return "Precision too large";
+        case parser_clue_creation_failed:
+            return "Clue creation failed";
+        case parser_invalid_asset_id:
+            return "Invalid asset ID";
+        case parser_unexpected_type:
+            return "Unexpected type";
+        case parser_unexpected_method:
+            return "Unexpected method";
         case parser_unexpected_buffer_end:
             return "Unexpected buffer end";
+        case parser_unexpected_value:
+            return "Unexpected value";
+        case parser_unexpected_number_items:
+            return "Unexpected number of items";
         case parser_unexpected_version:
             return "Unexpected version";
         case parser_unexpected_characters:
@@ -206,20 +286,32 @@ const char *parser_getErrorDescription(parser_error_t err) {
             return "Unexpected duplicated field";
         case parser_value_out_of_range:
             return "Value out of range";
+        case parser_invalid_address:
+            return "Invalid address";
         case parser_unexpected_chain:
             return "Unexpected chain";
         case parser_missing_field:
-            return "missing field";
-
-        case parser_display_idx_out_of_range:
-            return "display index out of range";
-        case parser_display_page_out_of_range:
-            return "display page out of range";
-        case parser_actions_overflow:
-            return "actions overflow";
+            return "Missing field";
+        case paser_unknown_transaction:
+            return "Unknown transaction";
         case parser_detection_data_overflow:
-            return "detection data overflow";
-
+            return "Detection data overflow";
+        case parser_actions_overflow:
+            return "Actions overflow";
+        case parser_spend_plan_error:
+            return "Spend plan error";
+        case parser_output_plan_error:
+            return "Output plan error";
+        case parser_delegate_plan_error:
+            return "Delegate plan error";
+        case parser_undelegate_plan_error:
+            return "Undelegate plan error";
+        case parser_ics20_withdrawal_plan_error:
+            return "ICS20 withdrawal plan error";
+        case parser_swap_plan_error:
+            return "Swap plan error";
+        case parser_invalid_metadata:
+            return "Invalid metadata";
         default:
             return "Unrecognized error code";
     }

@@ -19,34 +19,36 @@ use core::mem::MaybeUninit;
 // https://rustdoc.penumbra.zone/main/penumbra_transaction/plan/struct.TransactionPlan.html
 // actions:
 // https://rustdoc.penumbra.zone/main/penumbra_transaction/plan/enum.ActionPlan.html
-mod address;
-mod clue_plan;
-mod error;
-mod note;
-mod note_payload;
-mod plans;
-mod bytes;
-mod parameters;
 pub mod action;
+mod address;
 pub mod amount;
 pub mod balance;
+pub mod bytes;
+mod clue_plan;
 pub mod commitment;
 pub mod detection;
+pub mod effect_hash;
+mod error;
+pub mod fee;
 pub mod id;
 pub mod memo;
 pub mod memo_plain_text;
+mod note;
+mod note_payload;
 pub mod nullifier;
+mod parameters;
+mod plans;
 pub mod rseed;
-pub mod symmetric;
-pub mod value;
-pub mod effect_hash;
-pub mod swap_plaintext;
-pub mod trading_pair;
-pub mod fee;
-pub mod swap_payload;
 pub mod swap_ciphertext;
+pub mod swap_payload;
+pub mod swap_plaintext;
+pub mod symmetric;
+pub mod trading_pair;
+pub mod value;
 
+pub use bytes::BytesC;
 pub use error::ParserError;
+pub use plans::spend::SpendPlanC;
 
 #[derive(Clone, Copy, PartialEq, Eq)]
 #[cfg_attr(test, derive(Debug))]

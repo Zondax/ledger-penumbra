@@ -17,11 +17,11 @@
 use crate::keys::FullViewingKey;
 use crate::parser::{
     bytes::BytesC,
-    note::{Note, NoteC},
     commitment::Commitment,
+    effect_hash::{create_personalized_state, EffectHash},
+    note::{Note, NoteC},
     nullifier::Nullifier,
     value::{Sign, Value},
-    effect_hash::{create_personalized_state, EffectHash},
 };
 use crate::ParserError;
 use decaf377::Fr;
@@ -86,7 +86,7 @@ impl SpendPlanC {
     pub fn nullifier(&self, fvk: &FullViewingKey) -> Result<Nullifier, ParserError> {
         let nk = fvk.nullifier_key();
         let note = Note::try_from(self.note.clone())?;
-        let nullifier = Nullifier::derive(&nk, self.position, &note.commit()?.0);
+        let nullifier = Nullifier::derive(nk, self.position, &note.commit()?.0);
         Ok(nullifier)
     }
 

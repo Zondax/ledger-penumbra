@@ -19,16 +19,38 @@ use nom::error::ErrorKind;
 
 #[repr(u32)]
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
-// #[cfg_attr(test, derive(Debug))]
 pub enum ParserError {
     Ok = 0,
     // Generic errors
     NoData,
+    InitContextEmpty, // Added
     DisplayIdxOutOfRange,
     DisplayPageOutOfRange,
     UnexpectedError,
-    // Required fields
-    // Coin specific
+    // Method/Version related
+    UnexpectedMethod,     // Added
+    UnexpectedVersion,    // Added
+    UnexpectedCharacters, // Added
+    // Field related
+    DuplicatedField, // Added
+    MissingField,    // Added
+    UnexpectedField,
+    // Transaction related
+    UnknownTransaction, // Added
+    InvalidTransactionType,
+    // Plan related
+    SpendPlanError,           // Added
+    OutputPlanError,          // Added
+    DelegatePlanError,        // Added
+    UndelegatePlanError,      // Added
+    Ics20WithdrawalPlanError, // Added
+    SwapPlanError,            // Added
+    ParameterHashError,       // Added
+    EffectHashError,          // Added
+    // Chain related
+    InvalidChainId,
+    UnexpectedChain, // Added
+    // Other existing variants remain unchanged
     InvalidHashMode,
     InvalidSignature,
     InvalidPubkeyEncoding,
@@ -38,16 +60,13 @@ pub enum ParserError {
     InvalidCodec,
     InvalidThreshold,
     InvalidNetworkId,
-    InvalidChainId,
     InvalidAsciiValue,
     InvalidTimestamp,
     InvalidStakingAmount,
     UnexpectedType,
-    InvalidTransactionType,
     OperationOverflows,
     UnexpectedBufferEnd,
     UnexpectedNumberItems,
-    UnexpectedField,
     ValueOutOfRange,
     InvalidAddress,
     InvalidPath,
@@ -65,6 +84,11 @@ pub enum ParserError {
     InvalidPrecision,
     PrecisionTooLarge,
     ClueCreationFailed,
+    InvalidAssetId,
+    // Additional variants from C enum
+    DetectionDataOverflow, // Added
+    ActionsOverflow,       // Added
+    InvalidMetadata,       // Added
 }
 
 impl From<ErrorKind> for ParserError {

@@ -14,6 +14,7 @@
 *  limitations under the License.
 ********************************************************************************/
 
+use crate::constants::{AMOUNT_LEN_BYTES, ID_LEN_BYTES};
 use crate::parser::{
     amount::{Amount, AmountC},
     commitment::Commitment,
@@ -21,7 +22,6 @@ use crate::parser::{
     ParserError,
 };
 use decaf377::Fr;
-use crate::constants::{AMOUNT_LEN_BYTES, ID_LEN_BYTES};
 
 // this should be in imbalance.rs. For now, it’s not necessary
 pub enum Sign {
@@ -29,7 +29,8 @@ pub enum Sign {
     Provided,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone)]
+#[cfg_attr(any(feature = "derive-debug", test), derive(Debug))]
 pub struct Value {
     pub amount: Amount,
     // The asset ID. 256 bits.
@@ -58,13 +59,14 @@ impl Value {
         let value_blinding_generator = Commitment::value_blinding_generator();
         commitment += blinding_factor * value_blinding_generator;
 
-        Ok(Commitment(commitment))
+        Ok(commitment.into())
     }
 
     pub fn to_bytes(&self) -> Result<[u8; Self::LEN], ParserError> {
         let mut bytes = [0; Self::LEN];
         bytes[0..AMOUNT_LEN_BYTES].copy_from_slice(&self.amount.to_le_bytes());
-        bytes[AMOUNT_LEN_BYTES..AMOUNT_LEN_BYTES + ID_LEN_BYTES].copy_from_slice(&self.asset_id.to_bytes()?);
+        bytes[AMOUNT_LEN_BYTES..AMOUNT_LEN_BYTES + ID_LEN_BYTES]
+            .copy_from_slice(&self.asset_id.to_bytes());
         Ok(bytes)
     }
 }
