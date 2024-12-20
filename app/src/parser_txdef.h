@@ -19,9 +19,10 @@
 extern "C" {
 #endif
 
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <stdbool.h>
+
 #include "constants.h"
 
 #define MEMO_KEY_SIZE 32
@@ -37,8 +38,8 @@ extern "C" {
 #define RSEED_LEN 32
 #define CHAIN_ID_LEN 32
 
-#define MAX_SYMBOL_LEN 40
-#define MAX_ASSET_NAME_LEN 120
+#define MAX_SYMBOL_LEN 20
+#define MAX_ASSET_NAME_LEN 20
 
 typedef struct {
     const uint8_t *ptr;
@@ -240,8 +241,11 @@ typedef struct {
 
 typedef struct {
     actions_hash_t actions;
+    bool has_parameters;
     hash_t parameters_hash;
+    bool has_memo;
     memo_plan_t memo;
+    bool has_detection_data;
     detection_data_t detection_data;
 } transaction_plan_t;
 

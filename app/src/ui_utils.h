@@ -14,6 +14,7 @@
  *  limitations under the License.
  ********************************************************************************/
 #pragma once
+#include "parser_common.h"
 
 /**
  * @brief Encodes binary data into a Bech32 format string with a specified prefix.
@@ -35,8 +36,8 @@
  *         - `parser_invalid_address` if the length of the input data does not match the expected length.
  *         - `parser_display_idx_out_of_range` if the output buffer is too small.
  */
-parser_error_t printBech32Encoded(const char *prefix, uint16_t prefix_len, const uint8_t *data,
-                                         uint16_t data_len, char *out, uint16_t out_len);
+parser_error_t printBech32Encoded(const char *prefix, uint16_t prefix_len, const uint8_t *data, uint16_t data_len, char *out,
+                                  uint16_t out_len);
 
 /**
  * Formats a raw Penumbra address into its canonical short form with Bech32 encoding.
@@ -50,8 +51,9 @@ parser_error_t printBech32Encoded(const char *prefix, uint16_t prefix_len, const
  *
  * @return parser_error_t   parser_ok on success, error code otherwise
  */
-parser_error_t printShortAddress(uint8_t *address, uint16_t address_len, char *out, uint16_t out_len);
-parser_error_t printAddress(const uint8_t *address, uint16_t address_len, char *out, uint16_t out_len);
+parser_error_t printTxAddress(const bytes_t *address, char *out, uint16_t out_len);
+parser_error_t printShortAddress(const uint8_t *address, uint16_t address_len, char *out, uint16_t out_len);
+parser_error_t encodeAddress(const uint8_t *address, uint16_t address_len, char *out, uint16_t out_len);
 parser_error_t printAssetId(const uint8_t *asset, uint16_t asset_len, char *out, uint16_t out_len);
 
 /**

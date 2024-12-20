@@ -26,16 +26,19 @@ parser_error_t rs_compute_keys(keys_t *keys);
 int32_t rs_bech32_encode(const uint8_t *hrp_ptr, size_t hrp_len, const uint8_t *data_ptr, size_t data_len,
                          uint8_t *output_ptr, size_t output_len);
 
+parser_error_t rs_is_address_visible(const bytes_t *address, bool *is_visible, uint32_t *index);
+
 parser_error_t rs_compute_effect_hash(transaction_plan_t *plan, uint8_t *output, size_t output_len);
 
 parser_error_t rs_parameter_hash(bytes_t *data, uint8_t *output, size_t output_len);
-parser_error_t rs_spend_action_hash(spend_key_bytes_t *sk, spend_plan_t *plan, uint8_t *output, size_t output_len);
-parser_error_t rs_output_action_hash(spend_key_bytes_t *sk, output_plan_t *plan, bytes_t *memo_key, uint8_t *output,
-                                     size_t output_len);
-parser_error_t rs_swap_action_hash(spend_key_bytes_t *sk, swap_plan_t *plan, uint8_t *output, size_t output_len);
+parser_error_t rs_spend_action_hash(spend_plan_t *plan, uint8_t *output, size_t output_len);
+parser_error_t rs_output_action_hash(output_plan_t *plan, bytes_t *memo_key, uint8_t *output, size_t output_len);
+parser_error_t rs_swap_action_hash(swap_plan_t *plan, uint8_t *output, size_t output_len);
 parser_error_t rs_generic_action_hash(bytes_t *data, uint8_t action_type, uint8_t *output, size_t output_len);
 
 parser_error_t rs_get_asset_id_from_metadata(const bytes_t *metadata, uint8_t *asset_id, uint16_t asset_id_len);
+
+parser_error_t rs_sign_spend(const bytes_t *effect_hash, const bytes_t *randomizer, const spend_key_bytes_t *spend_key, uint8_t *signature, uint16_t len);
 
 #ifdef __cplusplus
 }

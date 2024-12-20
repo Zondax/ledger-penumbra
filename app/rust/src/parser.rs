@@ -23,7 +23,7 @@ pub mod action;
 mod address;
 pub mod amount;
 pub mod balance;
-mod bytes;
+pub mod bytes;
 mod clue_plan;
 pub mod commitment;
 pub mod detection;
@@ -48,6 +48,7 @@ pub mod value;
 
 pub use bytes::BytesC;
 pub use error::ParserError;
+pub use plans::spend::SpendPlanC;
 
 #[derive(Clone, Copy, PartialEq, Eq)]
 #[cfg_attr(test, derive(Debug))]
