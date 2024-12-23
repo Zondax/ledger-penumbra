@@ -97,11 +97,11 @@ __Z_INLINE void app_sign() {
     }
 }
 
-__Z_INLINE zxerr_t app_fill_spend_auth_signatures(uint16_t index) {
+__Z_INLINE zxerr_t app_fill_signatures(uint16_t index, signature_type_t signature_type) {
     // Put data directly in the apdu buffer
     MEMZERO(G_io_apdu_buffer, IO_APDU_BUFFER_SIZE);
 
-    cmdResponseLen = nv_get_signature(index, (signature_t *)G_io_apdu_buffer, Spend);
+    cmdResponseLen = nv_get_signature(index, (signature_t *)G_io_apdu_buffer, signature_type);
     if (cmdResponseLen == 0) {
         THROW(APDU_CODE_EXECUTION_ERROR);
     }

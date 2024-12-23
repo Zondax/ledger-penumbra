@@ -116,6 +116,51 @@ The general structure of commands and responses is as follows:
 | ADDR    | byte (80) | Address     |                          |
 | SW1-SW2 | byte (2)  | Return code | see list of return codes |
 
+---
+
+### INS_SIGN
+
+#### Command
+
+| Field | Type     | Content                | Expected  |
+| ----- | -------- | ---------------------- | --------- |
+| CLA   | byte (1) | Application Identifier | 0x80      |
+| INS   | byte (1) | Instruction ID         | 0x02      |
+| P1    | byte (1) | Payload desc           | 0 = init  |
+|       |          |                        | 1 = add   |
+|       |          |                        | 2 = last  |
+| P2    | byte (1) | ----                   | not used  |
+| L     | byte (1) | Bytes in payload       | (depends) |
+
+The first packet/chunk includes only the derivation path
+
+All other packets/chunks contain data chunks that are described below
+
+##### First Packet
+
+| Field         | Type      | Content                   | Expected           |
+| ------------- | --------- | ------------------------- | ------------------ |
+| Path[0]       | byte (4)  | Derivation Path Data      | 0x80000000 \| 44   |
+| Path[1]       | byte (4)  | Derivation Path Data      | 0x80000000 \| 6532 |
+| Path[2]       | byte (4)  | Derivation Path Data      | 0x80000000 \| 0    |
+
+##### Other Chunks/Packets
+
+| Field   | Type      | Content         | Expected                  |
+| ------- | --------- | --------------- | ------------------------- |
+| Message | bytes (?) | Message to Sign | hexadecimal string (utf8) |
+
+#### Response
+
+| Field                     | Type      | Content                               | Note                     |
+| ------------------------- | --------- | ------------------------------------- | ------------------------ |
+| effectHash                | byte (64) | Effect Hash                           |                          |
+| spendAuthSignatureQty     | u16       | Quantity of Spend Auth Signatures     |                          |
+| delegatorVoteSignatureQty | u16       | Quantity of Delegator Vote Signatures |                          |
+| SW1-SW2                   | byte (2)  | Return code                           | see list of return codes |
+
+---
+
 ### INS_GET_FVK
 
 #### Command
@@ -144,6 +189,89 @@ The general structure of commands and responses is as follows:
 
 | Field          | Type       | Content          | Note         |
 | -------------- | ---------- | ---------------- | ------------ |
-| Account        | u32        | Account          | 4 bytes      |
-| Has randomizer | u8         | Has randomizer   | 1 byte       |
-| Randomizer     | u8 (12)    | Randomizer       | 12 bytes     |
+| account        | u32        | Account          | 4 bytes      |
+| randomizer     | u8 (12)    | Randomizer       | 12 bytes     |
+
+---
+
+### INS_TX_METADATA
+
+#### Command
+
+| Field | Type     | Content                | Expected  |
+| ----- | -------- | ---------------------- | --------- |
+| CLA   | byte (1) | Application Identifier | 0x80      |
+| INS   | byte (1) | Instruction ID         | 0x04      |
+| P1    | byte (1) | Payload desc           | 0 = init  |
+|       |          |                        | 1 = add   |
+|       |          |                        | 2 = last  |
+| P2    | byte (1) | ----                   | not used  |
+| L     | byte (1) | Bytes in payload       | (depends) |
+
+The first packet/chunk includes only the derivation path
+
+All other packets/chunks contain data chunks that are described below
+
+##### First Packet
+
+| Field         | Type      | Content                   | Expected           |
+| ------------- | --------- | ------------------------- | ------------------ |
+| Path[0]       | byte (4)  | Derivation Path Data      | 0x80000000 \| 44   |
+| Path[1]       | byte (4)  | Derivation Path Data      | 0x80000000 \| 6532 |
+| Path[2]       | byte (4)  | Derivation Path Data      | 0x80000000 \| 0    |
+
+##### Other Chunks/Packets
+
+| Field      | Type           | Content              | Expected |
+| ---------- | -------------- | -------------------- | -------- |
+| Length_1   | u8             | Length of Metadata_1 |          |
+| Metadata_1 | bytes (Length) | Metadata_1           |          |
+| ...        | ...            | ...                  |          |
+| Length_n   | u8             | Length of Metadata_n |          |
+| Metadata_n | bytes (Length) | Metadata_n           |          |
+
+#### Response
+
+| Field    | Type      | Content     | Note                     |
+| -------- | --------- | ----------- | ------------------------ |
+| SW1-SW2  | byte (2)  | Return code | see list of return codes |
+
+---
+
+### INS_GET_SPEND_AUTH_SIGNATURES
+
+#### Command
+
+| Field | Type     | Content                | Expected |
+| ----- | -------- | ---------------------- | -------- |
+| CLA   | byte (1) | Application Identifier | 0x80     |
+| INS   | byte (1) | Instruction ID         | 0x05     |
+| P1    | byte (1) | Index                  |          |
+| P2    | byte (1) | Parameter 2            | ignored  |
+
+#### Response
+
+| Field     | Type      | Content                                                    | Note                     |
+| --------- | --------- | ---------------------------------------------------------- | ------------------------ |
+| Signature | byte (64) | Signature of the spend action at the index specified in P1 |                          |
+| SW1-SW2   | byte (2)  | Return code                                                | see list of return codes |
+
+---
+
+### INS_GET_DELEGATOR_VOTE_SIGNATURES
+
+#### Command
+
+| Field | Type     | Content                | Expected |
+| ----- | -------- | ---------------------- | -------- |
+| CLA   | byte (1) | Application Identifier | 0x80     |
+| INS   | byte (1) | Instruction ID         | 0x06     |
+| P1    | byte (1) | Index                  |          |
+| P2    | byte (1) | Parameter 2            | ignored  |
+
+#### Response
+
+| Field     | Type      | Content                                                             | Note                     |
+| --------- | --------- | ------------------------------------------------------------------- | ------------------------ |
+| Signature | byte (64) | Signature of the delegator vote action at the index specified in P1 |                          |
+| SW1-SW2   | byte (2)  | Return code                                                         | see list of return codes |

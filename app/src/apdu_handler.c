@@ -238,7 +238,25 @@ __Z_INLINE void handleGetSpendAuthSignatures(volatile uint32_t *flags, volatile 
     }
 
     uint16_t index = (uint16_t)G_io_apdu_buffer[OFFSET_P1];
-    zxerr_t zxerr = app_fill_spend_auth_signatures(index);
+    zxerr_t zxerr = app_fill_signatures(index, Spend);
+    *tx = cmdResponseLen;
+
+    if (zxerr != zxerr_ok) {
+        *tx = 0;
+        THROW(APDU_CODE_DATA_INVALID);
+    }
+
+    THROW(APDU_CODE_OK);
+}
+
+__Z_INLINE void handleGetDelegatorVoteSignatures(volatile uint32_t *flags, volatile uint32_t *tx, uint32_t rx) {
+    zemu_log("handleGetDelegatorVoteSignatures\n");
+    if (rx < OFFSET_DATA) {
+        THROW(APDU_CODE_WRONG_LENGTH);
+    }
+
+    uint16_t index = (uint16_t)G_io_apdu_buffer[OFFSET_P1];
+    zxerr_t zxerr = app_fill_signatures(index, DelegatorVote);
     *tx = cmdResponseLen;
 
     if (zxerr != zxerr_ok) {
@@ -300,6 +318,11 @@ void handleApdu(volatile uint32_t *flags, volatile uint32_t *tx, uint32_t rx) {
 
                 case INS_GET_SPEND_AUTH_SIGNATURES: {
                     handleGetSpendAuthSignatures(flags, tx, rx);
+                    break;
+                }
+
+                case INS_GET_DELEGATOR_VOTE_SIGNATURES: {
+                    handleGetDelegatorVoteSignatures(flags, tx, rx);
                     break;
                 }
 

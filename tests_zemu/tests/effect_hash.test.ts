@@ -53,7 +53,7 @@ describe('Standard', function () {
 
       
       const signatureResponse = await signatureRequest
-      console.log(signatureResponse.effectHash.toString('hex'))
+      console.log("Effect hash:", signatureResponse.effectHash.toString('hex'))
 
       if (signatureResponse.spendAuthSignatures.length > 0) {
         signatureResponse.spendAuthSignatures.forEach((signature, index) => {
