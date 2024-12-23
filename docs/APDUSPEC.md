@@ -175,7 +175,7 @@ All other packets/chunks contain data chunks that are described below
 | Path[0]       | byte (4)  | Derivation Path Data      | 0x80000000 \| 44   |
 | Path[1]       | byte (4)  | Derivation Path Data      | 0x80000000 \| 6532 |
 | Path[2]       | byte (4)  | Derivation Path Data      | 0x80000000 \| 0    |
-| Account Index | byte (21) | Account Index             | ?                  |
+| Account Index | byte (20) | Account Index             | ?                  |
 
 #### Response
 

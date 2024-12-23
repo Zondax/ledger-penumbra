@@ -58,7 +58,7 @@ describe('Standard', function () {
       if (signatureResponse.spendAuthSignatures.length > 0) {
         signatureResponse.spendAuthSignatures.forEach((signature, index) => {
           console.log(`Spend Auth Signature ${index + 1}: ${signature.toString('hex')}`);
-        });
+        })
       } else {
         console.log("No spend auth signatures available.");
       }
