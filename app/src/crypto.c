@@ -20,11 +20,11 @@
 #include "crypto_helper.h"
 #include "cx.h"
 #include "keys_def.h"
+#include "nv_signature.h"
 #include "parser_interface.h"
+#include "rslib.h"
 #include "zxformat.h"
 #include "zxmacros.h"
-#include "nv_signature.h"
-#include "rslib.h"
 
 // TODO: Maybe move this to crypto_helper
 #include "protobuf/penumbra/core/transaction/v1/transaction.pb.h"
@@ -177,8 +177,9 @@ zxerr_t crypto_sign(parser_tx_t *tx_obj, uint8_t *signature, uint16_t signatureM
     uint8_t spend_signature[64] = {0};
     bytes_t effect_hash = {.ptr = tx_obj->effect_hash, .len = 64};
     for (uint16_t i = 0; i < tx_obj->plan.actions.qty; i++) {
-        if (tx_obj->actions_plan[i].action_type == penumbra_core_transaction_v1_ActionPlan_spend_tag){
-            if (rs_sign_spend(&effect_hash, &tx_obj->actions_plan[i].action.spend.randomizer, &keys.skb, spend_signature, 64) != parser_ok) {
+        if (tx_obj->actions_plan[i].action_type == penumbra_core_transaction_v1_ActionPlan_spend_tag) {
+            if (rs_sign_spend(&effect_hash, &tx_obj->actions_plan[i].action.spend.randomizer, &keys.skb, spend_signature,
+                              64) != parser_ok) {
                 return zxerr_invalid_crypto_settings;
             }
 

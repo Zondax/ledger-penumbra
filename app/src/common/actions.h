@@ -22,11 +22,11 @@
 #include "apdu_codes.h"
 #include "coin.h"
 #include "crypto.h"
+#include "nv_signature.h"
 #include "parser_interface.h"
 #include "tx.h"
 #include "zxerror.h"
 #include "zxformat.h"
-#include "nv_signature.h"
 
 extern uint16_t cmdResponseLen;
 extern uint32_t address_idx_account;
