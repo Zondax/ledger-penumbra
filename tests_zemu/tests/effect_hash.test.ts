@@ -53,15 +53,26 @@ describe('Standard', function () {
 
       
       const signatureResponse = await signatureRequest
-      console.log(signatureResponse.signature.toString('hex'))
+      console.log(signatureResponse.effectHash.toString('hex'))
 
-      for (let i = 0; i < signatureResponse.spendAuth_signature_qty; i++) {
-        const spendAuthSignature = await app.getSpendAuthSignatures(i)
-        console.log(`spendAuthSignature ${i}`, spendAuthSignature.spendAuth_signature.toString('hex'))
+      if (signatureResponse.spendAuthSignatures.length > 0) {
+        signatureResponse.spendAuthSignatures.forEach((signature, index) => {
+          console.log(`Spend Auth Signature ${index + 1}: ${signature.toString('hex')}`);
+        });
+      } else {
+        console.log("No spend auth signatures available.");
+      }
+
+      if (signatureResponse.delegatorVoteSignatures.length > 0) {
+        signatureResponse.delegatorVoteSignatures.forEach((signature, index) => {
+          console.log(`Delegator Vote Signature ${index + 1}: ${signature.toString('hex')}`);
+        });
+      } else {
+        console.log("No delegator vote signatures available.");
       }
 
       // Now verify effect hash
-      expect(signatureResponse.signature.toString('hex')).toEqual(data.expected_effect_hash)
+      expect(signatureResponse.effectHash.toString('hex')).toEqual(data.expected_effect_hash)
 
     } finally {
       await sim.close()
