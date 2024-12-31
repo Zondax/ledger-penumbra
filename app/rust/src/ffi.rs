@@ -46,6 +46,16 @@ mod check_signature {
 
         let fvk = sk.full_viewing_key();
         let auth_data = plan.authorize(rand_chacha::rand_core::OsRng, &sk).unwrap();
+        // compare effect hash:
+        std::println!("expected_hash: {:?}", EFFECT_HASH);
+        std::println!(
+            "effect hash: {:?}",
+            hex::encode(auth_data.effect_hash.unwrap().0)
+        );
+        assert_eq!(
+            hex::decode(EFFECT_HASH).unwrap(),
+            auth_data.effect_hash.unwrap().0
+        );
         std::println!("AuthorizationData: {:?}", auth_data);
     }
 }
