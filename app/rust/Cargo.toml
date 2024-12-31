@@ -70,7 +70,9 @@ strip = "symbols"
 
 # Exclusive for rust tests
 [profile.dev]
+codegen-units = 1
 lto = false
+debug = true
 # panic = "abort"
 
 [features]
