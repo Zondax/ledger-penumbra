@@ -40,6 +40,17 @@ no-std-compat = { version = "0.4.1", features = ["std"] }
 blake2b_simd = { version = "1.0.2", default-features = false }
 chacha20poly1305 = { version = "0.10.1" }
 getrandom = { version = "0.1.14", default-features = false }
+serde = { version = "1.0.217", features = ["derive"] }
+tokio = { version = "1.42.0", features = ["full"] }
+penumbra-sdk-proto = "0.82.0-alpha.0"
+penumbra-sdk-transaction = "0.82.0-alpha.0"
+penumbra-sdk-tct = "0.82.0-alpha.0"
+# penumbra-sdk-app = "0.82.0-alpha.0"
+# penumbra-sdk-txhash = "0.82.0-alpha.0"
+prost = "0.13.4"
+decaf377 = { version = "0.10.1" }
+decaf377-rdsa = { version = "0.11" }
+penumbra-sdk-keys = "0.82.0-alpha.0"
 # blake2b_simd = { path = "../blake2_simd/blake2b", default-features = false }
 
 [target.thumbv6m-none-eabi.dev-dependencies]
@@ -57,9 +68,10 @@ lto = "fat"
 overflow-checks = false
 strip = "symbols"
 
+# Exclusive for rust tests
 [profile.dev]
 lto = false
-panic = "abort"
+# panic = "abort"
 
 [features]
 clippy = []
