@@ -99,3 +99,6 @@
 
 // Constant to use to allocate a buffer on the stack to hold the formatting of an delegate action
 #define DELEGATE_DISPLAY_MAX_LEN (VALUE_DISPLAY_MAX_LEN + 92)  // = 254
+
+// Constant to use to allocate a buffer on the stack to hold the formatting of an undelegate action
+#define UNDELEGATE_DISPLAY_MAX_LEN (2 * VALUE_DISPLAY_MAX_LEN + 100)  // = 424
