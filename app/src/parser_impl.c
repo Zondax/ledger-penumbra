@@ -79,14 +79,6 @@ bool decode_action(pb_istream_t *stream, const pb_field_t *field, void **arg) {
             decode_arg[actions_qty].action_data = action_data;
             CHECK_ACTION_ERROR(decode_output_plan(&action_data, &decode_arg[actions_qty].action.output));
             break;
-        case penumbra_core_transaction_v1_ActionPlan_delegate_tag:
-            decode_arg[actions_qty].action_data = action_data;
-            CHECK_ACTION_ERROR(decode_delegate_plan(&action_data, &decode_arg[actions_qty].action.delegate));
-            break;
-        case penumbra_core_transaction_v1_ActionPlan_undelegate_tag:
-            decode_arg[actions_qty].action_data = action_data;
-            CHECK_ACTION_ERROR(decode_undelegate_plan(&action_data, &decode_arg[actions_qty].action.undelegate));
-            break;
         case penumbra_core_transaction_v1_ActionPlan_ics20_withdrawal_tag:
             decode_arg[actions_qty].action_data = ics20_withdrawal_data;
             CHECK_ACTION_ERROR(
@@ -96,6 +88,16 @@ bool decode_action(pb_istream_t *stream, const pb_field_t *field, void **arg) {
             decode_arg[actions_qty].action_data = action_data;
             CHECK_ACTION_ERROR(decode_swap_plan(&action_data, &decode_arg[actions_qty].action.swap));
             break;
+#if defined(FULL_APP)
+        case penumbra_core_transaction_v1_ActionPlan_delegate_tag:
+            decode_arg[actions_qty].action_data = action_data;
+            CHECK_ACTION_ERROR(decode_delegate_plan(&action_data, &decode_arg[actions_qty].action.delegate));
+            break;
+        case penumbra_core_transaction_v1_ActionPlan_undelegate_tag:
+            decode_arg[actions_qty].action_data = action_data;
+            CHECK_ACTION_ERROR(decode_undelegate_plan(&action_data, &decode_arg[actions_qty].action.undelegate));
+            break;
+#endif
         default:
             return false;
     }

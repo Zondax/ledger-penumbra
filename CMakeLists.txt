@@ -124,6 +124,9 @@ add_definitions(
     -DLEDGER_MINOR_VERSION=${MINOR_VERSION}
 )
 
+# Add flag to compile all Penumbra actions for cpp tests 
+add_definitions(-DFULL_APP)
+
 ##############################################################
 # Static Libraries
 file(GLOB_RECURSE LIB_SRC
