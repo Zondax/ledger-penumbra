@@ -96,7 +96,7 @@ parser_error_t undelegate_printValue(const parser_context_t *ctx, const undelega
     // add validator identity
     uint8_t validator_identity_bytes[80] = {0};
     CHECK_ERROR(encodeIdentityKey(undelegate->validator_identity.ik.ptr, undelegate->validator_identity.ik.len,
-                                  validator_identity_bytes, sizeof(validator_identity_bytes)));
+                                  (char *)validator_identity_bytes, sizeof(validator_identity_bytes)));
 
     snprintf(outVal + written_value, outValLen - written_value, "%s", validator_identity_bytes);
     written_value = strlen(outVal);
@@ -106,10 +106,10 @@ parser_error_t undelegate_printValue(const parser_context_t *ctx, const undelega
     written_value = strlen(outVal);
 
     // add delegate amount
-    char metadata_buffer[150] = {0};
-    snprintf(metadata_buffer, sizeof(metadata_buffer), "udelegation_%s", validator_identity_bytes);
-    bytes_t metadata = {.ptr = metadata_buffer, .len = strlen(metadata_buffer)};
-    char asset_id_bytes[ASSET_ID_LEN] = {0};
+    uint8_t metadata_buffer[150] = {0};
+    snprintf((char *)metadata_buffer, sizeof(metadata_buffer), "udelegation_%s", validator_identity_bytes);
+    bytes_t metadata = {.ptr = metadata_buffer, .len = strlen((char *)metadata_buffer)};
+    uint8_t asset_id_bytes[ASSET_ID_LEN] = {0};
     rs_get_asset_id_from_metadata(&metadata, asset_id_bytes, ASSET_ID_LEN);
 
     value_t local_delegate_amount = {.amount = undelegate->delegation_amount,
@@ -125,9 +125,9 @@ parser_error_t undelegate_printValue(const parser_context_t *ctx, const undelega
     written_value = strlen(outVal);
 
     // add unbonded amount
-    snprintf(metadata_buffer, sizeof(metadata_buffer), "uunbonding_start_at_%llu_%s", undelegate->from_epoch.index,
+    snprintf((char *)metadata_buffer, sizeof(metadata_buffer), "uunbonding_start_at_%llu_%s", undelegate->from_epoch.index,
              validator_identity_bytes);
-    metadata.len = strlen(metadata_buffer);
+    metadata.len = strlen((char *)metadata_buffer);
     rs_get_asset_id_from_metadata(&metadata, asset_id_bytes, ASSET_ID_LEN);
 
     value_t local_unbonded_amount = {.amount = undelegate->unbonded_amount,
