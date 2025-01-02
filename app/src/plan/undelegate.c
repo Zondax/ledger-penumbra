@@ -125,7 +125,7 @@ parser_error_t undelegate_printValue(const parser_context_t *ctx, const undelega
     written_value = strlen(outVal);
 
     // add unbonded amount
-    snprintf(metadata_buffer, sizeof(metadata_buffer), "uunbonding_start_at_%d_%s", undelegate->from_epoch.index,
+    snprintf(metadata_buffer, sizeof(metadata_buffer), "uunbonding_start_at_%llu_%s", undelegate->from_epoch.index,
              validator_identity_bytes);
     metadata.len = strlen(metadata_buffer);
     rs_get_asset_id_from_metadata(&metadata, asset_id_bytes, ASSET_ID_LEN);
