@@ -85,6 +85,13 @@ else
 	APP_STACK_MIN_SIZE := 1752
 endif
 
+# Flag to compile all Penumbra actions
+FULL_APP ?= 0
+ifeq ($(FULL_APP),1)
+DEFINES += FULL_APP
+$(info ************ FULL APP ENABLED ************)
+endif
+
 include $(CURDIR)/../deps/ledger-zxlib/makefiles/Makefile.devices
 
 $(info TARGET_NAME  = [$(TARGET_NAME)])
@@ -130,8 +137,6 @@ CFLAGS += -O3 -Os -Wno-unknown-pragmas -Wno-unused-parameter -g
 else
 CFLAGS += -O3 -Os -Wno-unknown-pragmas -Wno-unused-parameter
 endif
-
-
 
 APP_CUSTOM_LINK_DEPENDENCIES = rust
 
