@@ -239,19 +239,15 @@ pub unsafe extern "C" fn rs_undelegate_claim_action_hash(
         return ParserError::Ok as u32;
     }
 
-    let Ok(fvk) = c_fvk_bytes() else {
-        return ParserError::UnexpectedError as u32;
-    };
+    let body_hash_bytes = plan.effect_hash();
 
-    // let body_hash_bytes = plan.effect_hash(&fvk);
-
-    // if let Ok(body_hash_bytes) = body_hash_bytes {
-    //     let body_hash_array = body_hash_bytes.as_array();
-    //     let copy_len: usize = core::cmp::min(output.len(), body_hash_array.len());
-    //     output[..copy_len].copy_from_slice(&body_hash_array[..copy_len]);
-    // } else {
-    //     return ParserError::SwapPlanError as u32;
-    // }
+    if let Ok(body_hash_bytes) = body_hash_bytes {
+        let body_hash_array = body_hash_bytes.as_array();
+        let copy_len: usize = core::cmp::min(output.len(), body_hash_array.len());
+        output[..copy_len].copy_from_slice(&body_hash_array[..copy_len]);
+    } else {
+        return ParserError::SwapPlanError as u32;
+    }
 
     ParserError::Ok as u32
 }
