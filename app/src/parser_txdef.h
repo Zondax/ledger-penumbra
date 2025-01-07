@@ -130,6 +130,10 @@ typedef struct {
 } swap_plaintext_t;
 
 typedef struct {
+    bytes_t inner;
+} penalty_t;
+
+typedef struct {
     note_t note;
     uint64_t position;
     bytes_t randomizer;
@@ -193,6 +197,20 @@ typedef struct {
 } ics20_withdrawal_plan_t;
 
 typedef struct {
+    bool has_validator_identity;
+    identity_key_t validator_identity;
+    uint64_t start_epoch_index;
+    bool has_penalty;
+    penalty_t penalty;
+    bool has_unbonding_amount;
+    amount_t unbonding_amount;
+    bytes_t balance_blinding;
+    bytes_t proof_blinding_r;
+    bytes_t proof_blinding_s;
+    uint64_t unbonding_start_height;
+} undelegate_claim_plan_t;
+
+typedef struct {
     address_plan_t return_address;
     bytes_t text;
 } memo_plain_text_t;
@@ -218,10 +236,11 @@ typedef struct {
     union {
         spend_plan_t spend;
         output_plan_t output;
-        delegate_plan_t delegate;
-        undelegate_plan_t undelegate;
         ics20_withdrawal_plan_t ics20_withdrawal;
         swap_plan_t swap;
+        delegate_plan_t delegate;
+        undelegate_plan_t undelegate;
+        undelegate_claim_plan_t undelegate_claim;
     } action;
 } action_t;
 

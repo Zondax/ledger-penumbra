@@ -28,6 +28,7 @@
 #include "spend.h"
 #include "swap.h"
 #include "undelegate.h"
+#include "undelegate_claim.h"
 #include "zxformat.h"
 
 static bool decode_action(pb_istream_t *stream, const pb_field_t *field, void **arg);
@@ -63,8 +64,8 @@ bool decode_action(pb_istream_t *stream, const pb_field_t *field, void **arg) {
 
     penumbra_core_transaction_v1_ActionPlan action = penumbra_core_transaction_v1_ActionPlan_init_default;
 
-    bytes_t action_data = {.ptr = stream->state + 3, .len = stream->bytes_left - 3};
-    bytes_t ics20_withdrawal_data = {.ptr = stream->state + 4, .len = stream->bytes_left - 4};
+    bytes_t action_data_3 = {.ptr = stream->state + 3, .len = stream->bytes_left - 3};
+    bytes_t action_data_4 = {.ptr = stream->state + 4, .len = stream->bytes_left - 4};
 
     if (!pb_decode(stream, penumbra_core_transaction_v1_ActionPlan_fields, &action)) {
         return false;
@@ -72,30 +73,34 @@ bool decode_action(pb_istream_t *stream, const pb_field_t *field, void **arg) {
     decode_arg[actions_qty].action_type = action.which_action;
     switch (action.which_action) {
         case penumbra_core_transaction_v1_ActionPlan_spend_tag:
-            decode_arg[actions_qty].action_data = action_data;
-            CHECK_ACTION_ERROR(decode_spend_plan(&action_data, &decode_arg[actions_qty].action.spend));
+            decode_arg[actions_qty].action_data = action_data_3;
+            CHECK_ACTION_ERROR(decode_spend_plan(&action_data_3, &decode_arg[actions_qty].action.spend));
             break;
         case penumbra_core_transaction_v1_ActionPlan_output_tag:
-            decode_arg[actions_qty].action_data = action_data;
-            CHECK_ACTION_ERROR(decode_output_plan(&action_data, &decode_arg[actions_qty].action.output));
+            decode_arg[actions_qty].action_data = action_data_3;
+            CHECK_ACTION_ERROR(decode_output_plan(&action_data_3, &decode_arg[actions_qty].action.output));
             break;
         case penumbra_core_transaction_v1_ActionPlan_ics20_withdrawal_tag:
-            decode_arg[actions_qty].action_data = ics20_withdrawal_data;
+            decode_arg[actions_qty].action_data = action_data_4;
             CHECK_ACTION_ERROR(
-                decode_ics20_withdrawal_plan(&ics20_withdrawal_data, &decode_arg[actions_qty].action.ics20_withdrawal));
+                decode_ics20_withdrawal_plan(&action_data_4, &decode_arg[actions_qty].action.ics20_withdrawal));
             break;
         case penumbra_core_transaction_v1_ActionPlan_swap_tag:
-            decode_arg[actions_qty].action_data = action_data;
-            CHECK_ACTION_ERROR(decode_swap_plan(&action_data, &decode_arg[actions_qty].action.swap));
+            decode_arg[actions_qty].action_data = action_data_3;
+            CHECK_ACTION_ERROR(decode_swap_plan(&action_data_3, &decode_arg[actions_qty].action.swap));
             break;
 #if defined(FULL_APP)
         case penumbra_core_transaction_v1_ActionPlan_delegate_tag:
-            decode_arg[actions_qty].action_data = action_data;
-            CHECK_ACTION_ERROR(decode_delegate_plan(&action_data, &decode_arg[actions_qty].action.delegate));
+            decode_arg[actions_qty].action_data = action_data_3;
+            CHECK_ACTION_ERROR(decode_delegate_plan(&action_data_3, &decode_arg[actions_qty].action.delegate));
             break;
         case penumbra_core_transaction_v1_ActionPlan_undelegate_tag:
-            decode_arg[actions_qty].action_data = action_data;
-            CHECK_ACTION_ERROR(decode_undelegate_plan(&action_data, &decode_arg[actions_qty].action.undelegate));
+            decode_arg[actions_qty].action_data = action_data_3;
+            CHECK_ACTION_ERROR(decode_undelegate_plan(&action_data_3, &decode_arg[actions_qty].action.undelegate));
+            break;
+        case penumbra_core_transaction_v1_ActionPlan_undelegate_claim_tag:
+            decode_arg[actions_qty].action_data = action_data_4;
+            CHECK_ACTION_ERROR(decode_undelegate_claim_plan(&action_data_4, &decode_arg[actions_qty].action.undelegate_claim));
             break;
 #endif
         default:
