@@ -142,7 +142,11 @@ APP_CUSTOM_LINK_DEPENDENCIES = rust
 
 .PHONY: rust
 rust:
+ifeq ($(FULL_APP), 1)
+	cd rust && RUSTC_BOOTSTRAP=1 CARGO_HOME="$(CURDIR)/rust/.cargo" cargo build --target $(RUST_TARGET) --release --features full_app
+else
 	cd rust && RUSTC_BOOTSTRAP=1 CARGO_HOME="$(CURDIR)/rust/.cargo" cargo build --target $(RUST_TARGET) --release
+endif
 
 # Before linking, we need to be sure rust lib is there
 bin/app.elf: rust

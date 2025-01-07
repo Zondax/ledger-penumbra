@@ -68,3 +68,5 @@ clippy = []
 derive-debug = []
 # use when compiling this crate as a lib for the cpp_tests suite
 cpp_tests = []
+# use when compiling this crate as a lib for the full_app suite
+full_app = []
