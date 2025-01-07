@@ -61,30 +61,26 @@ pub struct UndelegateClaimPlanC {
 
 impl UndelegateClaimPlanC {
     pub fn effect_hash(&self) -> Result<EffectHash, ParserError> {
-        let body = self.undelegate_claim_body();
+        let body = self.undelegate_claim_body()?;
 
-        if let Ok(body) = body {
-            let mut state = create_personalized_state("/penumbra.core.component.stake.v1.UndelegateClaimBody");
+        let mut state = create_personalized_state("/penumbra.core.component.stake.v1.UndelegateClaimBody");
 
-            state.update(&[0x0a, 0x22, 0x0a, 0x20]); // encode header 0a220a20 validator_identity
-            state.update(&body.validator_identity);
+        state.update(&[0x0a, 0x22, 0x0a, 0x20]); // encode header 0a220a20 validator_identity
+        state.update(&body.validator_identity);
 
-            state.update(&[0x1a, 0x22, 0x0a, 0x20]); // encode header 1a220a20 penalty
-            state.update(&body.penalty);
+        state.update(&[0x1a, 0x22, 0x0a, 0x20]); // encode header 1a220a20 penalty
+        state.update(&body.penalty);
 
-            state.update(&body.balance_commitment.to_proto_unbonding_claim());
+        state.update(&body.balance_commitment.to_proto_unbonding_claim());
 
-            let mut encoded = [0u8; 10];
-            encoded[0] = 0x28;
-            let pos = 1;
-            let len = encode_varint(body.unbonding_start_height, &mut encoded[pos..]);
-            state.update(&encoded[..len + 1]);
+        let mut encoded = [0u8; 10];
+        encoded[0] = 0x28;
+        let pos = 1;
+        let len = encode_varint(body.unbonding_start_height, &mut encoded[pos..]);
+        state.update(&encoded[..len + 1]);
 
-            let hash = state.finalize();
-            Ok(EffectHash(*hash.as_array()))
-        } else {
-            Err(ParserError::InvalidLength)
-        }
+        let hash = state.finalize();
+        Ok(EffectHash(*hash.as_array()))
     }
 
     pub fn undelegate_claim_body(&self) -> Result<Body, ParserError> {

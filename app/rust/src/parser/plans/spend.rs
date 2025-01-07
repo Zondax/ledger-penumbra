@@ -47,24 +47,20 @@ pub struct SpendPlanC {
 
 impl SpendPlanC {
     pub fn effect_hash(&self, fvk: &FullViewingKey) -> Result<EffectHash, ParserError> {
-        let body = self.spend_body(fvk);
+        let body = self.spend_body(fvk)?;
 
-        if let Ok(body) = body {
-            let mut state =
-                create_personalized_state("/penumbra.core.component.shielded_pool.v1.SpendBody");
+        let mut state =
+            create_personalized_state("/penumbra.core.component.shielded_pool.v1.SpendBody");
 
-            state.update(&body.balance_commitment.to_proto_spend());
+        state.update(&body.balance_commitment.to_proto_spend());
 
-            state.update(&[0x22, 0x22, 0x0a, 0x20]);
-            state.update(&body.rk.to_bytes());
+        state.update(&[0x22, 0x22, 0x0a, 0x20]);
+        state.update(&body.rk.to_bytes());
 
-            state.update(&body.nullifier.to_proto());
+        state.update(&body.nullifier.to_proto());
 
-            let hash = state.finalize();
-            Ok(EffectHash(*hash.as_array()))
-        } else {
-            Err(ParserError::InvalidLength)
-        }
+        let hash = state.finalize();
+        Ok(EffectHash(*hash.as_array()))
     }
 
     pub fn spend_body(&self, fvk: &FullViewingKey) -> Result<Body, ParserError> {

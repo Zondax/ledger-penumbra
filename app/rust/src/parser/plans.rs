@@ -246,7 +246,7 @@ pub unsafe extern "C" fn rs_undelegate_claim_action_hash(
         let copy_len: usize = core::cmp::min(output.len(), body_hash_array.len());
         output[..copy_len].copy_from_slice(&body_hash_array[..copy_len]);
     } else {
-        return ParserError::SwapPlanError as u32;
+        return ParserError::UndelegateClaimPlanError as u32;
     }
 
     ParserError::Ok as u32
