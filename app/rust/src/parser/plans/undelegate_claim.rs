@@ -90,7 +90,7 @@ impl UndelegateClaimPlanC {
 
         let body = Body {
             validator_identity,
-            penalty: penalty,
+            penalty,
             balance_commitment,
             unbonding_start_height: self.unbonding_start_height,
         };
@@ -117,7 +117,7 @@ impl UndelegateClaimPlanC {
     pub fn unbonding_id(&self) -> Result<Id, ParserError> {
         let hrp = "penumbravalid";
         let mut validator_identity_bytes = [0u8; 72];
-        bech32_encode(hrp, &self.validator_identity.ik.get_bytes()?, &mut validator_identity_bytes).unwrap();
+        bech32_encode(hrp, self.validator_identity.ik.get_bytes()?, &mut validator_identity_bytes).unwrap();
     
         let mut result = [0u8; 150];
         let prefix = b"uunbonding_start_at_";

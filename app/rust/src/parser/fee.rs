@@ -32,9 +32,7 @@ impl TryFrom<FeeC> for Fee {
             // If conversion fails, create a new Value with the amount and staking token asset ID
             Ok(Fee(Value {
                 amount: value.0.amount.try_into()?,
-                asset_id: Id {
-                    0: Fq::from_le_bytes_mod_order(&STAKING_TOKEN_ASSET_ID_BYTES),
-                },
+                asset_id: Id(Fq::from_le_bytes_mod_order(&STAKING_TOKEN_ASSET_ID_BYTES))
             }))
         }
     }
@@ -50,12 +48,8 @@ impl Fee {
     pub const LEN: usize = AMOUNT_LEN_BYTES + ID_LEN_BYTES;
 
     pub fn commit(&self, blinding: Fr) -> Result<Commitment, ParserError> {
-        let value = Value::try_from(self.0.clone());
-        if let Ok(value) = value {
-            Ok(value.commit(blinding, Sign::Required)?)
-        } else {
-            Err(ParserError::ClueCreationFailed)
-        }
+        let value = self.0.clone();
+        value.commit(blinding, Sign::Required)
     }
 
     pub fn to_bytes(&self) -> Result<[u8; Self::LEN], ParserError> {

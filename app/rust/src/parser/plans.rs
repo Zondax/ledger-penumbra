@@ -174,12 +174,9 @@ pub unsafe extern "C" fn rs_output_action_hash(
         return ParserError::UnexpectedError as u32;
     };
 
-    let memo_key_bytes = match memo_key.get_bytes() {
-        Ok(bytes) => bytes,
-        Err(_) => &[0u8; 32],
-    };
+    let memo_key_bytes = memo_key.get_bytes().unwrap_or(&[0u8; 32]);
 
-    let body_hash_bytes = plan.effect_hash(&fvk, &memo_key_bytes);
+    let body_hash_bytes = plan.effect_hash(&fvk, memo_key_bytes);
 
     if let Ok(body_hash_bytes) = body_hash_bytes {
         let body_hash_array = body_hash_bytes.as_array();
@@ -728,6 +725,7 @@ mod tests {
             assert_eq!(computed_hash, expected_hash);
         } else {
             panic!("output_action_hash is not Ok Error: {:?}", output_action_hash);
+
         }
     }
 }

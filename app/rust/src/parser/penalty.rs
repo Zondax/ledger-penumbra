@@ -54,9 +54,7 @@ impl Penalty {
             },
             provided_value: Value{
                 amount: self.apply_to_amount(unbonding_amount),
-                asset_id:  Id {
-                    0: Fq::from_le_bytes_mod_order(&STAKING_TOKEN_ASSET_ID_BYTES),
-                },
+                asset_id: Id(Fq::from_le_bytes_mod_order(&STAKING_TOKEN_ASSET_ID_BYTES))
             }
         }
     }

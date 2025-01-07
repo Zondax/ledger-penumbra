@@ -109,15 +109,15 @@ impl TryFrom<U128x128> for Amount {
     }
 }
 
-impl Into<Fq> for Amount {
-    fn into(self) -> Fq {
-        Fq::from(self.inner)
+impl From<Amount> for Fq {
+    fn from(val: Amount) -> Self {
+        Fq::from(val.inner)
     }
 }
 
-impl Into<Fr> for Amount {
-    fn into(self) -> Fr {
-        Fr::from(self.inner)
+impl From<Amount> for Fr {
+    fn from(val: Amount) -> Self {
+        Fr::from(val.inner)
     }
 }
 

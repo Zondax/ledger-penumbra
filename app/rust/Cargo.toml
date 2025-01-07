@@ -70,3 +70,4 @@ derive-debug = []
 cpp_tests = []
 # use when compiling this crate as a lib for the full_app suite
 full_app = []
+fuzzing = []

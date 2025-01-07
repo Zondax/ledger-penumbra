@@ -50,7 +50,7 @@ impl Value {
     pub fn commit(&self, blinding_factor: Fr, sign: Sign) -> Result<Commitment, ParserError> {
         let mut commitment = decaf377::Element::IDENTITY;
         let g_v = self.asset_id.value_generator();
-        let amount_fr: Fr = Into::into(self.amount.clone());
+        let amount_fr: Fr = Into::into(self.amount);
 
         if amount_fr.ne(&Fr::ZERO) {
             match sign {
@@ -84,14 +84,14 @@ impl Imbalance {
 
         // required value
         let g_v = self.required_value.asset_id.value_generator();
-        let amount_fr: Fr = Into::into(self.required_value.amount.clone());
+        let amount_fr: Fr = Into::into(self.required_value.amount);
         if amount_fr.ne(&Fr::ZERO) {
             commitment -= g_v * amount_fr;
         }
 
         // provided value
         let g_v = self.provided_value.asset_id.value_generator();
-        let amount_fr: Fr = Into::into(self.provided_value.amount.clone());
+        let amount_fr: Fr = Into::into(self.provided_value.amount);
         if amount_fr.ne(&Fr::ZERO) {
             commitment += g_v * amount_fr;
         }
