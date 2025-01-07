@@ -89,6 +89,8 @@ pub enum ParserError {
     DetectionDataOverflow, // Added
     ActionsOverflow,       // Added
     InvalidMetadata,       // Added
+    Overflow,
+    NonIntegral,
 }
 
 impl From<ErrorKind> for ParserError {

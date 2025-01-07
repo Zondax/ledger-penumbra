@@ -18,8 +18,9 @@ use crate::constants::AMOUNT_LEN_BYTES;
 use crate::utils::protobuf::encode_varint;
 use crate::ParserError;
 use decaf377::{Fq, Fr};
+use crate::parser::fixpoint::U128x128;
 
-#[derive(Clone)]
+#[derive(Copy, Clone)]
 #[cfg_attr(any(feature = "derive-debug", test), derive(Debug))]
 pub struct Amount {
     pub inner: u128,
@@ -84,6 +85,27 @@ impl TryFrom<AmountC> for Amount {
         let inner = shifted + lo;
 
         Ok(Amount { inner })
+    }
+}
+
+impl From<Amount> for U128x128 {
+    fn from(amount: Amount) -> U128x128 {
+        U128x128::from(amount.inner)
+    }
+}
+
+impl From<&Amount> for U128x128 {
+    fn from(value: &Amount) -> Self {
+        (*value).into()
+    }
+}
+
+impl TryFrom<U128x128> for Amount {
+    type Error = ParserError;
+    fn try_from(value: U128x128) -> Result<Self, Self::Error> {
+        Ok(Amount {
+            inner: value.try_into()?,
+        })
     }
 }
 

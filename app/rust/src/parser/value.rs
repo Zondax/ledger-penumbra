@@ -37,6 +37,13 @@ pub struct Value {
     pub asset_id: Id,
 }
 
+#[derive(Clone)]
+#[cfg_attr(any(feature = "derive-debug", test), derive(Debug))]
+pub struct Imbalance {
+    pub required_value: Value,
+    pub provided_value: Value,
+}
+
 // this should be implemented in the Balance, but since we are currently managing only one value, it isn’t necessary for now
 impl Value {
     pub const LEN: usize = AMOUNT_LEN_BYTES + ID_LEN_BYTES;
@@ -68,6 +75,31 @@ impl Value {
         bytes[AMOUNT_LEN_BYTES..AMOUNT_LEN_BYTES + ID_LEN_BYTES]
             .copy_from_slice(&self.asset_id.to_bytes());
         Ok(bytes)
+    }
+}
+
+impl Imbalance {
+    pub fn commit(&self, blinding_factor: Fr) -> Result<Commitment, ParserError> {
+        let mut commitment = decaf377::Element::IDENTITY;
+
+        // required value
+        let g_v = self.required_value.asset_id.value_generator();
+        let amount_fr: Fr = Into::into(self.required_value.amount.clone());
+        if amount_fr.ne(&Fr::ZERO) {
+            commitment -= g_v * amount_fr;
+        }
+
+        // provided value
+        let g_v = self.provided_value.asset_id.value_generator();
+        let amount_fr: Fr = Into::into(self.provided_value.amount.clone());
+        if amount_fr.ne(&Fr::ZERO) {
+            commitment += g_v * amount_fr;
+        }
+
+        let value_blinding_generator = Commitment::value_blinding_generator();
+        commitment += blinding_factor * value_blinding_generator;
+
+        Ok(commitment.into())
     }
 }
 

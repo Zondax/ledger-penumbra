@@ -73,6 +73,11 @@ zxerr_t compute_action_hash(action_t *action, bytes_t *memo_key, hash_t *output)
                 return zxerr_encoding_failed;
             }
             break;
+        case penumbra_core_transaction_v1_ActionPlan_undelegate_claim_tag:
+            if (rs_undelegate_claim_action_hash(&action->action.undelegate_claim, (uint8_t *)output, 64) != parser_ok) {
+                return zxerr_encoding_failed;
+            }
+            break;
 #endif
         default:
             return zxerr_unknown;

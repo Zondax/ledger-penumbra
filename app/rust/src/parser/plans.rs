@@ -28,6 +28,7 @@ use crate::ParserError;
 pub mod output;
 pub mod spend;
 pub mod swap;
+pub mod undelegate_claim;
 
 #[repr(C)]
 #[cfg_attr(any(feature = "derive-debug", test), derive(Debug))]
@@ -226,6 +227,38 @@ pub unsafe extern "C" fn rs_swap_action_hash(
 #[no_mangle]
 /// Use to compute an address and write it back into output
 /// argument.
+pub unsafe extern "C" fn rs_undelegate_claim_action_hash(
+    plan: &undelegate_claim::UndelegateClaimPlanC,
+    output: *mut u8,
+    output_len: usize,
+) -> u32 {
+    crate::zlog("rs_undelegate_claim_action_hash\x00");
+    let output = std::slice::from_raw_parts_mut(output, output_len);
+
+    if output.len() < 64 {
+        return ParserError::Ok as u32;
+    }
+
+    let Ok(fvk) = c_fvk_bytes() else {
+        return ParserError::UnexpectedError as u32;
+    };
+
+    // let body_hash_bytes = plan.effect_hash(&fvk);
+
+    // if let Ok(body_hash_bytes) = body_hash_bytes {
+    //     let body_hash_array = body_hash_bytes.as_array();
+    //     let copy_len: usize = core::cmp::min(output.len(), body_hash_array.len());
+    //     output[..copy_len].copy_from_slice(&body_hash_array[..copy_len]);
+    // } else {
+    //     return ParserError::SwapPlanError as u32;
+    // }
+
+    ParserError::Ok as u32
+}
+
+#[no_mangle]
+/// Use to compute an address and write it back into output
+/// argument.
 pub unsafe extern "C" fn rs_generic_action_hash(
     data: &BytesC,
     action_type: u8,
@@ -293,6 +326,8 @@ mod tests {
     use crate::parser::swap_plaintext::SwapPlaintextC;
     use crate::parser::trading_pair::TradingPairC;
     use crate::parser::value::ValueC;
+    use crate::parser::penalty::PenaltyC;
+    use crate::parser::identity_key::IdentityKeyC;
     #[test]
     fn test_transaction_plan_hash() {
         let dummy_action_hashes = ActionsHashC {
@@ -637,6 +672,65 @@ mod tests {
             assert_eq!(computed_hash, expected_hash);
         } else {
             panic!("output_action_hash is not Ok");
+        }
+    }
+
+    #[test]
+    fn test_undelegate_claim_action_hash() {
+        // Create dummy ActionC
+        let dummy_amount = AmountC {
+            lo: 74432202791432231,
+            hi: 0,
+        };
+
+        // Create dummy validator identity
+        let ik_bytes =
+            hex::decode("1e32c63102334a0fdfed9fdd4aa6b088824d1d42ad40109f4a56f8845dfb0e32")
+                .unwrap();
+        let dummy_validator_identity = IdentityKeyC {
+            ik: BytesC::from_slice(&ik_bytes),
+        };
+
+
+        // Create dummy penalty
+        let inner_bytes =
+            hex::decode("00000000000000000000000000000000fecbfb15b573eab367a0f9096bb98c7f")
+                .unwrap();
+        let dummy_penalty = PenaltyC {
+            inner: BytesC::from_slice(&inner_bytes),
+        };
+
+        let dummy_balance_blinding_bytes =
+            hex::decode("02a147e3c45b43f4f0cc9d8d6e2940c6927cbb5141b6062aae8ac3ba10ac4504")
+                .unwrap();
+        let dummy_proof_blinding_r_bytes =
+            hex::decode("a6f9bd68892e3c662cd41452dca6c196e31ce877f9e7303166e4eb25b496aa0a")
+                .unwrap();
+        let dummy_proof_blinding_s_bytes =
+            hex::decode("84d5bd78cab02b9528a4135abcdcf46d4953ab230d1e6d4dc295eb4208b5bf0d")
+                .unwrap();
+
+        let dummy_action = undelegate_claim::UndelegateClaimPlanC {
+            has_validator_identity: true,
+            validator_identity: dummy_validator_identity,
+            start_epoch_index: 0,
+            has_penalty: true,
+            penalty: dummy_penalty,
+            has_unbonding_amount: true,
+            unbonding_amount: dummy_amount,
+            balance_blinding: BytesC::from_slice(&dummy_balance_blinding_bytes),
+            proof_blinding_r: BytesC::from_slice(&dummy_proof_blinding_r_bytes),
+            proof_blinding_s: BytesC::from_slice(&dummy_proof_blinding_s_bytes),
+            unbonding_start_height: 25928,
+        };
+
+        let output_action_hash: Result<EffectHash, ParserError> = dummy_action.effect_hash();
+        let expected_hash = "6d780b622209a23a6ac8d2895abceb8420f89b611a2a5767e146aead8aa337a6a8999f258f80a7a2c6f4c21bff674615e0ea1430c4bf86b7d1ab76565d08569e";
+        if let Ok(output_action_hash_bytes) = output_action_hash {
+            let computed_hash = hex::encode(output_action_hash_bytes.as_array());
+            assert_eq!(computed_hash, expected_hash);
+        } else {
+            panic!("output_action_hash is not Ok Error: {:?}", output_action_hash);
         }
     }
 }
