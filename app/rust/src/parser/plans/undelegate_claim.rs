@@ -21,7 +21,7 @@ use crate::parser::{
     penalty::{PenaltyC, Penalty},
     effect_hash::{create_personalized_state, EffectHash},
     commitment::Commitment,
-    value::Imbalance,
+    value::Balance,
     id::Id,
     id::AssetId,
 };
@@ -107,11 +107,11 @@ impl UndelegateClaimPlanC {
         Ok(Fr::from_le_bytes_mod_order(balance_blinding_bytes))
     }
 
-    pub fn balance(&self) -> Result<Imbalance, ParserError> {
+    pub fn balance(&self) -> Result<Balance, ParserError> {
         let penalty = Penalty::try_from(self.penalty.clone())?;
         let unbonding_amount = self.unbonding_amount.clone().try_into()?;
-        Ok(penalty
-            .balance_for_claim(self.unbonding_id()?, unbonding_amount))
+        penalty
+            .balance_for_claim(self.unbonding_id()?, unbonding_amount)
     }
 
     pub fn unbonding_id(&self) -> Result<Id, ParserError> {

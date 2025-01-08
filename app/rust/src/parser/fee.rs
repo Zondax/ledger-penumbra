@@ -2,7 +2,7 @@ use crate::constants::{AMOUNT_LEN_BYTES, ID_LEN_BYTES};
 use crate::parser::commitment::Commitment;
 use crate::parser::id::Id;
 use crate::parser::value::Sign;
-use crate::parser::value::{Value, ValueC};
+use crate::parser::value::{Value, ValueC, Imbalance, Balance};
 use crate::ParserError;
 use decaf377::Fq;
 use decaf377::Fr;
@@ -48,8 +48,12 @@ impl Fee {
     pub const LEN: usize = AMOUNT_LEN_BYTES + ID_LEN_BYTES;
 
     pub fn commit(&self, blinding: Fr) -> Result<Commitment, ParserError> {
-        let value = self.0.clone();
-        value.commit(blinding, Sign::Required)
+        let mut balance = Balance::new();
+        balance.add(Imbalance{
+            value: self.0.clone(),
+            sign: Sign::Required,
+        })?;
+        balance.commit(blinding)
     }
 
     pub fn to_bytes(&self) -> Result<[u8; Self::LEN], ParserError> {
