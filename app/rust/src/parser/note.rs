@@ -98,7 +98,7 @@ impl Note {
             &Self::notecommit_domain_sep(),
             (
                 self.note_blinding()?,
-                self.value.amount.clone().into(),
+                self.value.amount.into(),
                 self.value.asset_id.0,
                 self.diversified_generator()?.vartime_compress_to_field(),
                 self.transmission_key_s,

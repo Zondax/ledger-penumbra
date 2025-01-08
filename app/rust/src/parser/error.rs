@@ -47,6 +47,7 @@ pub enum ParserError {
     SwapPlanError,            // Added
     ParameterHashError,       // Added
     EffectHashError,          // Added
+    UndelegateClaimPlanError, // Added
     // Chain related
     InvalidChainId,
     UnexpectedChain, // Added
@@ -89,6 +90,8 @@ pub enum ParserError {
     DetectionDataOverflow, // Added
     ActionsOverflow,       // Added
     InvalidMetadata,       // Added
+    Overflow,
+    NonIntegral,
 }
 
 impl From<ErrorKind> for ParserError {

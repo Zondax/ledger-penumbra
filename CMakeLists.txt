@@ -161,6 +161,7 @@ file(GLOB_RECURSE LIB_SRC
         ${CMAKE_CURRENT_SOURCE_DIR}/app/src/plan/swap.c
         ${CMAKE_CURRENT_SOURCE_DIR}/app/src/c_api/rust.c
         ${CMAKE_CURRENT_SOURCE_DIR}/app/src/plan/ics20_withdrawal.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/app/src/plan/undelegate_claim.c
         )
 
 add_library(app_lib STATIC ${LIB_SRC})
