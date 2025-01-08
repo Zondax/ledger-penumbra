@@ -299,8 +299,10 @@ const char *parser_getErrorDescription(parser_error_t err) {
             return "Unexpected chain";
         case parser_missing_field:
             return "Missing field";
-        case paser_unknown_transaction:
+        case parser_unknown_transaction:     // Fixed typo in enum name
             return "Unknown transaction";
+        case parser_invalid_transaction_type:  // Added
+            return "Invalid transaction type";
         case parser_detection_data_overflow:
             return "Detection data overflow";
         case parser_actions_overflow:
@@ -317,8 +319,20 @@ const char *parser_getErrorDescription(parser_error_t err) {
             return "ICS20 withdrawal plan error";
         case parser_swap_plan_error:
             return "Swap plan error";
+        case parser_parameter_hash_error:    // Added
+            return "Parameter hash error";
+        case parser_effect_hash_error:       // Added
+            return "Effect hash error";
+        case parser_undelegate_claim_plan_error:  // Added
+            return "Undelegate claim plan error";
         case parser_invalid_metadata:
             return "Invalid metadata";
+        case parser_invalid_signature_len:   // Added to match enum
+            return "Invalid signature length";
+        case parser_overflow:                // Added
+            return "Overflow error";
+        case parser_non_integral:            // Added
+            return "Non-integral value error";
         default:
             return "Unrecognized error code";
     }
