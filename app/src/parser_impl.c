@@ -85,11 +85,12 @@ bool decode_action(pb_istream_t *stream, const pb_field_t *field, void **arg) {
             CHECK_ACTION_ERROR(
                 decode_ics20_withdrawal_plan(&action_data_4, &decode_arg[actions_qty].action.ics20_withdrawal));
             break;
+#if defined(FULL_APP)
         case penumbra_core_transaction_v1_ActionPlan_swap_tag:
             decode_arg[actions_qty].action_data = action_data_3;
             CHECK_ACTION_ERROR(decode_swap_plan(&action_data_3, &decode_arg[actions_qty].action.swap));
             break;
-#if defined(FULL_APP)
+#endif
         case penumbra_core_transaction_v1_ActionPlan_delegate_tag:
             decode_arg[actions_qty].action_data = action_data_3;
             CHECK_ACTION_ERROR(decode_delegate_plan(&action_data_3, &decode_arg[actions_qty].action.delegate));
@@ -102,7 +103,6 @@ bool decode_action(pb_istream_t *stream, const pb_field_t *field, void **arg) {
             decode_arg[actions_qty].action_data = action_data_4;
             CHECK_ACTION_ERROR(decode_undelegate_claim_plan(&action_data_4, &decode_arg[actions_qty].action.undelegate_claim));
             break;
-#endif
         default:
             return false;
     }

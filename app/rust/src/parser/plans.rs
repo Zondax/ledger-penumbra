@@ -221,7 +221,6 @@ pub unsafe extern "C" fn rs_swap_action_hash(
     ParserError::Ok as u32
 }
 
-#[cfg(any(feature = "full_app", feature = "cpp_tests"))]
 #[no_mangle]
 /// Use to compute an address and write it back into output
 /// argument.
