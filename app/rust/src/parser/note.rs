@@ -57,8 +57,10 @@ pub struct Note {
 #[derive(Clone)]
 #[cfg_attr(any(feature = "derive-debug", test), derive(Debug))]
 pub struct NoteC {
+    pub has_value: bool,
     pub value: ValueC,
     pub rseed: BytesC,
+    pub has_address: bool,
     pub address: AddressC,
 }
 
