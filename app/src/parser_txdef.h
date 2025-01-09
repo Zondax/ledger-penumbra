@@ -143,7 +143,7 @@ typedef struct {
 } penalty_t;
 
 typedef struct {
-    governance_vote_e vote;
+    governance_vote_e vote_enum;
 } vote_t;
 
 typedef struct {
@@ -269,6 +269,7 @@ typedef struct {
         delegate_plan_t delegate;
         undelegate_plan_t undelegate;
         undelegate_claim_plan_t undelegate_claim;
+        delegator_vote_plan_t delegator_vote;
     } action;
 } action_t;
 
