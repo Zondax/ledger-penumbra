@@ -21,23 +21,28 @@ use nom::error::ErrorKind;
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 pub enum ParserError {
     Ok = 0,
+
     // Generic errors
     NoData,
     InitContextEmpty,
     DisplayIdxOutOfRange,
     DisplayPageOutOfRange,
     UnexpectedError,
+
     // Method/Version related
     UnexpectedMethod,
     UnexpectedVersion,
     UnexpectedCharacters,
+
     // Field related
     DuplicatedField,
     MissingField,
     UnexpectedField,
+
     // Transaction related
     UnknownTransaction,
     InvalidTransactionType,
+
     // Plan related
     SpendPlanError,
     OutputPlanError,
@@ -48,10 +53,12 @@ pub enum ParserError {
     ParameterHashError,
     EffectHashError,
     UndelegateClaimPlanError,
+
     // Chain related
     InvalidChainId,
     UnexpectedChain,
-    // Other existing variants
+
+    // Cryptographic and key-related errors
     InvalidHashMode,
     InvalidSignature,
     InvalidPubkeyEncoding,
@@ -86,13 +93,13 @@ pub enum ParserError {
     PrecisionTooLarge,
     ClueCreationFailed,
     InvalidAssetId,
-    // Additional variants from C enum
     DetectionDataOverflow,
     ActionsOverflow,
     InvalidMetadata,
+    InvalidSignatureLen,
     Overflow,
     NonIntegral,
-    InvalidSignatureLen, // Added from C enum
+    UnexpectedValue,
 }
 
 impl From<ErrorKind> for ParserError {

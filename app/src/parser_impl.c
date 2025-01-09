@@ -201,8 +201,11 @@ parser_error_t _read(parser_context_t *c, parser_tx_t *v) {
 
 const char *parser_getErrorDescription(parser_error_t err) {
     switch (err) {
+        // Success
         case parser_ok:
             return "No error";
+
+        // Generic errors
         case parser_no_data:
             return "No more data";
         case parser_init_context_empty:
@@ -213,6 +216,56 @@ const char *parser_getErrorDescription(parser_error_t err) {
             return "Display page out of range";
         case parser_unexpected_error:
             return "Unexpected error";
+
+        // Method/Version related
+        case parser_unexpected_method:
+            return "Unexpected method";
+        case parser_unexpected_version:
+            return "Unexpected version";
+        case parser_unexpected_characters:
+            return "Unexpected characters";
+
+        // Field related
+        case parser_duplicated_field:
+            return "Unexpected duplicated field";
+        case parser_missing_field:
+            return "Missing field";
+        case parser_unexpected_field:
+            return "Unexpected field";
+
+        // Transaction related
+        case parser_unknown_transaction:
+            return "Unknown transaction";
+        case parser_invalid_transaction_type:
+            return "Invalid transaction type";
+
+        // Plan related
+        case parser_spend_plan_error:
+            return "Spend plan error";
+        case parser_output_plan_error:
+            return "Output plan error";
+        case parser_delegate_plan_error:
+            return "Delegate plan error";
+        case parser_undelegate_plan_error:
+            return "Undelegate plan error";
+        case parser_ics20_withdrawal_plan_error:
+            return "ICS20 withdrawal plan error";
+        case parser_swap_plan_error:
+            return "Swap plan error";
+        case parser_parameter_hash_error:
+            return "Parameter hash error";
+        case parser_effect_hash_error:
+            return "Effect hash error";
+        case parser_undelegate_claim_plan_error:
+            return "Undelegate claim plan error";
+
+        // Chain related
+        case parser_invalid_chain_id:
+            return "Invalid chain ID";
+        case parser_unexpected_chain:
+            return "Unexpected chain";
+
+        // Cryptographic and key-related errors
         case parser_invalid_hash_mode:
             return "Invalid hash mode";
         case parser_invalid_signature:
@@ -231,16 +284,24 @@ const char *parser_getErrorDescription(parser_error_t err) {
             return "Invalid threshold";
         case parser_invalid_network_id:
             return "Invalid network ID";
-        case parser_invalid_chain_id:
-            return "Invalid chain ID";
         case parser_invalid_ascii_value:
             return "Invalid ASCII value";
         case parser_invalid_timestamp:
             return "Invalid timestamp";
         case parser_invalid_staking_amount:
             return "Invalid staking amount";
+        case parser_unexpected_type:
+            return "Unexpected type";
         case parser_operation_overflows:
             return "Operation overflows";
+        case parser_unexpected_buffer_end:
+            return "Unexpected buffer end";
+        case parser_unexpected_number_items:
+            return "Unexpected number of items";
+        case parser_value_out_of_range:
+            return "Value out of range";
+        case parser_invalid_address:
+            return "Invalid address";
         case parser_invalid_path:
             return "Invalid path";
         case parser_invalid_length:
@@ -273,66 +334,21 @@ const char *parser_getErrorDescription(parser_error_t err) {
             return "Clue creation failed";
         case parser_invalid_asset_id:
             return "Invalid asset ID";
-        case parser_unexpected_type:
-            return "Unexpected type";
-        case parser_unexpected_method:
-            return "Unexpected method";
-        case parser_unexpected_buffer_end:
-            return "Unexpected buffer end";
-        case parser_unexpected_value:
-            return "Unexpected value";
-        case parser_unexpected_number_items:
-            return "Unexpected number of items";
-        case parser_unexpected_version:
-            return "Unexpected version";
-        case parser_unexpected_characters:
-            return "Unexpected characters";
-        case parser_unexpected_field:
-            return "Unexpected field";
-        case parser_duplicated_field:
-            return "Unexpected duplicated field";
-        case parser_value_out_of_range:
-            return "Value out of range";
-        case parser_invalid_address:
-            return "Invalid address";
-        case parser_unexpected_chain:
-            return "Unexpected chain";
-        case parser_missing_field:
-            return "Missing field";
-        case parser_unknown_transaction:     // Fixed typo in enum name
-            return "Unknown transaction";
-        case parser_invalid_transaction_type:  // Added
-            return "Invalid transaction type";
         case parser_detection_data_overflow:
             return "Detection data overflow";
         case parser_actions_overflow:
             return "Actions overflow";
-        case parser_spend_plan_error:
-            return "Spend plan error";
-        case parser_output_plan_error:
-            return "Output plan error";
-        case parser_delegate_plan_error:
-            return "Delegate plan error";
-        case parser_undelegate_plan_error:
-            return "Undelegate plan error";
-        case parser_ics20_withdrawal_plan_error:
-            return "ICS20 withdrawal plan error";
-        case parser_swap_plan_error:
-            return "Swap plan error";
-        case parser_parameter_hash_error:    // Added
-            return "Parameter hash error";
-        case parser_effect_hash_error:       // Added
-            return "Effect hash error";
-        case parser_undelegate_claim_plan_error:  // Added
-            return "Undelegate claim plan error";
         case parser_invalid_metadata:
             return "Invalid metadata";
-        case parser_invalid_signature_len:   // Added to match enum
+        case parser_invalid_signature_len:
             return "Invalid signature length";
-        case parser_overflow:                // Added
+        case parser_overflow:
             return "Overflow error";
-        case parser_non_integral:            // Added
+        case parser_non_integral:
             return "Non-integral value error";
+        case parser_unexpected_value:
+            return "Unexpected value";
+
         default:
             return "Unrecognized error code";
     }
