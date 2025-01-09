@@ -29,6 +29,7 @@ pub mod output;
 pub mod spend;
 pub mod swap;
 pub mod undelegate_claim;
+pub mod delegator_vote;
 
 #[repr(C)]
 #[cfg_attr(any(feature = "derive-debug", test), derive(Debug))]
@@ -252,6 +253,34 @@ pub unsafe extern "C" fn rs_undelegate_claim_action_hash(
 #[no_mangle]
 /// Use to compute an address and write it back into output
 /// argument.
+pub unsafe extern "C" fn rs_delegator_vote_action_hash(
+    plan: &delegator_vote::DelegatorVotePlanC,
+    output: *mut u8,
+    output_len: usize,
+) -> u32 {
+    crate::zlog("rs_delegator_vote_action_hash\x00");
+    let output = std::slice::from_raw_parts_mut(output, output_len);
+
+    if output.len() < 64 {
+        return ParserError::Ok as u32;
+    }
+
+    let body_hash_bytes = plan.effect_hash();
+
+    if let Ok(body_hash_bytes) = body_hash_bytes {
+        let body_hash_array = body_hash_bytes.as_array();
+        let copy_len: usize = core::cmp::min(output.len(), body_hash_array.len());
+        output[..copy_len].copy_from_slice(&body_hash_array[..copy_len]);
+    } else {
+        return ParserError::DelegatorVotePlanError as u32;
+    }
+
+    ParserError::Ok as u32
+}
+
+#[no_mangle]
+/// Use to compute an address and write it back into output
+/// argument.
 pub unsafe extern "C" fn rs_generic_action_hash(
     data: &BytesC,
     action_type: u8,
@@ -431,6 +460,8 @@ mod tests {
                 .unwrap();
         let dummy_address_inner = hex::decode("890bc98e3698aa4578e419b028da5672e627c280d8b06166f4c42d5366bccf1fcf3b296cd61e8d744a21f75f2fb697183e18595d8a79008539d8fb138b405db09db65cc42d54c0e772e5d42d5f20b52f").unwrap();
         let dummy_note = NoteC {
+            has_value: true,
+            has_address: true,
             value: dummy_value,
             rseed: BytesC::from_slice(&dummy_rseed_bytes),
             address: AddressC {

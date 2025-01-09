@@ -227,7 +227,7 @@ typedef struct {
     uint64_t proposal;
     uint64_t start_position;
     bool has_vote;
-    vote_t vote;
+    uint8_t vote;
     bool has_staked_note;
     note_t staked_note;
     uint64_t staked_note_position;

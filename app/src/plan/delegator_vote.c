@@ -48,7 +48,7 @@ parser_error_t decode_delegator_vote_plan(const bytes_t *data, delegator_vote_pl
     delegator_vote->start_position = delegator_vote_plan.start_position;
     delegator_vote->has_vote = delegator_vote_plan.has_vote;
     if (delegator_vote_plan.has_vote) {
-        delegator_vote->vote.vote_enum = delegator_vote_plan.vote.vote;
+        delegator_vote->vote = delegator_vote_plan.vote.vote;
     }
     delegator_vote->has_staked_note = delegator_vote_plan.has_staked_note;
     if (delegator_vote_plan.has_staked_note) {
