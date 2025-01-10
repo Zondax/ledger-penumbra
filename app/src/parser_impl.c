@@ -263,6 +263,8 @@ const char *parser_getErrorDescription(parser_error_t err) {
             return "Effect hash error";
         case parser_undelegate_claim_plan_error:
             return "Undelegate claim plan error";
+        case parser_delegator_vote_plan_error:
+            return "Delegator vote plan error";
 
         // Chain related
         case parser_invalid_chain_id:
