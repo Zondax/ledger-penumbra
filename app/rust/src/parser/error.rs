@@ -53,6 +53,7 @@ pub enum ParserError {
     ParameterHashError,
     EffectHashError,
     UndelegateClaimPlanError,
+    DelegatorVotePlanError,
 
     // Chain related
     InvalidChainId,

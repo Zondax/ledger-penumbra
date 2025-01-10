@@ -75,6 +75,7 @@ typedef enum {
     parser_parameter_hash_error,
     parser_effect_hash_error,
     parser_undelegate_claim_plan_error,
+    parser_delegator_vote_plan_error,
 
     // Chain related
     parser_invalid_chain_id,

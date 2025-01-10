@@ -29,6 +29,7 @@
 #include "swap.h"
 #include "undelegate.h"
 #include "undelegate_claim.h"
+#include "delegator_vote.h"
 #include "zxformat.h"
 
 static bool decode_action(pb_istream_t *stream, const pb_field_t *field, void **arg);
@@ -102,6 +103,10 @@ bool decode_action(pb_istream_t *stream, const pb_field_t *field, void **arg) {
         case penumbra_core_transaction_v1_ActionPlan_undelegate_claim_tag:
             decode_arg[actions_qty].action_data = action_data_4;
             CHECK_ACTION_ERROR(decode_undelegate_claim_plan(&action_data_4, &decode_arg[actions_qty].action.undelegate_claim));
+            break;
+        case penumbra_core_transaction_v1_ActionPlan_delegator_vote_tag:
+            decode_arg[actions_qty].action_data = action_data_4;
+            CHECK_ACTION_ERROR(decode_delegator_vote_plan(&action_data_4, &decode_arg[actions_qty].action.delegator_vote));
             break;
         default:
             return false;
@@ -258,6 +263,8 @@ const char *parser_getErrorDescription(parser_error_t err) {
             return "Effect hash error";
         case parser_undelegate_claim_plan_error:
             return "Undelegate claim plan error";
+        case parser_delegator_vote_plan_error:
+            return "Delegator vote plan error";
 
         // Chain related
         case parser_invalid_chain_id:
