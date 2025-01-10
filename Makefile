@@ -37,6 +37,7 @@ default:
 endif
 
 test_all:
+	make clean
 	make
 	make zemu_install
 	make zemu_test
