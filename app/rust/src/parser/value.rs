@@ -23,7 +23,8 @@ use crate::parser::{
 };
 use decaf377::Fr;
 
-// this should be in imbalance.rs. For now, it’s not necessary
+#[derive(Clone)]
+#[cfg_attr(any(feature = "derive-debug", test), derive(Debug))]
 pub enum Sign {
     Required,
     Provided,
@@ -40,34 +41,78 @@ pub struct Value {
 #[derive(Clone)]
 #[cfg_attr(any(feature = "derive-debug", test), derive(Debug))]
 pub struct Imbalance {
-    pub required_value: Value,
-    pub provided_value: Value,
+    pub value: Value,
+    pub sign: Sign,
 }
 
-// this should be implemented in the Balance, but since we are currently managing only one value, it isn’t necessary for now
-impl Value {
-    pub const LEN: usize = AMOUNT_LEN_BYTES + ID_LEN_BYTES;
-    pub fn commit(&self, blinding_factor: Fr, sign: Sign) -> Result<Commitment, ParserError> {
-        let mut commitment = decaf377::Element::IDENTITY;
-        let g_v = self.asset_id.value_generator();
-        let amount_fr: Fr = Into::into(self.amount);
+// Only two imbalances are supported for now
+const IMBALANCES_SIZE: usize = 2;
 
-        if amount_fr.ne(&Fr::ZERO) {
-            match sign {
-                Sign::Required => {
-                    commitment -= g_v * amount_fr;
-                }
-                Sign::Provided => {
-                    commitment += g_v * amount_fr;
+#[derive(Clone)]
+#[cfg_attr(any(feature = "derive-debug", test), derive(Debug))]
+pub struct Balance {
+    pub imbalances: [Option<Imbalance>; IMBALANCES_SIZE],
+}
+
+impl Balance {
+    pub fn new() -> Self {
+        Balance {
+            imbalances: [None, None],
+        }
+    }
+
+    pub fn add(&mut self, imbalance: Imbalance) -> Result<(), ParserError> {
+        for slot in &mut self.imbalances {
+            if slot.is_none() {
+                *slot = Some(imbalance);
+                return Ok(());
+            }
+        }
+        Err(ParserError::InvalidLength)
+    }
+
+    pub fn commit(&self, blinding_factor: Fr) -> Result<Commitment, ParserError> {
+        if !self.has_valid_imbalance() {
+            return Err(ParserError::InvalidLength);
+        }
+    
+        let mut commitment = decaf377::Element::IDENTITY;
+    
+        for imbalance in self.imbalances.iter().flatten() {
+            let g_v = imbalance.value.asset_id.value_generator();
+            let amount_fr: Fr = Into::into(imbalance.value.amount);
+    
+            if amount_fr.ne(&Fr::ZERO) {
+                match imbalance.sign {
+                    Sign::Required => {
+                        commitment -= g_v * amount_fr;
+                    }
+                    Sign::Provided => {
+                        commitment += g_v * amount_fr;
+                    }
                 }
             }
         }
-
+    
         let value_blinding_generator = Commitment::value_blinding_generator();
         commitment += blinding_factor * value_blinding_generator;
-
+    
         Ok(commitment.into())
     }
+
+    fn has_valid_imbalance(&self) -> bool {
+        self.imbalances.iter().any(|slot| slot.is_some())
+    }
+}
+
+impl Default for Balance {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl Value {
+    pub const LEN: usize = AMOUNT_LEN_BYTES + ID_LEN_BYTES;
 
     pub fn to_bytes(&self) -> Result<[u8; Self::LEN], ParserError> {
         let mut bytes = [0; Self::LEN];
@@ -75,31 +120,6 @@ impl Value {
         bytes[AMOUNT_LEN_BYTES..AMOUNT_LEN_BYTES + ID_LEN_BYTES]
             .copy_from_slice(&self.asset_id.to_bytes());
         Ok(bytes)
-    }
-}
-
-impl Imbalance {
-    pub fn commit(&self, blinding_factor: Fr) -> Result<Commitment, ParserError> {
-        let mut commitment = decaf377::Element::IDENTITY;
-
-        // required value
-        let g_v = self.required_value.asset_id.value_generator();
-        let amount_fr: Fr = Into::into(self.required_value.amount);
-        if amount_fr.ne(&Fr::ZERO) {
-            commitment -= g_v * amount_fr;
-        }
-
-        // provided value
-        let g_v = self.provided_value.asset_id.value_generator();
-        let amount_fr: Fr = Into::into(self.provided_value.amount);
-        if amount_fr.ne(&Fr::ZERO) {
-            commitment += g_v * amount_fr;
-        }
-
-        let value_blinding_generator = Commitment::value_blinding_generator();
-        commitment += blinding_factor * value_blinding_generator;
-
-        Ok(commitment.into())
     }
 }
 

@@ -18,7 +18,7 @@ use crate::parser::{
     fixpoint::U128x128,
     ParserError,
     amount::Amount,
-    value::Imbalance,
+    value::{Balance, Imbalance, Sign},
     id::Id,
     value::Value,
     fee::STAKING_TOKEN_ASSET_ID_BYTES,
@@ -44,19 +44,25 @@ impl Penalty {
     /// This method takes the `unbonding_id` rather than the `UnbondingToken` so
     /// that it can be used in mock proof verification, where computation of the
     /// unbonding token's asset ID happens outside of the circuit.
-    pub fn balance_for_claim(&self, unbonding_id: Id, unbonding_amount: Amount) -> Imbalance {
+    pub fn balance_for_claim(&self, unbonding_id: Id, unbonding_amount: Amount) -> Result<Balance, ParserError> {
         // The undelegate claim action subtracts the unbonding amount and adds
         // the unbonded amount from the transaction's value balance.
-        Imbalance{
-            required_value: Value{
+        let mut balance = Balance::new();
+        balance.add(Imbalance{
+            value: Value{
                 amount: unbonding_amount,
                 asset_id: unbonding_id,
             },
-            provided_value: Value{
+            sign: Sign::Required,
+        })?;
+        balance.add(Imbalance{
+            value: Value{
                 amount: self.apply_to_amount(unbonding_amount),
                 asset_id: Id(Fq::from_le_bytes_mod_order(&STAKING_TOKEN_ASSET_ID_BYTES))
-            }
-        }
+            },
+            sign: Sign::Provided,
+        })?;
+        Ok(balance)
     }
 }
 
