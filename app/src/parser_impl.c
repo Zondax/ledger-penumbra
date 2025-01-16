@@ -70,7 +70,7 @@ bool decode_action(pb_istream_t *stream, const pb_field_t *field, void **arg) {
         decode_error = parser_unexpected_data;
         return false;
     }
-    
+
     penumbra_core_transaction_v1_ActionPlan action = penumbra_core_transaction_v1_ActionPlan_init_default;
 
     bytes_t action_data_3 = {.ptr = stream->state + ACTION_OFFSET_3, .len = stream->bytes_left - ACTION_OFFSET_3};
