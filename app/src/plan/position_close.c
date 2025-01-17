@@ -77,8 +77,13 @@ parser_error_t position_close_printValue(const parser_context_t *ctx, const posi
     MEMZERO(outVal, outValLen);
 
     // add action title
-    snprintf(outVal, outValLen, "PositionClose Reserves 1: ");
+    snprintf(outVal, outValLen, "PositionClose Position ID ");
     uint16_t written_value = strlen(outVal);
+
+    MEMCPY(outVal + written_value, position_close->position_id.inner.ptr, position_close->position_id.inner.len);
+
+    CHECK_ERROR(encodePositionId(position_close->position_id.inner.ptr, position_close->position_id.inner.len,
+                                 outVal + written_value, outValLen - written_value));
 
     return parser_ok;
 }

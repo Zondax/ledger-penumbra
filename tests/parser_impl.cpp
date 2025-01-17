@@ -36,9 +36,9 @@ TEST(SCALE, ReadBytes) {
     zxerr_t zxerr;
 
     uint8_t buffer[6000];
-    auto bufferLen = parseHexString(
-        buffer, sizeof(buffer),
-        "0a27fa01240a220a202e5581b4d438439f4801a1eece8f8d0c7c670ac383d5bb2bd36f7c5c8393e433121e08ed9906120a70656e756d6272612d311a0c0a0a08efe1c491a49cd7a80d");
+    auto bufferLen = parseHexString(buffer, sizeof(buffer),
+                                    "0a27fa01240a220a202e5581b4d438439f4801a1eece8f8d0c7c670ac383d5bb2bd36f7c5c8393e433121e0"
+                                    "8ed9906120a70656e756d6272612d311a0c0a0a08efe1c491a49cd7a80d");
 
     err = parser_parse(&ctx, buffer, bufferLen, &tx_obj);
     ASSERT_EQ(err, parser_ok) << parser_getErrorDescription(err);
@@ -58,7 +58,8 @@ TEST(SCALE, ReadBytes) {
     ASSERT_EQ(zxerr, zxerr_ok);
 
     std::string expected =
-        "2b1d981e9b0628512ea5d9f2ef7bf9670e876b6ad6289a50ad069b9cc54669d3d11951a481fc837d034d611f27f081b05f17a1243d5a2d1569b0759f35c757e5";
+        "2b1d981e9b0628512ea5d9f2ef7bf9670e876b6ad6289a50ad069b9cc54669d3d11951a481fc837d034d611f27f081b05f17a1243d5a2d1569b"
+        "0759f35c757e5";
     char actual[129];
     array_to_hexstr(actual, sizeof(actual), tx_obj.effect_hash, sizeof(tx_obj.effect_hash));
 

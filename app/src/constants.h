@@ -35,6 +35,9 @@
 #define IDENTITY_KEY_BECH32_PREFIX "penumbravalid"
 #define IDENTITY_KEY_LEN 32
 
+#define POSITION_ID_BECH32_PREFIX "plpid"
+#define POSITION_ID_LEN 32
+
 // Common BECH32m constants
 #define CHECKSUM_LENGTH 8
 #define BECH32_BITS_PER_CHAR 5

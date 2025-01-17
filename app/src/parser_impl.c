@@ -25,13 +25,13 @@
 #include "parser_pb_utils.h"
 #include "pb_common.h"
 #include "pb_decode.h"
+#include "position_close.h"
+#include "position_open.h"
 #include "protobuf/penumbra/core/transaction/v1/transaction.pb.h"
 #include "spend.h"
 #include "swap.h"
 #include "undelegate.h"
 #include "undelegate_claim.h"
-#include "position_open.h"
-#include "position_close.h"
 #include "zxformat.h"
 
 #define ACTION_OFFSET_3 3
