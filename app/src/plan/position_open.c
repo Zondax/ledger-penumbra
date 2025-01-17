@@ -13,8 +13,9 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  ********************************************************************************/
+#include "position_open.h"
+
 #include "note.h"
-#include "output.h"
 #include "parser_pb_utils.h"
 #include "ui_utils.h"
 #include "zxformat.h"
@@ -29,10 +30,10 @@ parser_error_t decode_position_open_plan(const bytes_t *data, position_open_plan
     fixed_size_field_t nonce_arg, pair_asset_1, pair_asset_2;
 
     setup_decode_fixed_field(&position_open_pb.position.nonce, &nonce_arg, &position_open->position.nonce, 32);
-    setup_decode_fixed_field((pb_callback_t*)&position_open_pb.position.phi.pair.asset_1, &pair_asset_1,
-                             &position_open->position.phi.pair.asset_1, ASSET_ID_LEN);
-    setup_decode_fixed_field((pb_callback_t*)&position_open_pb.position.phi.pair.asset_2, &pair_asset_2,
-                             &position_open->position.phi.pair.asset_2, ASSET_ID_LEN);
+    setup_decode_fixed_field(&position_open_pb.position.phi.pair.asset_1.inner, &pair_asset_1,
+                             &position_open->position.phi.pair.asset_1.inner, ASSET_ID_LEN);
+    setup_decode_fixed_field(&position_open_pb.position.phi.pair.asset_2.inner, &pair_asset_2,
+                             &position_open->position.phi.pair.asset_2.inner, ASSET_ID_LEN);
 
     if (!pb_decode(&stream, penumbra_core_component_dex_v1_PositionOpen_fields, &position_open_pb)) {
         return parser_output_plan_error;
@@ -89,61 +90,100 @@ parser_error_t decode_position_open_plan(const bytes_t *data, position_open_plan
     return parser_ok;
 }
 
-// parser_error_t position_open_getNumItems(const parser_context_t *ctx, uint8_t *num_items) {
-//     UNUSED(ctx);
-//     // from spends we display only two items:
-//     // - Output 100 USDC
-//     // - To Main Account
-//     *num_items = 1;
-//     return parser_ok;
-// }
+parser_error_t position_open_getNumItems(const parser_context_t *ctx, uint8_t *num_items) {
+    UNUSED(ctx);
+    *num_items = 1;
+    return parser_ok;
+}
 
-// parser_error_t position_open_getItem(const parser_context_t *ctx, const position_open_t *output, uint8_t actionIdx, char
-// *outKey,
-//                               uint16_t outKeyLen, char *outVal, uint16_t outValLen, uint8_t pageIdx, uint8_t *pageCount) {
-//     parser_error_t err = parser_no_data;
-//     if (output == NULL || outKey == NULL || outVal == NULL || outKeyLen == 0 || outValLen == 0) {
-//         return err;
-//     }
+parser_error_t position_open_getItem(const parser_context_t *ctx, const position_open_plan_t *position_open,
+                                     uint8_t actionIdx, char *outKey, uint16_t outKeyLen, char *outVal, uint16_t outValLen,
+                                     uint8_t pageIdx, uint8_t *pageCount) {
+    parser_error_t err = parser_no_data;
+    if (position_open == NULL || outKey == NULL || outVal == NULL || outKeyLen == 0 || outValLen == 0) {
+        return err;
+    }
 
-//     char bufferUI[OUTPUT_DISPLAY_MAX_LEN] = {0};
+    char bufferUI[POSITION_OPEN_DISPLAY_MAX_LEN] = {0};
 
-//     snprintf(outKey, outKeyLen, "Action_%d", actionIdx);
-//     CHECK_ERROR(output_printValue(ctx, output, bufferUI, sizeof(bufferUI)));
-//     pageString(outVal, outValLen, bufferUI, pageIdx, pageCount);
+    snprintf(outKey, outKeyLen, "Action_%d", actionIdx);
+    CHECK_ERROR(position_open_printValue(ctx, position_open, bufferUI, sizeof(bufferUI)));
+    pageString(outVal, outValLen, bufferUI, pageIdx, pageCount);
 
-//     return parser_ok;
-// }
+    return parser_ok;
+}
 
-// parser_error_t position_open_printValue(const parser_context_t *ctx, const position_open_t *output, char *outVal,
-//                                  uint16_t outValLen) {
-//     if (ctx == NULL || output == NULL || outVal == NULL) {
-//         return parser_no_data;
-//     }
+parser_error_t position_open_printValue(const parser_context_t *ctx, const position_open_plan_t *position_open, char *outVal,
+                                        uint16_t outValLen) {
+    if (ctx == NULL || position_open == NULL || outVal == NULL) {
+        return parser_no_data;
+    }
 
-//     if (outValLen < OUTPUT_DISPLAY_MAX_LEN) {
-//         return parser_unexpected_buffer_end;
-//     }
+    if (outValLen < POSITION_OPEN_DISPLAY_MAX_LEN) {
+        return parser_unexpected_buffer_end;
+    }
 
-//     MEMZERO(outVal, outValLen);
+    MEMZERO(outVal, outValLen);
 
-//     // example: Output 100 USDC to penumbra1k0zzug62gpz60sejdvu9q7mq…
+    // add action title
+    snprintf(outVal, outValLen, "PositionOpen Reserves 1: ");
+    uint16_t written_value = strlen(outVal);
 
-//     // add action title
-//     snprintf(outVal, outValLen, "Output ");
-//     uint16_t written_value = strlen(outVal);
+    // add value r1
+    value_t r1_amount = {.amount = position_open->position.reserves.r1,
+                         .asset_id.inner = {.ptr = position_open->position.phi.pair.asset_1.inner.ptr, .len = ASSET_ID_LEN},
+                         .has_amount = true,
+                         .has_asset_id = true};
 
-//     // add value
-//     CHECK_ERROR(printValue(ctx, &output->value, &ctx->tx_obj->parameters_plan.chain_id, outVal + written_value,
-//                            outValLen - written_value));
-//     written_value = strlen(outVal);
+    CHECK_ERROR(printValue(ctx, &r1_amount, &ctx->tx_obj->parameters_plan.chain_id, outVal + written_value,
+                           outValLen - written_value));
+    written_value = strlen(outVal);
 
-//     // add "to"
-//     snprintf(outVal + written_value, outValLen - written_value, " to ");
-//     written_value = strlen(outVal);
+    // add "Reserves 2: "
+    snprintf(outVal + written_value, outValLen - written_value, " Reserves 2: ");
+    written_value = strlen(outVal);
 
-//     // add address
-//     CHECK_ERROR(printTxAddress(&output->dest_address.inner, outVal + written_value, outValLen - written_value));
+    // add value r2
+    value_t r2_amount = {.amount = position_open->position.reserves.r2,
+                         .asset_id.inner = {.ptr = position_open->position.phi.pair.asset_2.inner.ptr, .len = ASSET_ID_LEN},
+                         .has_amount = true,
+                         .has_asset_id = true};
 
-//     return parser_ok;
-// }
+    CHECK_ERROR(printValue(ctx, &r2_amount, &ctx->tx_obj->parameters_plan.chain_id, outVal + written_value,
+                           outValLen - written_value));
+    written_value = strlen(outVal);
+
+    // add "Trading Function p: "
+    snprintf(outVal + written_value, outValLen - written_value, " Trading Function p: ");
+    written_value = strlen(outVal);
+
+    // add value p
+    char value_p_str[U128_STR_MAX_LEN] = {0};
+    CHECK_ERROR(uint128_to_str(value_p_str, U128_STR_MAX_LEN, position_open->position.phi.component.p.hi,
+                               position_open->position.phi.component.p.lo))
+    snprintf(outVal + written_value, outValLen - written_value, "%s", value_p_str);
+    written_value = strlen(outVal);
+
+    // add "Trading Function q: "
+    snprintf(outVal + written_value, outValLen - written_value, " Trading Function q: ");
+    written_value = strlen(outVal);
+
+    // add value q
+    char value_q_str[U128_STR_MAX_LEN] = {0};
+    CHECK_ERROR(uint128_to_str(value_q_str, U128_STR_MAX_LEN, position_open->position.phi.component.q.hi,
+                               position_open->position.phi.component.q.lo))
+    snprintf(outVal + written_value, outValLen - written_value, "%s", value_q_str);
+    written_value = strlen(outVal);
+
+    // add "Fee: "
+    snprintf(outVal + written_value, outValLen - written_value, " Fee: %u", position_open->position.phi.component.fee);
+    written_value = strlen(outVal);
+
+    // add close_on_fill
+    if (position_open->position.close_on_fill) {
+        snprintf(outVal + written_value, outValLen - written_value, " Close on fill: true");
+    } 
+
+    return parser_ok;
+}
+
