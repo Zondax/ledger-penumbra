@@ -105,3 +105,6 @@
 
 // Constant to use to allocate a buffer on the stack to hold the formatting of an position_open action
 #define POSITION_OPEN_DISPLAY_MAX_LEN (2 * VALUE_DISPLAY_MAX_LEN + 110)  // = 434
+
+// Constant to use to allocate a buffer on the stack to hold the formatting of an position_close action
+#define POSITION_CLOSE_DISPLAY_MAX_LEN 100  // = 100
