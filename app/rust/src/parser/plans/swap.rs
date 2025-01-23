@@ -45,8 +45,6 @@ pub struct SwapPlanC {
     pub has_swap_plaintext: bool,
     pub swap_plaintext: SwapPlaintextC,
     pub fee_blinding: BytesC,
-    pub proof_blinding_r: BytesC,
-    pub proof_blinding_s: BytesC,
 }
 
 impl SwapPlanC {

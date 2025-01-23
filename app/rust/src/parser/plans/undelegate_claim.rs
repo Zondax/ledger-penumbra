@@ -48,14 +48,11 @@ pub struct Body {
 pub struct UndelegateClaimPlanC {
     pub has_validator_identity: bool,
     pub validator_identity: IdentityKeyC,
-    pub start_epoch_index: u64,
     pub has_penalty: bool,
     pub penalty: PenaltyC,
     pub has_unbonding_amount: bool,
     pub unbonding_amount: AmountC,
     pub balance_blinding: BytesC,
-    pub proof_blinding_r: BytesC,
-    pub proof_blinding_s: BytesC,
     pub unbonding_start_height: u64,
 }
 

@@ -42,8 +42,6 @@ pub struct SpendPlanC {
     pub position: u64,
     pub randomizer: BytesC,
     pub value_blinding: BytesC,
-    pub proof_blinding_r: BytesC,
-    pub proof_blinding_s: BytesC,
 }
 
 impl SpendPlanC {

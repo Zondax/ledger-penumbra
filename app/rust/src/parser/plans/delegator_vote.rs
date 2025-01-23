@@ -59,8 +59,6 @@ pub struct DelegatorVotePlanC {
     pub has_unbonded_amount: bool,
     pub unbonded_amount: AmountC,
     pub randomizer: BytesC,
-    pub proof_blinding_r: BytesC,
-    pub proof_blinding_s: BytesC,
 }
 
 impl DelegatorVotePlanC {

@@ -29,10 +29,8 @@ parser_error_t decode_action_dutch_auction_schedule_plan(
     CHECK_APP_CANARY()
 
     // Set up fixed size fields
-    fixed_size_field_t nonce_arg, input_asset_id_arg, output_asset_id_arg;
+    fixed_size_field_t input_asset_id_arg, output_asset_id_arg;
 
-    setup_decode_fixed_field(&action_dutch_auction_schedule_pb.description.nonce, &nonce_arg,
-                             &action_dutch_auction_schedule->description.nonce, 32);
     setup_decode_fixed_field(&action_dutch_auction_schedule_pb.description.input.asset_id.inner, &input_asset_id_arg,
                              &action_dutch_auction_schedule->description.input.asset_id.inner, ASSET_ID_LEN);
     setup_decode_fixed_field(&action_dutch_auction_schedule_pb.description.output_id.inner, &output_asset_id_arg,

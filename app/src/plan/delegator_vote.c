@@ -47,12 +47,8 @@ parser_error_t decode_delegator_vote_plan(const bytes_t *data, delegator_vote_pl
     CHECK_APP_CANARY()
 
     // Set up fixed size fields
-    fixed_size_field_t randomizer_arg, proof_blinding_r_arg, proof_blinding_s_arg;
+    fixed_size_field_t randomizer_arg;
     setup_decode_fixed_field(&delegator_vote_plan.randomizer, &randomizer_arg, &delegator_vote->randomizer, 32);
-    setup_decode_fixed_field(&delegator_vote_plan.proof_blinding_r, &proof_blinding_r_arg, &delegator_vote->proof_blinding_r,
-                             32);
-    setup_decode_fixed_field(&delegator_vote_plan.proof_blinding_s, &proof_blinding_s_arg, &delegator_vote->proof_blinding_s,
-                             32);
 
     // staked_note
     fixed_size_field_t address_inner_arg, asset_id_arg, rseed_arg;

@@ -244,6 +244,8 @@ parser_error_t _read(parser_context_t *c, parser_tx_t *v) {
     v->plan.has_detection_data = request.has_detection_data;
     v->plan.actions.qty = actions_qty;
 
+    ZEMU_LOGF(50, "STEP 1.0!!!!!\n");
+
     return parser_ok;
 }
 

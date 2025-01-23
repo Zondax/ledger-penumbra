@@ -37,7 +37,6 @@ parser_error_t decode_undelegate_plan(const bytes_t *data, undelegate_plan_t *un
     }
 
     undelegate->has_validator_identity = undelegate_plan.has_validator_identity;
-    undelegate->start_epoch_index = undelegate_plan.start_epoch_index;
     if (undelegate_plan.has_unbonded_amount) {
         undelegate->unbonded_amount.lo = undelegate_plan.unbonded_amount.lo;
         undelegate->unbonded_amount.hi = undelegate_plan.unbonded_amount.hi;
