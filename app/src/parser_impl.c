@@ -244,8 +244,6 @@ parser_error_t _read(parser_context_t *c, parser_tx_t *v) {
     v->plan.has_detection_data = request.has_detection_data;
     v->plan.actions.qty = actions_qty;
 
-    ZEMU_LOGF(50, "STEP 1.0!!!!!\n");
-
     return parser_ok;
 }
 
@@ -310,6 +308,10 @@ const char *parser_getErrorDescription(parser_error_t err) {
             return "Undelegate claim plan error";
         case parser_delegator_vote_plan_error:
             return "Delegator vote plan error";
+        case parser_position_open_plan_error:
+            return "Position open plan error";
+        case parser_position_close_plan_error:
+            return "Position close plan error";
         case parser_position_withdraw_plan_error:
             return "Position withdraw plan error";
 

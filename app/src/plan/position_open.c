@@ -34,7 +34,7 @@ parser_error_t decode_position_open_plan(const bytes_t *data, position_open_plan
                              &position_open->position.phi.pair.asset_2.inner, ASSET_ID_LEN);
 
     if (!pb_decode(&stream, penumbra_core_component_dex_v1_PositionOpen_fields, &position_open_pb)) {
-        return parser_output_plan_error;
+        return parser_position_open_plan_error;
     }
 
     position_open->has_position = position_open_pb.has_position;

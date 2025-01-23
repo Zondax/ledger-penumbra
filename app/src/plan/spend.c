@@ -116,7 +116,6 @@ parser_error_t spend_getItem(const parser_context_t *ctx, const spend_plan_t *sp
     char bufferUI[SPEND_DISPLAY_MAX_LEN] = {0};
 
     snprintf(outKey, outKeyLen, "Action_%d", actionIdx);
-    ZEMU_LOGF(50, "STEP 3.0!!!!!\n");
     CHECK_ERROR(spend_printValue(ctx, spend, bufferUI, sizeof(bufferUI)));
     pageString(outVal, outValLen, bufferUI, pageIdx, pageCount);
 

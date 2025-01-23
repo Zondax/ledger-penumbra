@@ -56,11 +56,6 @@ zxerr_t compute_action_hash(action_t *action, bytes_t *memo_key, hash_t *output)
                 return zxerr_encoding_failed;
             }
             break;
-        case penumbra_core_transaction_v1_ActionPlan_ics20_withdrawal_tag:
-            if (rs_generic_action_hash(&action->action_data, action->action_type, (uint8_t *)output, 64) != parser_ok) {
-                return zxerr_encoding_failed;
-            }
-            break;
 #if defined(FULL_APP)
         case penumbra_core_transaction_v1_ActionPlan_swap_tag:
             if (rs_swap_action_hash(&action->action.swap, (uint8_t *)output, 64) != parser_ok) {
@@ -68,6 +63,7 @@ zxerr_t compute_action_hash(action_t *action, bytes_t *memo_key, hash_t *output)
             }
             break;
 #endif
+        case penumbra_core_transaction_v1_ActionPlan_ics20_withdrawal_tag:
         case penumbra_core_transaction_v1_ActionPlan_delegate_tag:
         case penumbra_core_transaction_v1_ActionPlan_undelegate_tag:
         case penumbra_core_transaction_v1_ActionPlan_position_open_tag:

@@ -37,7 +37,7 @@ parser_error_t decode_undelegate_claim_plan(const bytes_t *data, undelegate_clai
                              &undelegate_claim_claim->balance_blinding, 32);
 
     if (!pb_decode(&stream, penumbra_core_component_stake_v1_UndelegateClaimPlan_fields, &undelegate_claim_plan)) {
-        return parser_undelegate_plan_error;
+        return parser_undelegate_claim_plan_error;
     }
 
     undelegate_claim_claim->has_validator_identity = undelegate_claim_plan.has_validator_identity;
