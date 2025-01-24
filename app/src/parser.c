@@ -42,6 +42,8 @@
 #include "tx_metadata.h"
 #include "undelegate.h"
 #include "undelegate_claim.h"
+#include "parser_interface.h"
+
 static uint8_t action_idx = 0;
 
 parser_error_t parser_init_context(parser_context_t *ctx, const uint8_t *buffer, uint16_t bufferSize) {
@@ -63,6 +65,21 @@ parser_error_t parser_parse(parser_context_t *ctx, const uint8_t *data, size_t d
     CHECK_ERROR(parser_init_context(ctx, data, dataLen))
     ctx->tx_obj = tx_obj;
     return _read(ctx, tx_obj);
+}
+
+parser_error_t parser_computeEffectHash(parser_context_t *ctx) {
+    // compute parameters hash
+    CHECK_ERROR(compute_parameters_hash(&ctx->tx_obj->parameters_plan.data_bytes, &ctx->tx_obj->plan.parameters_hash));
+
+    // compute action hashes
+    for (uint16_t i = 0; i < ctx->tx_obj->plan.actions.qty; i++) {
+        CHECK_ERROR(compute_action_hash(&ctx->tx_obj->actions_plan[i], &ctx->tx_obj->plan.memo.key, &ctx->tx_obj->plan.actions.hashes[i]));
+    }
+
+    // compute effect hash
+    CHECK_ERROR(compute_effect_hash(&ctx->tx_obj->plan, ctx->tx_obj->effect_hash, sizeof(ctx->tx_obj->effect_hash)));
+
+    return parser_ok;
 }
 
 parser_error_t parser_validate(parser_context_t *ctx) {
