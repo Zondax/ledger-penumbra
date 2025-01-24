@@ -69,8 +69,7 @@ impl OutputPlanC {
             state.update(&body.wrapped_memo_key.to_proto());
             state.update(&body.ovk_wrapped_key.to_proto());
 
-            let hash = state.finalize();
-            Ok(EffectHash(*hash.as_array()))
+            Ok(EffectHash(*state.finalize().as_array()))
         } else {
             Err(ParserError::InvalidLength)
         }

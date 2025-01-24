@@ -34,6 +34,7 @@
 #include "parameters.h"
 #include "parser_common.h"
 #include "parser_impl.h"
+#include "parser_interface.h"
 #include "position_close.h"
 #include "position_open.h"
 #include "position_withdraw.h"
@@ -42,7 +43,6 @@
 #include "tx_metadata.h"
 #include "undelegate.h"
 #include "undelegate_claim.h"
-#include "parser_interface.h"
 
 static uint8_t action_idx = 0;
 
@@ -73,7 +73,8 @@ parser_error_t parser_computeEffectHash(parser_context_t *ctx) {
 
     // compute action hashes
     for (uint16_t i = 0; i < ctx->tx_obj->plan.actions.qty; i++) {
-        CHECK_ERROR(compute_action_hash(&ctx->tx_obj->actions_plan[i], &ctx->tx_obj->plan.memo.key, &ctx->tx_obj->plan.actions.hashes[i]));
+        CHECK_ERROR(compute_action_hash(&ctx->tx_obj->actions_plan[i], &ctx->tx_obj->plan.memo.key,
+                                        &ctx->tx_obj->plan.actions.hashes[i]));
     }
 
     // compute effect hash
@@ -233,7 +234,7 @@ parser_error_t parser_getItem(const parser_context_t *ctx, uint8_t displayIdx, c
                     outKeyLen, outVal, outValLen, pageIdx, pageCount))
                 break;
             default:
-                return parser_unexpected_error;
+                return parser_invalid_action_type;
         }
     }
 

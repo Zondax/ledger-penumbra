@@ -159,7 +159,7 @@ zxerr_t crypto_sign(parser_tx_t *tx_obj, uint8_t *signature, uint16_t signatureM
     nv_signature_init();
 
     zxerr_t error = zxerr_invalid_crypto_settings;
-    
+
     // compute spend key
     CATCH_ZX_ERROR(computeSpendKey(&keys));
 

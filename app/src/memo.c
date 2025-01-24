@@ -36,7 +36,6 @@ parser_error_t memo_getItem(const parser_context_t *ctx, uint8_t displayIdx, cha
         return err;
     }
 
-
     char short_address[100] = {0};
     switch (displayIdx) {
         case 0:

@@ -32,8 +32,7 @@ parser_error_t decode_swap_plan(const bytes_t *data, swap_plan_t *swap) {
     CHECK_APP_CANARY()
 
     // Set up fixed size fields
-    fixed_size_field_t fee_blinding_arg, asset_1_arg, asset_2_arg,
-        fee_asset_id_arg, claim_address_arg, rseed_arg;
+    fixed_size_field_t fee_blinding_arg, asset_1_arg, asset_2_arg, fee_asset_id_arg, claim_address_arg, rseed_arg;
     setup_decode_fixed_field(&swap_plan.fee_blinding, &fee_blinding_arg, &swap->fee_blinding, 32);
 
     setup_decode_fixed_field(&swap_plan.swap_plaintext.trading_pair.asset_1.inner, &asset_1_arg,

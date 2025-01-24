@@ -65,8 +65,7 @@ impl SwapPlanC {
         state.update(&body.fee_commitment.to_proto_swap());
         state.update(&body.payload.to_proto());
 
-        let hash = state.finalize();
-        Ok(EffectHash(*hash.as_array()))
+        Ok(EffectHash(*state.finalize().as_array()))
     }
 
     pub fn swap_body(&self, fvk: &FullViewingKey) -> Result<Body, ParserError> {

@@ -77,8 +77,7 @@ impl UndelegateClaimPlanC {
         let len = encode_varint(body.unbonding_start_height, &mut encoded[pos..]);
         state.update(&encoded[..len + 1]);
 
-        let hash = state.finalize();
-        Ok(EffectHash(*hash.as_array()))
+        Ok(EffectHash(*state.finalize().as_array()))
     }
 
     pub fn undelegate_claim_body(&self) -> Result<Body, ParserError> {

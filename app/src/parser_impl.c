@@ -152,6 +152,7 @@ bool decode_action(pb_istream_t *stream, const pb_field_t *field, void **arg) {
                 &action_data_4, &decode_arg[actions_qty].action.action_dutch_auction_withdraw));
             break;
         default:
+            decode_error = parser_invalid_action_type;
             return false;
     }
     actions_qty++;

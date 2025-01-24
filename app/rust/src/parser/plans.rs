@@ -79,7 +79,7 @@ pub unsafe extern "C" fn rs_compute_effect_hash(
     let output = std::slice::from_raw_parts_mut(output, output_len);
 
     if output.len() < EFFECT_HASH_LEN {
-        return ParserError::UnexpectedData as u32;
+        return ParserError::InvalidLength as u32;
     }
 
     let plan_hash_result = plan.effect_hash();
@@ -105,8 +105,8 @@ pub unsafe extern "C" fn rs_parameter_hash(
     crate::zlog("rs_parameter_hash\x00");
     let output = std::slice::from_raw_parts_mut(output, output_len);
 
-    if output.len() < 64 {
-        return ParserError::Ok as u32;
+    if output.len() < EFFECT_HASH_LEN {
+        return ParserError::InvalidLength as u32;
     }
 
     let effect_hash: EffectHash;
@@ -137,21 +137,21 @@ pub unsafe extern "C" fn rs_spend_action_hash(
     crate::zlog("rs_spend_action_hash\x00");
     let output = std::slice::from_raw_parts_mut(output, output_len);
 
-    if output.len() < 64 {
-        return ParserError::Ok as u32;
+    if output.len() < EFFECT_HASH_LEN {
+        return ParserError::InvalidLength as u32;
     }
 
     let Ok(fvk) = c_fvk_bytes() else {
         return ParserError::InvalidFvk as u32;
     };
-    let body_hash_bytes = plan.effect_hash(&fvk);
 
-    if let Ok(body_hash_bytes) = body_hash_bytes {
-        let body_hash_array = body_hash_bytes.as_array();
-        let copy_len: usize = core::cmp::min(output.len(), body_hash_array.len());
-        output[..copy_len].copy_from_slice(&body_hash_array[..copy_len]);
-    } else {
-        return ParserError::SpendPlanError as u32;
+    match plan.effect_hash(&fvk) {
+        Ok(body_hash_bytes) => {
+            let body_hash_array = body_hash_bytes.as_array();
+            let copy_len: usize = core::cmp::min(output.len(), body_hash_array.len());
+            output[..copy_len].copy_from_slice(&body_hash_array[..copy_len]);
+        }
+        Err(err) => return err as u32,
     }
 
     ParserError::Ok as u32
@@ -169,8 +169,8 @@ pub unsafe extern "C" fn rs_output_action_hash(
     crate::zlog("rs_output_action_hash\x00");
     let output = std::slice::from_raw_parts_mut(output, output_len);
 
-    if output.len() < 64 {
-        return ParserError::Ok as u32;
+    if output.len() < EFFECT_HASH_LEN {
+        return ParserError::InvalidLength as u32;
     }
 
     let Ok(fvk) = c_fvk_bytes() else {
@@ -179,14 +179,13 @@ pub unsafe extern "C" fn rs_output_action_hash(
 
     let memo_key_bytes = memo_key.get_bytes().unwrap_or(&[0u8; 32]);
 
-    let body_hash_bytes = plan.effect_hash(&fvk, memo_key_bytes);
-
-    if let Ok(body_hash_bytes) = body_hash_bytes {
-        let body_hash_array = body_hash_bytes.as_array();
-        let copy_len: usize = core::cmp::min(output.len(), body_hash_array.len());
+    match plan.effect_hash(&fvk, memo_key_bytes) {
+        Ok(body_hash_bytes) => {
+            let body_hash_array = body_hash_bytes.as_array();
+            let copy_len: usize = core::cmp::min(output.len(), body_hash_array.len());
         output[..copy_len].copy_from_slice(&body_hash_array[..copy_len]);
-    } else {
-        return ParserError::OutputPlanError as u32;
+        }
+        Err(err) => return err as u32,
     }
 
     ParserError::Ok as u32
@@ -203,22 +202,21 @@ pub unsafe extern "C" fn rs_swap_action_hash(
     crate::zlog("rs_swap_action_hash\x00");
     let output = std::slice::from_raw_parts_mut(output, output_len);
 
-    if output.len() < 64 {
-        return ParserError::Ok as u32;
+    if output.len() < EFFECT_HASH_LEN {
+        return ParserError::InvalidLength as u32;
     }
 
     let Ok(fvk) = c_fvk_bytes() else {
         return ParserError::InvalidFvk as u32;
     };
 
-    let body_hash_bytes = plan.effect_hash(&fvk);
-
-    if let Ok(body_hash_bytes) = body_hash_bytes {
-        let body_hash_array = body_hash_bytes.as_array();
-        let copy_len: usize = core::cmp::min(output.len(), body_hash_array.len());
-        output[..copy_len].copy_from_slice(&body_hash_array[..copy_len]);
-    } else {
-        return ParserError::SwapPlanError as u32;
+    match plan.effect_hash(&fvk) {
+        Ok(body_hash_bytes) => {
+            let body_hash_array = body_hash_bytes.as_array();
+            let copy_len: usize = core::cmp::min(output.len(), body_hash_array.len());
+            output[..copy_len].copy_from_slice(&body_hash_array[..copy_len]);
+        }
+        Err(err) => return err as u32,
     }
 
     ParserError::Ok as u32
@@ -235,18 +233,17 @@ pub unsafe extern "C" fn rs_undelegate_claim_action_hash(
     crate::zlog("rs_undelegate_claim_action_hash\x00");
     let output = std::slice::from_raw_parts_mut(output, output_len);
 
-    if output.len() < 64 {
-        return ParserError::Ok as u32;
+    if output.len() < EFFECT_HASH_LEN {
+        return ParserError::InvalidLength as u32;
     }
 
-    let body_hash_bytes = plan.effect_hash();
-
-    if let Ok(body_hash_bytes) = body_hash_bytes {
-        let body_hash_array = body_hash_bytes.as_array();
-        let copy_len: usize = core::cmp::min(output.len(), body_hash_array.len());
-        output[..copy_len].copy_from_slice(&body_hash_array[..copy_len]);
-    } else {
-        return ParserError::UndelegateClaimPlanError as u32;
+    match plan.effect_hash() {
+        Ok(body_hash_bytes) => {
+            let body_hash_array = body_hash_bytes.as_array();
+            let copy_len: usize = core::cmp::min(output.len(), body_hash_array.len());
+            output[..copy_len].copy_from_slice(&body_hash_array[..copy_len]);
+        }
+        Err(err) => return err as u32,
     }
 
     ParserError::Ok as u32
@@ -263,22 +260,21 @@ pub unsafe extern "C" fn rs_delegator_vote_action_hash(
     crate::zlog("rs_delegator_vote_action_hash\x00");
     let output = std::slice::from_raw_parts_mut(output, output_len);
 
-    if output.len() < 64 {
-        return ParserError::Ok as u32;
+    if output.len() < EFFECT_HASH_LEN {
+        return ParserError::InvalidLength as u32;
     }
 
     let Ok(fvk) = c_fvk_bytes() else {
         return ParserError::InvalidFvk as u32;
     };
 
-    let body_hash_bytes = plan.effect_hash(&fvk);
-
-    if let Ok(body_hash_bytes) = body_hash_bytes {
-        let body_hash_array = body_hash_bytes.as_array();
-        let copy_len: usize = core::cmp::min(output.len(), body_hash_array.len());
-        output[..copy_len].copy_from_slice(&body_hash_array[..copy_len]);
-    } else {
-        return ParserError::DelegatorVotePlanError as u32;
+    match plan.effect_hash(&fvk) {
+        Ok(body_hash_bytes) => {
+            let body_hash_array = body_hash_bytes.as_array();
+            let copy_len: usize = core::cmp::min(output.len(), body_hash_array.len());
+            output[..copy_len].copy_from_slice(&body_hash_array[..copy_len]);
+        }
+        Err(err) => return err as u32,
     }
 
     ParserError::Ok as u32
@@ -295,18 +291,17 @@ pub unsafe extern "C" fn rs_position_withdraw_action_hash(
     crate::zlog("rs_position_withdraw_action_hash\x00");
     let output = std::slice::from_raw_parts_mut(output, output_len);
 
-    if output.len() < 64 {
-        return ParserError::Ok as u32;
+    if output.len() < EFFECT_HASH_LEN {
+        return ParserError::InvalidLength as u32;
     }
 
-    let body_hash_bytes = plan.effect_hash();
-
-    if let Ok(body_hash_bytes) = body_hash_bytes {
-        let body_hash_array = body_hash_bytes.as_array();
-        let copy_len: usize = core::cmp::min(output.len(), body_hash_array.len());
-        output[..copy_len].copy_from_slice(&body_hash_array[..copy_len]);
-    } else {
-        return ParserError::PositionWithdrawPlanError as u32;
+    match plan.effect_hash() {
+        Ok(body_hash_bytes) => {
+            let body_hash_array = body_hash_bytes.as_array();
+            let copy_len: usize = core::cmp::min(output.len(), body_hash_array.len());
+            output[..copy_len].copy_from_slice(&body_hash_array[..copy_len]);
+        }
+        Err(err) => return err as u32,
     }
 
     ParserError::Ok as u32
@@ -323,18 +318,17 @@ pub unsafe extern "C" fn rs_action_dutch_auction_withdraw_action_hash(
     crate::zlog("rs_action_dutch_auction_withdraw_action_hash\x00");
     let output = std::slice::from_raw_parts_mut(output, output_len);
 
-    if output.len() < 64 {
-        return ParserError::Ok as u32;
+    if output.len() < EFFECT_HASH_LEN {
+        return ParserError::InvalidLength as u32;
     }
 
-    let body_hash_bytes = plan.effect_hash();
-
-    if let Ok(body_hash_bytes) = body_hash_bytes {
-        let body_hash_array = body_hash_bytes.as_array();
-        let copy_len: usize = core::cmp::min(output.len(), body_hash_array.len());
-        output[..copy_len].copy_from_slice(&body_hash_array[..copy_len]);
-    } else {
-        return ParserError::DutchAuctionWithdrawPlanError as u32;
+    match plan.effect_hash() {
+        Ok(body_hash_bytes) => {
+            let body_hash_array = body_hash_bytes.as_array();
+            let copy_len: usize = core::cmp::min(output.len(), body_hash_array.len());
+            output[..copy_len].copy_from_slice(&body_hash_array[..copy_len]);
+        }
+        Err(err) => return err as u32,
     }
 
     ParserError::Ok as u32
@@ -352,8 +346,8 @@ pub unsafe extern "C" fn rs_generic_action_hash(
     crate::zlog("rs_generic_action_hash\x00");
     let output = std::slice::from_raw_parts_mut(output, output_len);
 
-    if output.len() < 64 {
-        return ParserError::Ok as u32;
+    if output.len() < EFFECT_HASH_LEN {
+        return ParserError::InvalidLength as u32;
     }
 
     let action_type = ActionPlan::from(action_type);
@@ -403,7 +397,7 @@ pub unsafe extern "C" fn rs_generic_action_hash(
                 );
             }
             _ => {
-                return ParserError::UnexpectedData as u32;
+                return ParserError::InvalidActionType as u32;
             }
         }
 
