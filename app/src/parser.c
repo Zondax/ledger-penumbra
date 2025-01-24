@@ -68,17 +68,30 @@ parser_error_t parser_parse(parser_context_t *ctx, const uint8_t *data, size_t d
 }
 
 parser_error_t parser_computeEffectHash(parser_context_t *ctx) {
+#if defined(LEDGER_SPECIFIC)
+    io_seproxyhal_io_heartbeat();
+#endif
     // compute parameters hash
     CHECK_ERROR(compute_parameters_hash(&ctx->tx_obj->parameters_plan.data_bytes, &ctx->tx_obj->plan.parameters_hash));
 
     // compute action hashes
     for (uint16_t i = 0; i < ctx->tx_obj->plan.actions.qty; i++) {
+#if defined(LEDGER_SPECIFIC)
+        io_seproxyhal_io_heartbeat();
+#endif
         CHECK_ERROR(compute_action_hash(&ctx->tx_obj->actions_plan[i], &ctx->tx_obj->plan.memo.key,
                                         &ctx->tx_obj->plan.actions.hashes[i]));
     }
 
+#if defined(LEDGER_SPECIFIC)
+    io_seproxyhal_io_heartbeat();
+#endif
     // compute effect hash
     CHECK_ERROR(compute_effect_hash(&ctx->tx_obj->plan, ctx->tx_obj->effect_hash, sizeof(ctx->tx_obj->effect_hash)));
+
+#if defined(LEDGER_SPECIFIC)
+    io_seproxyhal_io_heartbeat();
+#endif
 
     return parser_ok;
 }
