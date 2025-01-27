@@ -142,7 +142,6 @@ parser_error_t action_dutch_auction_withdraw_printValue(
     snprintf(outVal + written_value, outValLen - written_value, " Sequence number: ");
     written_value = strlen(outVal);
     snprintf(outVal + written_value, outValLen - written_value, "%llu", action_dutch_auction_withdraw->seq);
-    written_value = strlen(outVal);
 
     return parser_ok;
 }
