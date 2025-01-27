@@ -168,7 +168,9 @@ parser_error_t position_open_printValue(const parser_context_t *ctx, const posit
     written_value = strlen(outVal);
 
     // add "Fee: "
-    snprintf(outVal + written_value, outValLen - written_value, " Fee: %u", position_open->position.phi.component.fee);
+    snprintf(outVal + written_value, outValLen - written_value, " Fee: ");
+    written_value = strlen(outVal);
+    uint32_to_str(outVal + written_value, outValLen - written_value, position_open->position.phi.component.fee);
     written_value = strlen(outVal);
 
     // add close_on_fill

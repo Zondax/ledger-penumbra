@@ -137,7 +137,7 @@ parser_error_t delegator_vote_printValue(const parser_context_t *ctx, const dele
     uint16_t written_value = strlen(outVal);
 
     // add proposal
-    snprintf(outVal + written_value, outValLen - written_value, "%llu", delegator_vote->proposal);
+    uint64_to_str(outVal + written_value, outValLen - written_value, delegator_vote->proposal);
     written_value = strlen(outVal);
 
     // add vote

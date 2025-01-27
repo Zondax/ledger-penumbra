@@ -184,22 +184,20 @@ parser_error_t action_dutch_auction_schedule_printValue(
     // Start block height
     snprintf(outVal + written_value, outValLen - written_value, " Start block height: ");
     written_value = strlen(outVal);
-    snprintf(outVal + written_value, outValLen - written_value, "%llu",
-             action_dutch_auction_schedule->description.start_height);
+    uint64_to_str(outVal + written_value, outValLen - written_value,
+                  action_dutch_auction_schedule->description.start_height);
     written_value = strlen(outVal);
 
     // End block height
     snprintf(outVal + written_value, outValLen - written_value, " End block height: ");
     written_value = strlen(outVal);
-    snprintf(outVal + written_value, outValLen - written_value, "%llu",
-             action_dutch_auction_schedule->description.end_height);
+    uint64_to_str(outVal + written_value, outValLen - written_value, action_dutch_auction_schedule->description.end_height);
     written_value = strlen(outVal);
 
     // Step count
     snprintf(outVal + written_value, outValLen - written_value, " Steps: ");
     written_value = strlen(outVal);
-    snprintf(outVal + written_value, outValLen - written_value, "%llu",
-             action_dutch_auction_schedule->description.step_count);
+    uint64_to_str(outVal + written_value, outValLen - written_value, action_dutch_auction_schedule->description.step_count);
 
     return parser_ok;
 }

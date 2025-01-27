@@ -77,7 +77,7 @@ parser_error_t spend_printValue(const parser_context_t *ctx, const spend_plan_t 
     // example: Spend 100 USDC to penumbra1k0zzug62gpz60sejdvu9q7mq…
 
     // add action title
-    snprintf(outVal, outValLen, "%s", "Spend ");
+    snprintf(outVal, outValLen, "Spend ");
     uint16_t written_value = strlen(outVal);
 
     // add value
