@@ -79,30 +79,27 @@ pub(crate) fn canary() {
     }
 }
 
-#[cfg(all(
-    not(test),
-    not(feature = "clippy"),
-    not(feature = "fuzzing"),
-    not(feature = "cpp_tests")
-))]
 pub fn is_expert_mode() -> bool {
-    unsafe { app_mode_expert() > 0 }
-}
-
-#[cfg(any(test, feature = "clippy", feature = "fuzzing", feature = "cpp_tests"))]
-pub fn is_expert_mode() -> bool {
-    true
+    cfg_if::cfg_if! {
+        if #[cfg(all(not(test), not(feature = "clippy"), not(feature = "fuzzing"), not(feature = "cpp_tests")))] {
+            unsafe {
+                app_mode_expert() > 0
+            }
+        } else {
+            true
+        }
+    }
 }
 
 pub fn zlog(_msg: &str) {
-    #[cfg(all(
-        not(test),
-        not(feature = "clippy"),
-        not(feature = "fuzzing"),
-        not(feature = "cpp_tests")
-    ))]
-    unsafe {
-        zemu_log_stack(_msg.as_bytes().as_ptr());
+    cfg_if::cfg_if! {
+        if #[cfg(all(not(test), not(feature = "clippy"), not(feature = "fuzzing"), not(feature = "cpp_tests")))] {
+            unsafe {
+                zemu_log_stack(_msg.as_bytes().as_ptr());
+            }
+        } else {
+            std::println!("{}", _msg);
+        }
     }
 }
 
@@ -112,4 +109,16 @@ macro_rules! check_canary {
         use canary;
         canary();
     };
+}
+
+pub fn pic_addr(addr: u32) -> u32 {
+    cfg_if::cfg_if! {
+        if #[cfg(all(not(test), not(feature = "clippy"), not(feature = "fuzzing"), not(feature = "cpp_tests")))] {
+        unsafe {
+            pic(addr)
+        }
+        } else {
+            addr
+        }
+    }
 }
