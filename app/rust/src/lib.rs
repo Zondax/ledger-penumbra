@@ -17,7 +17,6 @@
 #![no_builtins]
 #![allow(dead_code)]
 #![deny(unused_crate_dependencies)]
-#![feature(inline_const)]
 
 extern crate no_std_compat as std;
 
@@ -40,6 +39,8 @@ pub mod zxerror;
 pub use parser::{FromBytes, ParserError, ViewError};
 pub(crate) use utils::prf::{expand_fq, expand_fr};
 
+pub(crate) use bolos::*;
+
 fn debug(_msg: &str) {}
 
 // for cpp_tests we need to define the panic handler
@@ -52,73 +53,4 @@ use core::panic::PanicInfo;
 #[panic_handler]
 fn panic(_info: &PanicInfo) -> ! {
     loop {}
-}
-
-#[cfg(all(
-    not(test),
-    not(feature = "clippy"),
-    not(feature = "fuzzing"),
-    not(feature = "cpp_tests")
-))]
-extern "C" {
-    fn check_app_canary();
-    fn pic(link_address: u32) -> u32;
-    fn app_mode_expert() -> u8;
-    fn zemu_log_stack(s: *const u8);
-}
-
-pub(crate) fn canary() {
-    #[cfg(all(
-        not(test),
-        not(feature = "clippy"),
-        not(feature = "fuzzing"),
-        not(feature = "cpp_tests")
-    ))]
-    unsafe {
-        check_app_canary();
-    }
-}
-
-pub fn is_expert_mode() -> bool {
-    cfg_if::cfg_if! {
-        if #[cfg(all(not(test), not(feature = "clippy"), not(feature = "fuzzing"), not(feature = "cpp_tests")))] {
-            unsafe {
-                app_mode_expert() > 0
-            }
-        } else {
-            true
-        }
-    }
-}
-
-pub fn zlog(_msg: &str) {
-    cfg_if::cfg_if! {
-        if #[cfg(all(not(test), not(feature = "clippy"), not(feature = "fuzzing"), not(feature = "cpp_tests")))] {
-            unsafe {
-                zemu_log_stack(_msg.as_bytes().as_ptr());
-            }
-        } else {
-            std::println!("{}", _msg);
-        }
-    }
-}
-
-#[macro_export]
-macro_rules! check_canary {
-    () => {
-        use canary;
-        canary();
-    };
-}
-
-pub fn pic_addr(addr: u32) -> u32 {
-    cfg_if::cfg_if! {
-        if #[cfg(all(not(test), not(feature = "clippy"), not(feature = "fuzzing"), not(feature = "cpp_tests")))] {
-        unsafe {
-            pic(addr)
-        }
-        } else {
-            addr
-        }
-    }
 }
