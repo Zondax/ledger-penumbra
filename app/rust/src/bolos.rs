@@ -27,12 +27,15 @@ use rand::{CryptoRng, RngCore};
     not(feature = "cpp_tests")
 ))]
 extern "C" {
-    fn cx_rng(buffer: *mut u8, len: u32);
     fn check_app_canary();
     fn pic(link_address: u32) -> u32;
     fn app_mode_expert() -> u8;
     fn zemu_log_stack(s: *const u8);
     fn io_heartbeat();
+}
+
+extern "C" {
+    fn cx_rng(buffer: *mut u8, len: u32);
 }
 
 pub struct Trng;
@@ -97,14 +100,14 @@ pub fn is_expert_mode() -> bool {
 }
 
 pub fn zlog(_msg: &str) {
-    cfg_if::cfg_if! {
-        if #[cfg(all(not(test), not(feature = "clippy"), not(feature = "fuzzing"), not(feature = "cpp_tests")))] {
-            unsafe {
-                zemu_log_stack(_msg.as_bytes().as_ptr());
-            }
-        } else {
-            std::println!("{}", _msg);
-        }
+    #[cfg(all(
+        not(test),
+        not(feature = "clippy"),
+        not(feature = "fuzzing"),
+        not(feature = "cpp_tests")
+    ))]
+    unsafe {
+        zemu_log_stack(_msg.as_bytes().as_ptr());
     }
 }
 
