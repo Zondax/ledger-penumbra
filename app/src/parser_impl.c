@@ -253,7 +253,7 @@ parser_error_t _read(parser_context_t *c, parser_tx_t *v) {
     }
 
     // Calculate action addresses now to avoid delay in display
-    for (uint8_t i = 0; i < actions_qty; i++) {
+    for (uint16_t i = 0; i < actions_qty; i++) {
         switch (v->actions_plan[i].action_type) {
             case penumbra_core_transaction_v1_ActionPlan_spend_tag:
                 CHECK_ERROR(printTxAddress(&v->actions_plan[i].action.spend.note.address.inner,
