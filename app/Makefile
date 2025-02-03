@@ -114,7 +114,8 @@ else
 CFLAGS += -O3 -Os -Wno-unknown-pragmas -Wno-unused-parameter
 endif
 
-APP_CUSTOM_LINK_DEPENDENCIES = rust
+# make rust a prerequisite for all object files
+$(OBJECT_FILES): rust
 
 .PHONY: rust
 rust:
@@ -132,10 +133,6 @@ rust_clean:
 	cd rust && CARGO_HOME="$(CURDIR)/rust/.cargo" cargo clean
 
 clean: rust_clean
-
-
-# make rust a prerequisite for all object files
-$(OBJECT_FILES): rust
 
 #add dependency on custom makefile filename
 dep/%.d: %.c Makefile
