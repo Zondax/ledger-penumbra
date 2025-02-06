@@ -14,6 +14,7 @@
 *  limitations under the License.
 ********************************************************************************/
 
+use crate::constants::ACTION_DUTCH_AUCTION_WITHDRAWAL_PERSONALIZED;
 use crate::parser::{
     balance::Balance,
     commitment::Commitment,
@@ -49,7 +50,8 @@ impl ActionDutchAuctionWithdrawPlanC {
         let action_dutch_auction_withdraw = self.to_action()?;
 
         let mut state = create_personalized_state(
-            "/penumbra.core.component.auction.v1.ActionDutchAuctionWithdraw",
+            std::str::from_utf8(ACTION_DUTCH_AUCTION_WITHDRAWAL_PERSONALIZED)
+                .expect("ACTION_DUTCH_AUCTION_WITHDRAWAL_PERSONALIZED must be valid UTF-8"),
         );
 
         // auction_id

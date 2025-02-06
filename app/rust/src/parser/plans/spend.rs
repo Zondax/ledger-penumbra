@@ -14,6 +14,7 @@
 *  limitations under the License.
 ********************************************************************************/
 
+use crate::constants::SPEND_PERSONALIZED;
 use crate::keys::FullViewingKey;
 use crate::parser::{
     balance::Balance,
@@ -48,8 +49,10 @@ impl SpendPlanC {
     pub fn effect_hash(&self, fvk: &FullViewingKey) -> Result<EffectHash, ParserError> {
         let body = self.spend_body(fvk)?;
 
-        let mut state =
-            create_personalized_state("/penumbra.core.component.shielded_pool.v1.SpendBody");
+        let mut state = create_personalized_state(
+            std::str::from_utf8(SPEND_PERSONALIZED)
+                .expect("SPEND_PERSONALIZED must be valid UTF-8"),
+        );
 
         state.update(&body.balance_commitment.to_proto_spend());
 

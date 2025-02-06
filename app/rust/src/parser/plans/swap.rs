@@ -14,6 +14,7 @@
 *  limitations under the License.
 ********************************************************************************/
 
+use crate::constants::SWAP_PERSONALIZED;
 use crate::keys::FullViewingKey;
 use crate::parser::{
     amount::Amount,
@@ -51,7 +52,9 @@ impl SwapPlanC {
     pub fn effect_hash(&self, fvk: &FullViewingKey) -> Result<EffectHash, ParserError> {
         let body = self.swap_body(fvk)?;
 
-        let mut state = create_personalized_state("/penumbra.core.component.dex.v1.SwapBody");
+        let mut state = create_personalized_state(
+            std::str::from_utf8(SWAP_PERSONALIZED).expect("SWAP_PERSONALIZED must be valid UTF-8"),
+        );
 
         state.update(&body.trading_pair.to_proto()?);
         state.update(&[0x12]); // encode tag

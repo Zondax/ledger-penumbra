@@ -14,6 +14,7 @@
 *  limitations under the License.
 ********************************************************************************/
 
+use crate::constants::UNDELEGATE_CLAIM_PERSONALIZED;
 use crate::ffi::bech32::bech32_encode;
 use crate::parser::{
     amount::AmountC,
@@ -60,8 +61,10 @@ impl UndelegateClaimPlanC {
     pub fn effect_hash(&self) -> Result<EffectHash, ParserError> {
         let body = self.undelegate_claim_body()?;
 
-        let mut state =
-            create_personalized_state("/penumbra.core.component.stake.v1.UndelegateClaimBody");
+        let mut state = create_personalized_state(
+            std::str::from_utf8(UNDELEGATE_CLAIM_PERSONALIZED)
+                .expect("UNDELEGATE_CLAIM_PERSONALIZED must be valid UTF-8"),
+        );
 
         state.update(&[0x0a, 0x22, 0x0a, 0x20]); // encode header 0a220a20 validator_identity
         state.update(&body.validator_identity);

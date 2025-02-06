@@ -15,6 +15,7 @@
 ********************************************************************************/
 
 use crate::address::Address;
+use crate::constants::OUTPUT_PERSONALIZED;
 use crate::keys::FullViewingKey;
 use crate::parser::note::Note;
 use crate::parser::{
@@ -61,8 +62,10 @@ impl OutputPlanC {
         let body = self.body(fvk, &memo_payload_key);
 
         if let Ok(body) = body {
-            let mut state =
-                create_personalized_state("/penumbra.core.component.shielded_pool.v1.OutputBody");
+            let mut state = create_personalized_state(
+                std::str::from_utf8(OUTPUT_PERSONALIZED)
+                    .expect("OUTPUT_PERSONALIZED must be valid UTF-8"),
+            );
 
             state.update(&body.note_payload.to_proto());
             state.update(&body.balance_commitment.to_proto_output());

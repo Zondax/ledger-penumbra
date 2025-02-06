@@ -14,7 +14,7 @@
 *  limitations under the License.
 ********************************************************************************/
 
-use crate::constants::MAX_REWARDS;
+use crate::constants::{MAX_REWARDS, POSITION_WITHDRAWAL_PERSONALIZED};
 use crate::parser::{
     commitment::Commitment,
     effect_hash::{create_personalized_state, EffectHash},
@@ -57,8 +57,10 @@ impl PositionWithdrawPlanC {
     pub fn effect_hash(&self) -> Result<EffectHash, ParserError> {
         let position_withdraw = self.position_withdraw()?;
 
-        let mut state =
-            create_personalized_state("/penumbra.core.component.dex.v1.PositionWithdraw");
+        let mut state = create_personalized_state(
+            std::str::from_utf8(POSITION_WITHDRAWAL_PERSONALIZED)
+                .expect("POSITION_WITHDRAWAL_PERSONALIZED must be valid UTF-8"),
+        );
 
         // position_id
         state.update(&[0x0a, 0x22, 0x0a, 0x20]);

@@ -14,6 +14,7 @@
 *  limitations under the License.
 ********************************************************************************/
 
+use crate::constants::DELEGATOR_VOTE_PERSONALIZED;
 use crate::keys::FullViewingKey;
 use crate::parser::{
     amount::{Amount, AmountC},
@@ -65,8 +66,10 @@ impl DelegatorVotePlanC {
     pub fn effect_hash(&self, fvk: &FullViewingKey) -> Result<EffectHash, ParserError> {
         let body = self.delegator_vote_body(fvk)?;
 
-        let mut state =
-            create_personalized_state("/penumbra.core.component.governance.v1.DelegatorVoteBody");
+        let mut state = create_personalized_state(
+            std::str::from_utf8(DELEGATOR_VOTE_PERSONALIZED)
+                .expect("DELEGATOR_VOTE_PERSONALIZED must be valid UTF-8"),
+        );
 
         // proposal
         let mut encoded = [0u8; 11];
