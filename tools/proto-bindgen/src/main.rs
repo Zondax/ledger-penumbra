@@ -9,7 +9,7 @@ fn main() {
     println!("Current dir: {:?}", std::env::current_dir().unwrap());
 
     let protobuf_dir = Path::new("../../app/src/protobuf");
-    let output_dir = Path::new("../../app/rust/src/protobuf-h");
+    let output_dir = Path::new("../../app/rust/src/protobuf_h");
 
     // Get absolute paths
     let protobuf_dir = protobuf_dir.canonicalize().expect("Failed to resolve protobuf directory");
@@ -45,6 +45,8 @@ fn main() {
             && path.file_stem().and_then(|s| s.to_str()).map(|s| s.ends_with(".pb")).unwrap_or(false) {
             
             let file_name = path.file_stem().unwrap().to_str().unwrap();
+            // Replace .pb with _pb in the output filename
+            let file_name = file_name.replace(".pb", "_pb");
             let output_file = output_dir.join(format!("{}.rs", file_name));
 
             println!("Processing: {:?} -> {:?}", path, output_file);
@@ -55,6 +57,7 @@ fn main() {
                 .clang_arg("-I../../app/src/nanopb_tiny")  // Include path for nanopb
                 .clang_arg("-I../../app/src/protobuf")  // Include path for protobuf
                 .parse_callbacks(Box::new(bindgen::CargoCallbacks::new()))
+                .allowlist_var(r"^([A-Za-z0-9_]+_tag.*|[A-Z0-9_]+)$")  // Include defines with _tag or all caps
                 .generate()
                 .expect("Unable to generate bindings");
 

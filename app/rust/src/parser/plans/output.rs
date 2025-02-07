@@ -32,6 +32,13 @@ use crate::parser::{
 };
 use crate::ParserError;
 use decaf377::Fr;
+use crate::utils::protobuf::encode_and_update_proto_field;
+use crate::protobuf_h::shielded_pool_pb::{
+    penumbra_core_component_shielded_pool_v1_OutputBody_balance_commitment_tag,
+    penumbra_core_component_shielded_pool_v1_OutputBody_wrapped_memo_key_tag,
+    penumbra_core_component_shielded_pool_v1_OutputBody_ovk_wrapped_key_tag, PB_LTYPE_UVARINT,
+};
+
 
 #[derive(Clone)]
 #[cfg_attr(any(feature = "derive-debug", test), derive(Debug))]
@@ -67,10 +74,32 @@ impl OutputPlanC {
                     .expect("OUTPUT_PERSONALIZED must be valid UTF-8"),
             );
 
-            state.update(&body.note_payload.to_proto());
-            state.update(&body.balance_commitment.to_proto_output());
-            state.update(&body.wrapped_memo_key.to_proto());
-            state.update(&body.ovk_wrapped_key.to_proto());
+            // Encode note payload
+            body.note_payload.update_proto(&mut state)?;
+
+            // Encode balance commitment
+            encode_and_update_proto_field(
+                &mut state,
+                penumbra_core_component_shielded_pool_v1_OutputBody_balance_commitment_tag as u64,
+                PB_LTYPE_UVARINT as u64,
+                &body.balance_commitment.to_proto(),
+            )?;
+
+            // Encode wrapped memo key
+            encode_and_update_proto_field(
+                &mut state,
+                penumbra_core_component_shielded_pool_v1_OutputBody_wrapped_memo_key_tag as u64,
+                PB_LTYPE_UVARINT as u64,
+                &body.wrapped_memo_key.0,
+            )?;
+
+            // Encode ovk wrapped key
+            encode_and_update_proto_field(
+                &mut state,
+                penumbra_core_component_shielded_pool_v1_OutputBody_ovk_wrapped_key_tag as u64,
+                PB_LTYPE_UVARINT as u64,
+                &body.ovk_wrapped_key.0,
+            )?;
 
             Ok(EffectHash(*state.finalize().as_array()))
         } else {

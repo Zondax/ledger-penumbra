@@ -14,6 +14,13 @@
 *  limitations under the License.
 ********************************************************************************/
 
+use crate::protobuf_h::asset_pb::{
+    penumbra_core_asset_v1_BalanceCommitment_inner_tag, PB_LTYPE_UVARINT,
+};
+use crate::protobuf_h::tct_pb::{
+    penumbra_crypto_tct_v1_StateCommitment_inner_tag,
+};
+use crate::utils::protobuf::encode_varint;
 use decaf377::{Element, Encoding, Fq};
 
 #[derive(Clone)]
@@ -33,7 +40,7 @@ pub struct StateCommitment(pub Fq);
 
 impl Commitment {
     pub const LEN: usize = 32;
-    pub const PROTO_LEN: usize = Self::LEN + 4;
+    pub const PROTO_LEN: usize = Self::LEN + 2;
 
     pub fn value_blinding_generator() -> decaf377::Element {
         let s =
@@ -41,11 +48,15 @@ impl Commitment {
         decaf377::Element::encode_to_curve(&s)
     }
 
-    pub fn to_proto_spend(&self) -> [u8; Self::PROTO_LEN] {
-        // let x = self.0.to_bytes();
+    pub fn to_proto(&self) -> [u8; Self::PROTO_LEN] {
         let mut proto = [0u8; Self::PROTO_LEN];
-        proto[0..4].copy_from_slice(&[0x0a, 0x22, 0x0a, 0x20]);
-        proto[4..].copy_from_slice(&self.bytes_compress());
+
+        let tag_and_type =
+            penumbra_core_asset_v1_BalanceCommitment_inner_tag << 3 | PB_LTYPE_UVARINT;
+        let mut len = encode_varint(tag_and_type as u64, &mut proto);
+        len += encode_varint(Self::LEN as u64, &mut proto[len..]);
+
+        proto[len..].copy_from_slice(&self.bytes_compress());
         proto
     }
 
@@ -100,12 +111,24 @@ impl From<Element> for Commitment {
 
 impl StateCommitment {
     pub const LEN: usize = 32;
-    pub const PROTO_LEN: usize = Self::LEN + 4;
+    pub const PROTO_LEN: usize = Self::LEN + 2;
 
     pub fn to_proto_swap(&self) -> [u8; Self::PROTO_LEN] {
         let mut proto = [0u8; Self::PROTO_LEN];
         proto[0..4].copy_from_slice(&[0x0a, 0x22, 0x0a, 0x20]);
         proto[4..].copy_from_slice(&self.0.to_bytes());
+        proto
+    }
+
+    pub fn to_proto(&self) -> [u8; Self::PROTO_LEN] {
+        let mut proto = [0u8; Self::PROTO_LEN];
+
+        let tag_and_type =
+        penumbra_crypto_tct_v1_StateCommitment_inner_tag << 3 | PB_LTYPE_UVARINT;
+        let mut len = encode_varint(tag_and_type as u64, &mut proto);
+        len += encode_varint(Self::LEN as u64, &mut proto[len..]);
+
+        proto[len..].copy_from_slice(&self.0.to_bytes());
         proto
     }
 }
