@@ -84,4 +84,4 @@ app/rust/.cargo/git
 app/rust/target
 
 tools/proto-compiler/target
-tools/proto-h-to-rs/target
+tools/proto-bindgen/target
