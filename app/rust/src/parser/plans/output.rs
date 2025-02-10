@@ -34,6 +34,7 @@ use crate::ParserError;
 use decaf377::Fr;
 use crate::utils::protobuf::encode_and_update_proto_field;
 use crate::protobuf_h::shielded_pool_pb::{
+    penumbra_core_component_shielded_pool_v1_OutputBody_note_payload_tag,
     penumbra_core_component_shielded_pool_v1_OutputBody_balance_commitment_tag,
     penumbra_core_component_shielded_pool_v1_OutputBody_wrapped_memo_key_tag,
     penumbra_core_component_shielded_pool_v1_OutputBody_ovk_wrapped_key_tag, PB_LTYPE_UVARINT,
@@ -75,14 +76,19 @@ impl OutputPlanC {
             );
 
             // Encode note payload
-            body.note_payload.update_proto(&mut state)?;
+            encode_and_update_proto_field(
+                &mut state,
+                penumbra_core_component_shielded_pool_v1_OutputBody_note_payload_tag as u64,
+                PB_LTYPE_UVARINT as u64,
+                &body.note_payload.to_proto()?,
+            )?;
 
             // Encode balance commitment
             encode_and_update_proto_field(
                 &mut state,
                 penumbra_core_component_shielded_pool_v1_OutputBody_balance_commitment_tag as u64,
                 PB_LTYPE_UVARINT as u64,
-                &body.balance_commitment.to_proto(),
+                &body.balance_commitment.to_proto()?,
             )?;
 
             // Encode wrapped memo key

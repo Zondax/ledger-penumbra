@@ -30,6 +30,8 @@ use crate::parser::{
 use crate::utils::apdu_unwrap::ApduPanic;
 use crate::ParserError;
 use decaf377::{Element, Encoding, Fq, Fr};
+use crate::utils::protobuf::encode_proto_field;
+use crate::protobuf_h::shielded_pool_pb::{penumbra_core_component_shielded_pool_v1_NoteCiphertext_inner_tag, PB_LTYPE_UVARINT};
 
 pub const NOTE_LEN_BYTES: usize = 160;
 pub const NOTE_CIPHERTEXT_BYTES: usize = 176;
@@ -206,6 +208,24 @@ impl Note {
             .ephemeral_secret_key()
             .map_err(|_| ParserError::UnexpectedError)?
             .diversified_public(&self.diversified_generator()?))
+    }
+}
+
+impl NoteCiphertext {
+    pub const PROTO_LEN: usize = NOTE_CIPHERTEXT_BYTES + 3;
+
+    pub fn to_proto(&self) -> Result<[u8; Self::PROTO_LEN], ParserError> {
+        let mut proto = [0u8; Self::PROTO_LEN];
+
+        let len = encode_proto_field(
+            penumbra_core_component_shielded_pool_v1_NoteCiphertext_inner_tag as u64,
+            PB_LTYPE_UVARINT as u64,
+            &self.0,
+            &mut proto,
+        )?;
+
+        proto[len..].copy_from_slice(&self.0);
+        Ok(proto)
     }
 }
 

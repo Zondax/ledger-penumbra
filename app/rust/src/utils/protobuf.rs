@@ -63,7 +63,7 @@ pub fn encode_and_update_proto_field(
     wire_type: u64,
     value: &[u8],
 ) -> Result<(), ParserError> {
-    let mut proto_buf = [0u8; 20]; // Increased from 4 to safely handle two max-sized varints
+    let mut proto_buf = [0u8; 20];
         
     let len = encode_proto_field(tag, wire_type, value, &mut proto_buf)?;
 

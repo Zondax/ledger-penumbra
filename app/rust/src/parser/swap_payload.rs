@@ -33,8 +33,8 @@ impl SwapPayload {
         let mut proto = [0u8; Self::PROTO_LEN];
 
         proto[0..3].copy_from_slice(&Self::PROTO_PREFIX);
-        proto[3..Commitment::PROTO_LEN + 3].copy_from_slice(&self.commitment.to_proto_swap());
-        proto[Commitment::PROTO_LEN + 3..Self::PROTO_LEN]
+        proto[3..36 + 3].copy_from_slice(&self.commitment.to_proto_swap());
+        proto[36 + 3..Self::PROTO_LEN]
             .copy_from_slice(&self.encrypted_swap.to_proto());
 
         proto

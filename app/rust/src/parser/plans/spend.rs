@@ -81,7 +81,7 @@ impl SpendPlanC {
             &mut state,
             penumbra_core_component_shielded_pool_v1_SpendBody_balance_commitment_tag as u64,
             PB_LTYPE_UVARINT as u64,
-            &body.balance_commitment.to_proto(),
+            &body.balance_commitment.to_proto()?,
         )?;
 
         // Encode rk

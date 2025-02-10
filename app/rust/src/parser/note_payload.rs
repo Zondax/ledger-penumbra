@@ -36,50 +36,48 @@ pub struct NotePayload {
 
 impl NotePayload {
     pub const LEN: usize = 32 + 32 + NOTE_CIPHERTEXT_BYTES;
-    pub const PROTO_LEN: usize = Self::LEN + 15;
-    pub const PROTO_PREFIX_NOTE_COMMITMENT: [u8; 3] = [0x0a, 0xfc, 0x01];
-    pub const PROTO_PREFIX_EPHEMERAL_KEY: [u8; 2] = [0x12, 0x20];
-    pub const PROTO_PREFIX_ENCRYPTED_NOTE: [u8; 6] = [0x1a, 0xb3, 0x01, 0x0a, 0xb0, 0x01];
+    pub const PROTO_LEN: usize = Self::LEN + 12;
 
-    pub fn to_proto(&self) -> [u8; Self::PROTO_LEN] {
+    pub fn to_proto(&self) -> Result<[u8; Self::PROTO_LEN], ParserError> {
         let mut proto = [0u8; Self::PROTO_LEN];
-        proto[0..5].copy_from_slice(&Self::PROTO_PREFIX_NOTE_COMMITMENT);
-        proto[5..39].copy_from_slice(&self.note_commitment.to_proto());
-        proto[39..41].copy_from_slice(&Self::PROTO_PREFIX_EPHEMERAL_KEY);
-        proto[41..73].copy_from_slice(&self.ephemeral_key.0);
-        proto[73..79].copy_from_slice(&Self::PROTO_PREFIX_ENCRYPTED_NOTE);
-        proto[79..].copy_from_slice(&self.encrypted_note.0);
+        let mut offset = 0;
 
-        proto
-    }
-
-    pub fn update_proto(&self, state: &mut blake2b_simd::State) -> Result<(), ParserError> {
-        let mut proto = [0u8; Self::PROTO_LEN];
-        proto[0..3].copy_from_slice(&Self::PROTO_PREFIX_NOTE_COMMITMENT);
-        //proto[5..39].copy_from_slice(&self.note_commitment.to_proto());
-
-        encode_proto_field(
+        // Encode note_commitment
+        let note_commitment_bytes = self.note_commitment.to_proto()?;
+        offset += encode_proto_field(
             penumbra_core_component_shielded_pool_v1_NotePayload_note_commitment_tag as u64,
             PB_LTYPE_UVARINT as u64,
-            &self.note_commitment.to_proto(),
-            &mut proto[3..5],
+            &note_commitment_bytes,
+            &mut proto[offset..offset + 2],
         )?;
-        proto[5..39].copy_from_slice(&self.note_commitment.to_proto());
+        proto[offset..offset + note_commitment_bytes.len()].copy_from_slice(&note_commitment_bytes);
+        offset += note_commitment_bytes.len();
 
-        encode_proto_field(
+        // Encode ephemeral_key
+        offset += encode_proto_field(
             penumbra_core_component_shielded_pool_v1_NotePayload_ephemeral_key_tag as u64,
             PB_LTYPE_UVARINT as u64,
             &self.ephemeral_key.0,
-            &mut proto[39..41],
+            &mut proto[offset..offset + 2],
         )?;
-        proto[41..73].copy_from_slice(&self.ephemeral_key.0);
-        
-        proto[73..79].copy_from_slice(&Self::PROTO_PREFIX_ENCRYPTED_NOTE);
-        proto[79..].copy_from_slice(&self.encrypted_note.0);
+        proto[offset..offset + self.ephemeral_key.0.len()].copy_from_slice(&self.ephemeral_key.0);
+        offset += self.ephemeral_key.0.len();
 
+        // Encode encrypted_note
+        let encrypted_note_bytes = self.encrypted_note.to_proto()?;
+        offset += encode_proto_field(
+            penumbra_core_component_shielded_pool_v1_NotePayload_encrypted_note_tag as u64,
+            PB_LTYPE_UVARINT as u64,
+            &encrypted_note_bytes,
+            &mut proto[offset..offset + 3],
+        )?;
+        proto[offset..offset + encrypted_note_bytes.len()].copy_from_slice(&encrypted_note_bytes);
+        offset += encrypted_note_bytes.len();
 
+        if offset != Self::PROTO_LEN {
+            return Err(ParserError::InvalidLength);
+        }
 
-        state.update(&proto);
-        Ok(())
+        Ok(proto)
     }
 }

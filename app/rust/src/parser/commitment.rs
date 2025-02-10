@@ -20,8 +20,9 @@ use crate::protobuf_h::asset_pb::{
 use crate::protobuf_h::tct_pb::{
     penumbra_crypto_tct_v1_StateCommitment_inner_tag,
 };
-use crate::utils::protobuf::encode_varint;
+use crate::utils::protobuf::{encode_proto_field, encode_varint};
 use decaf377::{Element, Encoding, Fq};
+use crate::ParserError;
 
 #[derive(Clone)]
 #[cfg_attr(any(feature = "derive-debug", test), derive(Debug))]
@@ -48,16 +49,23 @@ impl Commitment {
         decaf377::Element::encode_to_curve(&s)
     }
 
-    pub fn to_proto(&self) -> [u8; Self::PROTO_LEN] {
+    pub fn to_proto(&self) -> Result<[u8; Self::PROTO_LEN], ParserError> {
         let mut proto = [0u8; Self::PROTO_LEN];
 
-        let tag_and_type =
-            penumbra_core_asset_v1_BalanceCommitment_inner_tag << 3 | PB_LTYPE_UVARINT;
-        let mut len = encode_varint(tag_and_type as u64, &mut proto);
-        len += encode_varint(Self::LEN as u64, &mut proto[len..]);
+        let bytes = self.bytes_compress();
+        let len = encode_proto_field(
+            penumbra_core_asset_v1_BalanceCommitment_inner_tag as u64,
+            PB_LTYPE_UVARINT as u64,
+            &bytes,
+            &mut proto,
+        )?;
 
-        proto[len..].copy_from_slice(&self.bytes_compress());
-        proto
+        if len + bytes.len() != Self::PROTO_LEN {
+            return Err(ParserError::InvalidLength);
+        }
+
+        proto[len..].copy_from_slice(&bytes);
+        Ok(proto)
     }
 
     pub fn to_proto_output(&self) -> [u8; Self::PROTO_LEN] {
@@ -68,8 +76,8 @@ impl Commitment {
         proto
     }
 
-    pub fn to_proto_swap(&self) -> [u8; Self::PROTO_LEN] {
-        let mut proto = [0u8; Self::PROTO_LEN];
+    pub fn to_proto_swap(&self) -> [u8; Self::PROTO_LEN+2] {
+        let mut proto = [0u8; Self::PROTO_LEN+2];
         proto[0..4].copy_from_slice(&[0x22, 0x22, 0x0a, 0x20]);
         proto[4..].copy_from_slice(&self.0 .0);
         proto
@@ -113,22 +121,29 @@ impl StateCommitment {
     pub const LEN: usize = 32;
     pub const PROTO_LEN: usize = Self::LEN + 2;
 
-    pub fn to_proto_swap(&self) -> [u8; Self::PROTO_LEN] {
-        let mut proto = [0u8; Self::PROTO_LEN];
+    pub fn to_proto_swap(&self) -> [u8; Self::PROTO_LEN + 2] {
+        let mut proto = [0u8; Self::PROTO_LEN + 2];
         proto[0..4].copy_from_slice(&[0x0a, 0x22, 0x0a, 0x20]);
         proto[4..].copy_from_slice(&self.0.to_bytes());
         proto
     }
 
-    pub fn to_proto(&self) -> [u8; Self::PROTO_LEN] {
+    pub fn to_proto(&self) -> Result<[u8; Self::PROTO_LEN], ParserError> {
         let mut proto = [0u8; Self::PROTO_LEN];
 
-        let tag_and_type =
-        penumbra_crypto_tct_v1_StateCommitment_inner_tag << 3 | PB_LTYPE_UVARINT;
-        let mut len = encode_varint(tag_and_type as u64, &mut proto);
-        len += encode_varint(Self::LEN as u64, &mut proto[len..]);
+        let bytes = self.0.to_bytes();
+        let len = encode_proto_field(
+            penumbra_crypto_tct_v1_StateCommitment_inner_tag as u64,
+            PB_LTYPE_UVARINT as u64,
+            &bytes,
+            &mut proto,
+        )?;
 
-        proto[len..].copy_from_slice(&self.0.to_bytes());
-        proto
+        if len + bytes.len() != Self::PROTO_LEN {
+            return Err(ParserError::InvalidLength);
+        }
+
+        proto[len..].copy_from_slice(&bytes);
+        Ok(proto)
     }
 }
