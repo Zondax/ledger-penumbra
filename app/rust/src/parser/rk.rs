@@ -14,41 +14,26 @@
 *  limitations under the License.
 ********************************************************************************/
 
-use crate::keys::nk::NullifierKey;
-use crate::protobuf_h::sct_pb::{
-    penumbra_core_component_sct_v1_Nullifier_inner_tag, PB_LTYPE_UVARINT,
+use crate::constants::RK_LEN_BYTES;
+use crate::protobuf_h::decaf377_rdsa_pb::{
+    penumbra_crypto_decaf377_rdsa_v1_SpendVerificationKey_inner_tag, PB_LTYPE_UVARINT,
 };
 use crate::utils::protobuf::encode_proto_field;
 use crate::ParserError;
-use decaf377::Fq;
-use poseidon377::hash_3;
+use decaf377_rdsa::{SpendAuth, VerificationKey};
 
-#[cfg_attr(any(feature = "derive-debug", test), derive(Debug))]
-pub struct Nullifier(pub Fq);
+#[derive(Clone, PartialEq, Eq)]
+pub struct Rk(pub VerificationKey<SpendAuth>);
 
-impl Nullifier {
-    pub const LEN: usize = 32;
-    pub const PROTO_LEN: usize = Self::LEN + 2;
-
-    /// Derive the [`Nullifier`] for a positioned note or swap given its [`merkle::Position`]
-    /// and [`Commitment`].
-    pub fn derive(nk: &NullifierKey, pos: u64, state_commitment: &Fq) -> Nullifier {
-        Nullifier(hash_3(
-            &Self::nullifier_domain_sep(),
-            (nk.0, *state_commitment, pos.into()),
-        ))
-    }
-
-    fn nullifier_domain_sep() -> Fq {
-        Fq::from_le_bytes_mod_order(blake2b_simd::blake2b(b"penumbra.nullifier").as_bytes())
-    }
+impl Rk {
+    pub const PROTO_LEN: usize = RK_LEN_BYTES + 2;
 
     pub fn to_proto(&self) -> Result<[u8; Self::PROTO_LEN], ParserError> {
         let mut proto = [0u8; Self::PROTO_LEN];
 
         let bytes = self.0.to_bytes();
         let len = encode_proto_field(
-            penumbra_core_component_sct_v1_Nullifier_inner_tag as u64,
+            penumbra_crypto_decaf377_rdsa_v1_SpendVerificationKey_inner_tag as u64,
             PB_LTYPE_UVARINT as u64,
             &bytes,
             &mut proto,

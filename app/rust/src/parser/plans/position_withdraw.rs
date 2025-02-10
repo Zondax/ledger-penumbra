@@ -77,7 +77,7 @@ impl PositionWithdrawPlanC {
         let mut encoded = [0u8; 11];
         encoded[0] = 0x18;
         let pos = 1;
-        let len = encode_varint(position_withdraw.sequence, &mut encoded[pos..]);
+        let len = encode_varint(position_withdraw.sequence, &mut encoded[pos..])?;
         state.update(&encoded[..len + 1]);
 
         Ok(EffectHash(*state.finalize().as_array()))

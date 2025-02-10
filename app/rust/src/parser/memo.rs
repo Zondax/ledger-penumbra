@@ -92,7 +92,7 @@ impl MemoCiphertext {
         // Max size needed for u64 varint + 1 byte tag
         let mut tag_and_len = [0u8; 11];
         tag_and_len[0] = 0x0A; // Tag
-        let varint_len = encode_varint(len as u64, &mut tag_and_len[1..]);
+        let varint_len = encode_varint(len as u64, &mut tag_and_len[1..]).unwrap();
 
         state.update(&tag_and_len[..varint_len + 1]);
         state.update(&self.0);

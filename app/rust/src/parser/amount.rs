@@ -51,13 +51,13 @@ impl Amount {
         if lo != 0 {
             encoded[pos] = Self::PROTO_PREFIX_LO[0];
             pos += 1;
-            pos += encode_varint(lo, &mut encoded[pos..]);
+            pos += encode_varint(lo, &mut encoded[pos..]).unwrap();
         }
 
         if hi != 0 {
             encoded[pos] = Self::PROTO_PREFIX_HI[0];
             pos += 1;
-            pos += encode_varint(hi, &mut encoded[pos..]);
+            pos += encode_varint(hi, &mut encoded[pos..]).unwrap();
         }
 
         // Add the value of pos to the first byte of encoded

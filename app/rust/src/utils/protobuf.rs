@@ -16,8 +16,13 @@
 
 use crate::ParserError;
 
-pub fn encode_varint(mut value: u64, buf: &mut [u8]) -> usize {
+pub fn encode_varint(mut value: u64, buf: &mut [u8]) -> Result<usize, ParserError> {
+    if buf.is_empty() {
+        return Err(ParserError::InvalidLength);
+    }
+
     let mut pos = 0;
+    let size = buf.len();
     loop {
         let mut byte = (value & 0x7F) as u8;
         value >>= 7;
@@ -26,11 +31,33 @@ pub fn encode_varint(mut value: u64, buf: &mut [u8]) -> usize {
         }
         buf[pos] = byte;
         pos += 1;
+        if pos > size {
+            return Err(ParserError::InvalidLength);
+        }
         if value == 0 {
             break;
         }
     }
-    pos
+
+    Ok(pos)
+}
+
+pub fn encode_proto_number(tag: u64, value: u64, buf: &mut [u8]) -> Result<usize, ParserError> {
+    if buf.is_empty() {
+        return Err(ParserError::InvalidLength);
+    }
+
+    let mut len = encode_varint(tag << 3, buf)?;
+    if len >= buf.len() {
+        return Err(ParserError::InvalidLength);
+    }
+
+    len += encode_varint(value, &mut buf[len..])?;
+    if len > buf.len() {
+        return Err(ParserError::InvalidLength);
+    }
+
+    Ok(len)
 }
 
 pub fn encode_proto_field(
@@ -39,15 +66,16 @@ pub fn encode_proto_field(
     value: &[u8],
     buf: &mut [u8],
 ) -> Result<usize, ParserError> {
-    let tag_and_type = tag << 3 | wire_type;
-    let mut len = encode_varint(tag_and_type, buf);
-    if len >= buf.len() {
+    if buf.is_empty() {
         return Err(ParserError::InvalidLength);
     }
 
+    let tag_and_type = tag << 3 | wire_type;
+    let mut len = encode_varint(tag_and_type, buf)?;
+
     let remaining_buf = &mut buf[len..];
     let value_len = value.len();
-    let varint_len = encode_varint(value_len as u64, remaining_buf);
+    let varint_len = encode_varint(value_len as u64, remaining_buf)?;
     len += varint_len;
 
     if len > buf.len() {
@@ -78,9 +106,8 @@ pub fn encode_and_update_proto_number(
     value: u64,
 ) -> Result<(), ParserError> {
     let mut proto_buf = [0u8; 20];
-    let len = encode_varint(value, &mut proto_buf);
+    let len = encode_proto_number(tag, value, &mut proto_buf)?;
 
-    state.update(&[(tag << 3) as u8]);
     state.update(&proto_buf[..len]);
     Ok(())
 }

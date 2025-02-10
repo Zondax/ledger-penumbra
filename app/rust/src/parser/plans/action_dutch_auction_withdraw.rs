@@ -62,7 +62,7 @@ impl ActionDutchAuctionWithdrawPlanC {
         let mut encoded = [0u8; 11];
         encoded[0] = 0x10;
         let pos = 1;
-        let len = encode_varint(action_dutch_auction_withdraw.seq, &mut encoded[pos..]);
+        let len = encode_varint(action_dutch_auction_withdraw.seq, &mut encoded[pos..])?;
         state.update(&encoded[..len + 1]);
 
         // reserves_commitment

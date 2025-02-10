@@ -5,6 +5,7 @@
 pub mod asset_pb;
 pub mod decaf377_rdsa_pb;
 pub mod dex_pb;
+pub mod governance_pb;
 pub mod keys_pb;
 pub mod num_pb;
 pub mod sct_pb;

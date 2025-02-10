@@ -73,7 +73,7 @@ impl Value {
 
         // Encode the length as a varint
         let mut value_len_encoded = [0u8; 10];
-        let len = encode_varint(value_len as u64, &mut value_len_encoded);
+        let len = encode_varint(value_len as u64, &mut value_len_encoded).unwrap();
 
         // Initialize the proto buffer
         let mut proto = [0u8; 62];
