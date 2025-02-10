@@ -18,13 +18,13 @@ use crate::keys::ka;
 use crate::parser::commitment::StateCommitment;
 use crate::parser::note::NoteCiphertext;
 use crate::parser::note::NOTE_CIPHERTEXT_BYTES;
-use crate::ParserError;
-use crate::utils::protobuf::encode_proto_field;
 use crate::protobuf_h::shielded_pool_pb::{
-    penumbra_core_component_shielded_pool_v1_NotePayload_note_commitment_tag,
+    penumbra_core_component_shielded_pool_v1_NotePayload_encrypted_note_tag,
     penumbra_core_component_shielded_pool_v1_NotePayload_ephemeral_key_tag,
-    penumbra_core_component_shielded_pool_v1_NotePayload_encrypted_note_tag, PB_LTYPE_UVARINT,
+    penumbra_core_component_shielded_pool_v1_NotePayload_note_commitment_tag, PB_LTYPE_UVARINT,
 };
+use crate::utils::protobuf::encode_proto_field;
+use crate::ParserError;
 
 #[derive(Clone)]
 #[cfg_attr(any(feature = "derive-debug", test), derive(Debug))]

@@ -16,9 +16,12 @@
 
 use crate::parser::bytes::BytesC;
 use crate::parser::id::{Id, IdC};
-use crate::ParserError;
+use crate::protobuf_h::dex_pb::{
+    penumbra_core_component_dex_v1_TradingPair_asset_1_tag,
+    penumbra_core_component_dex_v1_TradingPair_asset_2_tag, PB_LTYPE_UVARINT,
+};
 use crate::utils::protobuf::encode_proto_field;
-use crate::protobuf_h::dex_pb::{penumbra_core_component_dex_v1_TradingPair_asset_1_tag, penumbra_core_component_dex_v1_TradingPair_asset_2_tag, PB_LTYPE_UVARINT};
+use crate::ParserError;
 
 #[derive(Clone, Debug)]
 pub struct TradingPair {

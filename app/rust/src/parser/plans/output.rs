@@ -30,16 +30,15 @@ use crate::parser::{
     symmetric::{OvkWrappedKey, WrappedMemoKey},
     value::{Imbalance, Sign, Value, ValueC},
 };
+use crate::protobuf_h::shielded_pool_pb::{
+    penumbra_core_component_shielded_pool_v1_OutputBody_balance_commitment_tag,
+    penumbra_core_component_shielded_pool_v1_OutputBody_note_payload_tag,
+    penumbra_core_component_shielded_pool_v1_OutputBody_ovk_wrapped_key_tag,
+    penumbra_core_component_shielded_pool_v1_OutputBody_wrapped_memo_key_tag, PB_LTYPE_UVARINT,
+};
+use crate::utils::protobuf::encode_and_update_proto_field;
 use crate::ParserError;
 use decaf377::Fr;
-use crate::utils::protobuf::encode_and_update_proto_field;
-use crate::protobuf_h::shielded_pool_pb::{
-    penumbra_core_component_shielded_pool_v1_OutputBody_note_payload_tag,
-    penumbra_core_component_shielded_pool_v1_OutputBody_balance_commitment_tag,
-    penumbra_core_component_shielded_pool_v1_OutputBody_wrapped_memo_key_tag,
-    penumbra_core_component_shielded_pool_v1_OutputBody_ovk_wrapped_key_tag, PB_LTYPE_UVARINT,
-};
-
 
 #[derive(Clone)]
 #[cfg_attr(any(feature = "derive-debug", test), derive(Debug))]

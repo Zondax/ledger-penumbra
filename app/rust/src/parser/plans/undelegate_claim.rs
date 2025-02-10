@@ -26,17 +26,24 @@ use crate::parser::{
     id::Id,
     identity_key::IdentityKeyC,
     penalty::{Penalty, PenaltyC},
+    validator_identity::ValidatorIdentity,
 };
-use crate::utils::protobuf::encode_varint;
+use crate::protobuf_h::stake_pb::{
+    penumbra_core_component_stake_v1_UndelegateClaimBody_balance_commitment_tag,
+    penumbra_core_component_stake_v1_UndelegateClaimBody_penalty_tag,
+    penumbra_core_component_stake_v1_UndelegateClaimBody_unbonding_start_height_tag,
+    penumbra_core_component_stake_v1_UndelegateClaimBody_validator_identity_tag, PB_LTYPE_UVARINT,
+};
+use crate::utils::protobuf::{encode_and_update_proto_field, encode_and_update_proto_number};
 use crate::ParserError;
 use decaf377::{Fq, Fr};
 use itoa::Buffer;
 
 pub struct Body {
     /// The identity key of the validator to undelegate from.
-    pub validator_identity: [u8; 32],
+    pub validator_identity: ValidatorIdentity,
     /// The penalty applied to undelegation, in bps^2.
-    pub penalty: [u8; 32],
+    pub penalty: Penalty,
     /// The action's contribution to the transaction's value balance.
     pub balance_commitment: Commitment,
     /// The height at which unbonding started.
@@ -66,19 +73,36 @@ impl UndelegateClaimPlanC {
                 .expect("UNDELEGATE_CLAIM_PERSONALIZED must be valid UTF-8"),
         );
 
-        state.update(&[0x0a, 0x22, 0x0a, 0x20]); // encode header 0a220a20 validator_identity
-        state.update(&body.validator_identity);
+        // encode validator identity
+        encode_and_update_proto_field(
+            &mut state,
+            penumbra_core_component_stake_v1_UndelegateClaimBody_validator_identity_tag as u64,
+            PB_LTYPE_UVARINT as u64,
+            &body.validator_identity.to_proto()?,
+        )?;
 
-        state.update(&[0x1a, 0x22, 0x0a, 0x20]); // encode header 1a220a20 penalty
-        state.update(&body.penalty);
+        // encode penalty
+        encode_and_update_proto_field(
+            &mut state,
+            penumbra_core_component_stake_v1_UndelegateClaimBody_penalty_tag as u64,
+            PB_LTYPE_UVARINT as u64,
+            &body.penalty.to_proto()?,
+        )?;
 
-        state.update(&body.balance_commitment.to_proto_unbonding_claim());
+        // encode balance commitment
+        encode_and_update_proto_field(
+            &mut state,
+            penumbra_core_component_stake_v1_UndelegateClaimBody_balance_commitment_tag as u64,
+            PB_LTYPE_UVARINT as u64,
+            &body.balance_commitment.to_proto()?,
+        )?;
 
-        let mut encoded = [0u8; 10];
-        encoded[0] = 0x28;
-        let pos = 1;
-        let len = encode_varint(body.unbonding_start_height, &mut encoded[pos..]);
-        state.update(&encoded[..len + 1]);
+        // encode unbonding start height
+        encode_and_update_proto_number(
+            &mut state,
+            penumbra_core_component_stake_v1_UndelegateClaimBody_unbonding_start_height_tag as u64,
+            body.unbonding_start_height,
+        )?;
 
         Ok(EffectHash(*state.finalize().as_array()))
     }
@@ -99,7 +123,7 @@ impl UndelegateClaimPlanC {
         let balance_commitment = self.balance()?.commit(self.get_balance_blinding_fr()?)?;
 
         let body = Body {
-            validator_identity,
+            validator_identity: ValidatorIdentity(validator_identity),
             penalty,
             balance_commitment,
             unbonding_start_height: self.unbonding_start_height,

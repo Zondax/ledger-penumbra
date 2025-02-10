@@ -27,10 +27,16 @@ use crate::parser::{
     swap_plaintext::SwapPlaintextC,
     trading_pair::TradingPair,
 };
+use crate::protobuf_h::dex_pb::{
+    penumbra_core_component_dex_v1_SwapBody_delta_1_i_tag,
+    penumbra_core_component_dex_v1_SwapBody_delta_2_i_tag,
+    penumbra_core_component_dex_v1_SwapBody_fee_commitment_tag,
+    penumbra_core_component_dex_v1_SwapBody_payload_tag,
+    penumbra_core_component_dex_v1_SwapBody_trading_pair_tag, PB_LTYPE_UVARINT,
+};
+use crate::utils::protobuf::encode_and_update_proto_field;
 use crate::ParserError;
 use decaf377::Fr;
-use crate::protobuf_h::dex_pb::{penumbra_core_component_dex_v1_SwapBody_trading_pair_tag,penumbra_core_component_dex_v1_SwapBody_delta_1_i_tag, penumbra_core_component_dex_v1_SwapBody_delta_2_i_tag, penumbra_core_component_dex_v1_SwapBody_fee_commitment_tag, penumbra_core_component_dex_v1_SwapBody_payload_tag, PB_LTYPE_UVARINT};
-use crate::utils::protobuf::encode_and_update_proto_field;
 
 #[cfg_attr(any(feature = "derive-debug", test), derive(Debug))]
 pub struct Body {

@@ -14,13 +14,16 @@
 *  limitations under the License.
 ********************************************************************************/
 
+use crate::constants::SWAP_CIPHERTEXT_BYTES;
 use crate::parser::commitment::Commitment;
 use crate::parser::commitment::StateCommitment;
 use crate::parser::swap_ciphertext::SwapCiphertext;
-use crate::protobuf_h::dex_pb::{penumbra_core_component_dex_v1_SwapPayload_commitment_tag, penumbra_core_component_dex_v1_SwapPayload_encrypted_swap_tag, PB_LTYPE_UVARINT};
+use crate::protobuf_h::dex_pb::{
+    penumbra_core_component_dex_v1_SwapPayload_commitment_tag,
+    penumbra_core_component_dex_v1_SwapPayload_encrypted_swap_tag, PB_LTYPE_UVARINT,
+};
 use crate::utils::protobuf::encode_proto_field;
 use crate::ParserError;
-use crate::constants::SWAP_CIPHERTEXT_BYTES;
 
 #[derive(Clone, PartialEq, Eq)]
 #[cfg_attr(any(feature = "derive-debug", test), derive(Debug))]

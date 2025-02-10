@@ -4,8 +4,10 @@
 
 pub mod asset_pb;
 pub mod decaf377_rdsa_pb;
+pub mod dex_pb;
+pub mod keys_pb;
+pub mod num_pb;
 pub mod sct_pb;
 pub mod shielded_pool_pb;
+pub mod stake_pb;
 pub mod tct_pb;
-pub mod dex_pb;
-pub mod num_pb;

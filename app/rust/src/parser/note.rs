@@ -27,11 +27,13 @@ use crate::parser::{
     symmetric::{OutgoingCipherKey, OvkWrappedKey, PayloadKind, OVK_WRAPPED_LEN_BYTES},
     value::{Value, ValueC},
 };
+use crate::protobuf_h::shielded_pool_pb::{
+    penumbra_core_component_shielded_pool_v1_NoteCiphertext_inner_tag, PB_LTYPE_UVARINT,
+};
 use crate::utils::apdu_unwrap::ApduPanic;
+use crate::utils::protobuf::encode_proto_field;
 use crate::ParserError;
 use decaf377::{Element, Encoding, Fq, Fr};
-use crate::utils::protobuf::encode_proto_field;
-use crate::protobuf_h::shielded_pool_pb::{penumbra_core_component_shielded_pool_v1_NoteCiphertext_inner_tag, PB_LTYPE_UVARINT};
 
 pub const NOTE_LEN_BYTES: usize = 160;
 pub const NOTE_CIPHERTEXT_BYTES: usize = 176;

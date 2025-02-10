@@ -24,6 +24,8 @@ pub const PAYLOAD_KEY_LEN_BYTES: usize = 32;
 pub const RSEED_LEN_BYTES: usize = 32;
 pub const ID_LEN_BYTES: usize = 32;
 pub const AMOUNT_LEN_BYTES: usize = 16;
+pub const VALIDATOR_IDENTITY_BYTES: usize = 32;
+pub const PENALTY_BYTES: usize = 32;
 
 pub const DETECTION_DATA_QTY: usize = 16;
 pub const ACTION_DATA_QTY: usize = 16;

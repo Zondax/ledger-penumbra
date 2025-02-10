@@ -19,8 +19,8 @@ use crate::protobuf_h::asset_pb::{
 };
 use crate::protobuf_h::tct_pb::penumbra_crypto_tct_v1_StateCommitment_inner_tag;
 use crate::utils::protobuf::encode_proto_field;
-use decaf377::{Element, Encoding, Fq};
 use crate::ParserError;
+use decaf377::{Element, Encoding, Fq};
 
 #[derive(Clone)]
 #[cfg_attr(any(feature = "derive-debug", test), derive(Debug))]
@@ -64,13 +64,6 @@ impl Commitment {
 
         proto[len..].copy_from_slice(&bytes);
         Ok(proto)
-    }
-
-    pub fn to_proto_unbonding_claim(&self) -> [u8; Self::PROTO_LEN] {
-        let mut proto = [0u8; Self::PROTO_LEN];
-        proto[0..4].copy_from_slice(&[0x22, 0x22, 0x0a, 0x20]);
-        proto[4..].copy_from_slice(&self.0 .0);
-        proto
     }
 
     pub fn to_proto_position_withdraw(&self) -> [u8; Self::PROTO_LEN] {

@@ -48,6 +48,7 @@ pub mod swap_payload;
 pub mod swap_plaintext;
 pub mod symmetric;
 pub mod trading_pair;
+pub mod validator_identity;
 pub mod value;
 
 pub use bytes::BytesC;

@@ -16,11 +16,11 @@
 
 use crate::constants::ID_LEN_BYTES;
 use crate::parser::bytes::BytesC;
+use crate::protobuf_h::asset_pb::{penumbra_core_asset_v1_AssetId_inner_tag, PB_LTYPE_UVARINT};
 use crate::utils::prf::expand_fq;
+use crate::utils::protobuf::encode_proto_field;
 use crate::ParserError;
 use decaf377::Fq;
-use crate::protobuf_h::asset_pb::{penumbra_core_asset_v1_AssetId_inner_tag, PB_LTYPE_UVARINT};
-use crate::utils::protobuf::encode_proto_field;
 
 #[derive(Clone, Debug, Default)]
 pub struct Id(pub Fq);
@@ -55,8 +55,8 @@ impl Id {
         proto
     }
 
-    pub fn to_proto_tmp(&self) -> Result<[u8; Self::PROTO_LEN-2], ParserError> {
-        let mut proto = [0u8; Self::PROTO_LEN-2];
+    pub fn to_proto_tmp(&self) -> Result<[u8; Self::PROTO_LEN - 2], ParserError> {
+        let mut proto = [0u8; Self::PROTO_LEN - 2];
 
         let bytes = self.to_bytes();
         let len = encode_proto_field(
@@ -66,7 +66,7 @@ impl Id {
             &mut proto,
         )?;
 
-        if len + bytes.len() != Self::PROTO_LEN-2 {
+        if len + bytes.len() != Self::PROTO_LEN - 2 {
             return Err(ParserError::InvalidLength);
         }
 
