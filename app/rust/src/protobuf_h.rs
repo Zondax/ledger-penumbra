@@ -7,3 +7,5 @@ pub mod decaf377_rdsa_pb;
 pub mod sct_pb;
 pub mod shielded_pool_pb;
 pub mod tct_pb;
+pub mod dex_pb;
+pub mod num_pb;

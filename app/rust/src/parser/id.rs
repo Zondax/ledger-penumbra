@@ -19,6 +19,8 @@ use crate::parser::bytes::BytesC;
 use crate::utils::prf::expand_fq;
 use crate::ParserError;
 use decaf377::Fq;
+use crate::protobuf_h::asset_pb::{penumbra_core_asset_v1_AssetId_inner_tag, PB_LTYPE_UVARINT};
+use crate::utils::protobuf::encode_proto_field;
 
 #[derive(Clone, Debug, Default)]
 pub struct Id(pub Fq);
@@ -45,11 +47,31 @@ impl Id {
         bytes
     }
 
+    // TODO: remove this
     pub fn to_proto(&self) -> [u8; Self::PROTO_LEN] {
         let mut proto = [0u8; Self::PROTO_LEN];
         proto[0..4].copy_from_slice(&[0x12, 0x22, 0x0a, 0x20]);
         proto[4..].copy_from_slice(&self.to_bytes());
         proto
+    }
+
+    pub fn to_proto_tmp(&self) -> Result<[u8; Self::PROTO_LEN-2], ParserError> {
+        let mut proto = [0u8; Self::PROTO_LEN-2];
+
+        let bytes = self.to_bytes();
+        let len = encode_proto_field(
+            penumbra_core_asset_v1_AssetId_inner_tag as u64,
+            PB_LTYPE_UVARINT as u64,
+            &bytes,
+            &mut proto,
+        )?;
+
+        if len + bytes.len() != Self::PROTO_LEN-2 {
+            return Err(ParserError::InvalidLength);
+        }
+
+        proto[len..].copy_from_slice(&bytes);
+        Ok(proto)
     }
 }
 

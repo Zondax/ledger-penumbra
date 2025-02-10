@@ -17,10 +17,8 @@
 use crate::protobuf_h::asset_pb::{
     penumbra_core_asset_v1_BalanceCommitment_inner_tag, PB_LTYPE_UVARINT,
 };
-use crate::protobuf_h::tct_pb::{
-    penumbra_crypto_tct_v1_StateCommitment_inner_tag,
-};
-use crate::utils::protobuf::{encode_proto_field, encode_varint};
+use crate::protobuf_h::tct_pb::penumbra_crypto_tct_v1_StateCommitment_inner_tag;
+use crate::utils::protobuf::encode_proto_field;
 use decaf377::{Element, Encoding, Fq};
 use crate::ParserError;
 
@@ -68,21 +66,6 @@ impl Commitment {
         Ok(proto)
     }
 
-    pub fn to_proto_output(&self) -> [u8; Self::PROTO_LEN] {
-        let mut proto = [0u8; Self::PROTO_LEN];
-        proto[0..4].copy_from_slice(&[0x12, 0x22, 0x0a, 0x20]);
-        // proto[4..].copy_from_slice(&self.0.vartime_compress().0);
-        proto[4..].copy_from_slice(&self.bytes_compress());
-        proto
-    }
-
-    pub fn to_proto_swap(&self) -> [u8; Self::PROTO_LEN+2] {
-        let mut proto = [0u8; Self::PROTO_LEN+2];
-        proto[0..4].copy_from_slice(&[0x22, 0x22, 0x0a, 0x20]);
-        proto[4..].copy_from_slice(&self.0 .0);
-        proto
-    }
-
     pub fn to_proto_unbonding_claim(&self) -> [u8; Self::PROTO_LEN] {
         let mut proto = [0u8; Self::PROTO_LEN];
         proto[0..4].copy_from_slice(&[0x22, 0x22, 0x0a, 0x20]);
@@ -120,13 +103,6 @@ impl From<Element> for Commitment {
 impl StateCommitment {
     pub const LEN: usize = 32;
     pub const PROTO_LEN: usize = Self::LEN + 2;
-
-    pub fn to_proto_swap(&self) -> [u8; Self::PROTO_LEN + 2] {
-        let mut proto = [0u8; Self::PROTO_LEN + 2];
-        proto[0..4].copy_from_slice(&[0x0a, 0x22, 0x0a, 0x20]);
-        proto[4..].copy_from_slice(&self.0.to_bytes());
-        proto
-    }
 
     pub fn to_proto(&self) -> Result<[u8; Self::PROTO_LEN], ParserError> {
         let mut proto = [0u8; Self::PROTO_LEN];

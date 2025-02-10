@@ -29,6 +29,8 @@ use crate::parser::{
 };
 use crate::ParserError;
 use decaf377::Fr;
+use crate::protobuf_h::dex_pb::{penumbra_core_component_dex_v1_SwapBody_trading_pair_tag,penumbra_core_component_dex_v1_SwapBody_delta_1_i_tag, penumbra_core_component_dex_v1_SwapBody_delta_2_i_tag, penumbra_core_component_dex_v1_SwapBody_fee_commitment_tag, penumbra_core_component_dex_v1_SwapBody_payload_tag, PB_LTYPE_UVARINT};
+use crate::utils::protobuf::encode_and_update_proto_field;
 
 #[cfg_attr(any(feature = "derive-debug", test), derive(Debug))]
 pub struct Body {
@@ -56,17 +58,39 @@ impl SwapPlanC {
             std::str::from_utf8(SWAP_PERSONALIZED).expect("SWAP_PERSONALIZED must be valid UTF-8"),
         );
 
-        state.update(&body.trading_pair.to_proto()?);
-        state.update(&[0x12]); // encode tag
+        // encode trading pair
+        encode_and_update_proto_field(
+            &mut state,
+            penumbra_core_component_dex_v1_SwapBody_trading_pair_tag as u64,
+            PB_LTYPE_UVARINT as u64,
+            &body.trading_pair.to_proto()?,
+        )?;
+
+        // encode delta_1_i
+        state.update(&[(penumbra_core_component_dex_v1_SwapBody_delta_1_i_tag << 3 | 2) as u8]);
         let (asset_1, len_1) = body.delta_1_i.to_proto();
         state.update(&asset_1[..len_1]);
 
-        state.update(&[0x1a]); // encode tag
+        // encode delta_2_i
+        state.update(&[(penumbra_core_component_dex_v1_SwapBody_delta_2_i_tag << 3 | 2) as u8]);
         let (asset_2, len_2) = body.delta_2_i.to_proto();
         state.update(&asset_2[..len_2]);
 
-        state.update(&body.fee_commitment.to_proto_swap());
-        state.update(&body.payload.to_proto());
+        // encode fee_commitment
+        encode_and_update_proto_field(
+            &mut state,
+            penumbra_core_component_dex_v1_SwapBody_fee_commitment_tag as u64,
+            PB_LTYPE_UVARINT as u64,
+            &body.fee_commitment.to_proto()?,
+        )?;
+
+        // encode payload
+        encode_and_update_proto_field(
+            &mut state,
+            penumbra_core_component_dex_v1_SwapBody_payload_tag as u64,
+            PB_LTYPE_UVARINT as u64,
+            &body.payload.to_proto()?,
+        )?;
 
         Ok(EffectHash(*state.finalize().as_array()))
     }

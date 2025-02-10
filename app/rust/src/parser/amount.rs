@@ -20,6 +20,7 @@ use crate::utils::protobuf::encode_varint;
 use crate::ParserError;
 use decaf377::{Fq, Fr};
 use std::ops;
+use crate::protobuf_h::num_pb::{penumbra_core_num_v1_Amount_lo_tag, penumbra_core_num_v1_Amount_hi_tag};
 
 #[derive(Copy, Clone)]
 #[cfg_attr(any(feature = "derive-debug", test), derive(Debug))]
@@ -29,8 +30,8 @@ pub struct Amount {
 
 impl Amount {
     pub const LEN: usize = AMOUNT_LEN_BYTES;
-    pub const PROTO_PREFIX_LO: [u8; 1] = [0x08]; // (1 << 3) | 0 = 8
-    pub const PROTO_PREFIX_HI: [u8; 1] = [0x10]; // (2 << 3) | 0 = 16
+    pub const PROTO_PREFIX_LO: [u8; 1] = [(penumbra_core_num_v1_Amount_lo_tag << 3) as u8]; // (1 << 3) | 0 = 8
+    pub const PROTO_PREFIX_HI: [u8; 1] = [(penumbra_core_num_v1_Amount_hi_tag << 3) as u8]; // (2 << 3) | 0 = 16
 
     pub fn to_le_bytes(&self) -> [u8; Self::LEN] {
         self.inner.to_le_bytes()
