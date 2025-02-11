@@ -83,5 +83,4 @@ app/rust/.cargo/.global-cache
 app/rust/.cargo/git
 app/rust/target
 
-tools/proto-compiler/target
 tools/proto-bindgen/target
