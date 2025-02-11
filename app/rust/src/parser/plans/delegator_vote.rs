@@ -36,8 +36,8 @@ use crate::protobuf_h::governance_pb::{
     penumbra_core_component_governance_v1_Vote_vote_tag, PB_LTYPE_UVARINT,
 };
 use crate::utils::protobuf::{
-    encode_and_update_proto_field, encode_and_update_proto_field_tmp,
-    encode_and_update_proto_number, encode_proto_number, encode_varint,
+    encode_and_update_proto_field, encode_and_update_proto_number, encode_proto_number,
+    encode_varint,
 };
 use crate::ParserError;
 use decaf377::Fr;
@@ -118,7 +118,7 @@ impl DelegatorVotePlanC {
 
         // value amount
         let (value, value_len) = body.value.to_proto()?;
-        encode_and_update_proto_field_tmp(
+        encode_and_update_proto_field(
             &mut state,
             penumbra_core_component_governance_v1_DelegatorVoteBody_value_tag as u64,
             PB_LTYPE_UVARINT as u64,
@@ -135,7 +135,7 @@ impl DelegatorVotePlanC {
         state.update(&unbonded_amount[..unbonded_amount_len]);
 
         // nullifier
-        encode_and_update_proto_field_tmp(
+        encode_and_update_proto_field(
             &mut state,
             penumbra_core_component_governance_v1_DelegatorVoteBody_nullifier_tag as u64,
             PB_LTYPE_UVARINT as u64,
@@ -144,11 +144,13 @@ impl DelegatorVotePlanC {
         )?;
 
         // rk
+        let rk = body.rk.to_proto()?;
         encode_and_update_proto_field(
             &mut state,
             penumbra_core_component_governance_v1_DelegatorVoteBody_rk_tag as u64,
             PB_LTYPE_UVARINT as u64,
-            &body.rk.to_proto()?,
+            &rk,
+            rk.len(),
         )?;
 
         Ok(EffectHash(*state.finalize().as_array()))

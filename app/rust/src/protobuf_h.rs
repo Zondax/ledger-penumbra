@@ -3,6 +3,7 @@
 #![allow(warnings)]
 
 pub mod asset_pb;
+pub mod auction_pb;
 pub mod decaf377_rdsa_pb;
 pub mod dex_pb;
 pub mod governance_pb;

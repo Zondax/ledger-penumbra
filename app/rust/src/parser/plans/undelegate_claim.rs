@@ -74,27 +74,33 @@ impl UndelegateClaimPlanC {
         );
 
         // encode validator identity
+        let validator_identity = body.validator_identity.to_proto()?;
         encode_and_update_proto_field(
             &mut state,
             penumbra_core_component_stake_v1_UndelegateClaimBody_validator_identity_tag as u64,
             PB_LTYPE_UVARINT as u64,
-            &body.validator_identity.to_proto()?,
+            &validator_identity,
+            validator_identity.len(),
         )?;
 
         // encode penalty
+        let penalty = body.penalty.to_proto()?;
         encode_and_update_proto_field(
             &mut state,
             penumbra_core_component_stake_v1_UndelegateClaimBody_penalty_tag as u64,
             PB_LTYPE_UVARINT as u64,
-            &body.penalty.to_proto()?,
+            &penalty,
+            penalty.len(),
         )?;
 
         // encode balance commitment
+        let balance_commitment = body.balance_commitment.to_proto()?;
         encode_and_update_proto_field(
             &mut state,
             penumbra_core_component_stake_v1_UndelegateClaimBody_balance_commitment_tag as u64,
             PB_LTYPE_UVARINT as u64,
-            &body.balance_commitment.to_proto()?,
+            &balance_commitment,
+            balance_commitment.len(),
         )?;
 
         // encode unbonding start height

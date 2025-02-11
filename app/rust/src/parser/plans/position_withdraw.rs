@@ -18,17 +18,19 @@ use crate::constants::{MAX_REWARDS, POSITION_WITHDRAWAL_PERSONALIZED};
 use crate::parser::{
     commitment::Commitment,
     effect_hash::{create_personalized_state, EffectHash},
-    id::{IdRaw, IdC},
+    id::{IdC, IdRaw},
     reserves::{Reserves, ReservesC},
     trading_pair::{TradingPair, TradingPairC},
     value::{Sign, Value, ValueC},
 };
+use crate::protobuf_h::dex_pb::{
+    penumbra_core_component_dex_v1_PositionWithdraw_position_id_tag,
+    penumbra_core_component_dex_v1_PositionWithdraw_reserves_commitment_tag,
+    penumbra_core_component_dex_v1_PositionWithdraw_sequence_tag, PB_LTYPE_UVARINT,
+};
+use crate::utils::protobuf::{encode_and_update_proto_field, encode_and_update_proto_number};
 use crate::ParserError;
 use decaf377::Fr;
-use crate::protobuf_h::dex_pb::{penumbra_core_component_dex_v1_PositionWithdraw_position_id_tag,
-    penumbra_core_component_dex_v1_PositionWithdraw_reserves_commitment_tag, 
-    penumbra_core_component_dex_v1_PositionWithdraw_sequence_tag, PB_LTYPE_UVARINT};
-use crate::utils::protobuf::{encode_and_update_proto_field, encode_and_update_proto_number};
 
 pub struct PositionWithdraw {
     /// The identity key of the validator to undelegate from.
@@ -66,19 +68,23 @@ impl PositionWithdrawPlanC {
         );
 
         // position_id
+        let position_id = position_withdraw.position_id.to_proto()?;
         encode_and_update_proto_field(
             &mut state,
             penumbra_core_component_dex_v1_PositionWithdraw_position_id_tag as u64,
             PB_LTYPE_UVARINT as u64,
-            &position_withdraw.position_id.to_proto()?,
+            &position_id,
+            position_id.len(),
         )?;
 
         // reserves_commitment
+        let reserves_commitment = position_withdraw.reserves_commitment.to_proto()?;
         encode_and_update_proto_field(
             &mut state,
             penumbra_core_component_dex_v1_PositionWithdraw_reserves_commitment_tag as u64,
             PB_LTYPE_UVARINT as u64,
-            &position_withdraw.reserves_commitment.to_proto()?,
+            &reserves_commitment,
+            reserves_commitment.len(),
         )?;
 
         // sequence

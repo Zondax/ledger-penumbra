@@ -64,27 +64,33 @@ impl SpendPlanC {
         );
 
         // Encode balance commitment
+        let balance_commitment = body.balance_commitment.to_proto()?;
         encode_and_update_proto_field(
             &mut state,
             penumbra_core_component_shielded_pool_v1_SpendBody_balance_commitment_tag as u64,
             PB_LTYPE_UVARINT as u64,
-            &body.balance_commitment.to_proto()?,
+            &balance_commitment,
+            balance_commitment.len(),
         )?;
 
         // Encode rk
+        let rk = body.rk.to_proto()?;
         encode_and_update_proto_field(
             &mut state,
             penumbra_core_component_shielded_pool_v1_SpendBody_rk_tag as u64,
             PB_LTYPE_UVARINT as u64,
-            &body.rk.to_proto()?,
+            &rk,
+            rk.len(),
         )?;
 
         // Encode nullifier
+        let nullifier = body.nullifier.to_proto()?;
         encode_and_update_proto_field(
             &mut state,
             penumbra_core_component_shielded_pool_v1_SpendBody_nullifier_tag as u64,
             PB_LTYPE_UVARINT as u64,
-            &body.nullifier.to_proto()?,
+            &nullifier,
+            nullifier.len(),
         )?;
 
         Ok(EffectHash(*state.finalize().as_array()))

@@ -74,7 +74,7 @@ impl Amount {
 
         // Copy the encoded data to the output buffer
         output_buffer[prefix_len..total_length].copy_from_slice(&temp_buffer[..pos]);
-        
+
         Ok((output_buffer, total_length))
     }
 }

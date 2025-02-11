@@ -65,11 +65,13 @@ impl SwapPlanC {
         );
 
         // encode trading pair
+        let trading_pair = body.trading_pair.to_proto()?;
         encode_and_update_proto_field(
             &mut state,
             penumbra_core_component_dex_v1_SwapBody_trading_pair_tag as u64,
             PB_LTYPE_UVARINT as u64,
-            &body.trading_pair.to_proto()?,
+            &trading_pair,
+            trading_pair.len(),
         )?;
 
         // encode delta_1_i
@@ -83,19 +85,23 @@ impl SwapPlanC {
         state.update(&asset_2[..len_2]);
 
         // encode fee_commitment
+        let fee_commitment = body.fee_commitment.to_proto()?;
         encode_and_update_proto_field(
             &mut state,
             penumbra_core_component_dex_v1_SwapBody_fee_commitment_tag as u64,
             PB_LTYPE_UVARINT as u64,
-            &body.fee_commitment.to_proto()?,
+            &fee_commitment,
+            fee_commitment.len(),
         )?;
 
         // encode payload
+        let payload = body.payload.to_proto()?;
         encode_and_update_proto_field(
             &mut state,
             penumbra_core_component_dex_v1_SwapBody_payload_tag as u64,
             PB_LTYPE_UVARINT as u64,
-            &body.payload.to_proto()?,
+            &payload,
+            payload.len(),
         )?;
 
         Ok(EffectHash(*state.finalize().as_array()))

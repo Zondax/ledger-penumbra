@@ -75,19 +75,23 @@ impl OutputPlanC {
             );
 
             // Encode note payload
+            let note_payload = body.note_payload.to_proto()?;
             encode_and_update_proto_field(
                 &mut state,
                 penumbra_core_component_shielded_pool_v1_OutputBody_note_payload_tag as u64,
                 PB_LTYPE_UVARINT as u64,
-                &body.note_payload.to_proto()?,
+                &note_payload,
+                note_payload.len(),
             )?;
 
             // Encode balance commitment
+            let balance_commitment = body.balance_commitment.to_proto()?;
             encode_and_update_proto_field(
                 &mut state,
                 penumbra_core_component_shielded_pool_v1_OutputBody_balance_commitment_tag as u64,
                 PB_LTYPE_UVARINT as u64,
-                &body.balance_commitment.to_proto()?,
+                &balance_commitment,
+                balance_commitment.len(),
             )?;
 
             // Encode wrapped memo key
@@ -96,6 +100,7 @@ impl OutputPlanC {
                 penumbra_core_component_shielded_pool_v1_OutputBody_wrapped_memo_key_tag as u64,
                 PB_LTYPE_UVARINT as u64,
                 &body.wrapped_memo_key.0,
+                body.wrapped_memo_key.0.len(),
             )?;
 
             // Encode ovk wrapped key
@@ -104,6 +109,7 @@ impl OutputPlanC {
                 penumbra_core_component_shielded_pool_v1_OutputBody_ovk_wrapped_key_tag as u64,
                 PB_LTYPE_UVARINT as u64,
                 &body.ovk_wrapped_key.0,
+                body.ovk_wrapped_key.0.len(),
             )?;
 
             Ok(EffectHash(*state.finalize().as_array()))

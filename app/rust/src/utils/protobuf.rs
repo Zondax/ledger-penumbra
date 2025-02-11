@@ -109,23 +109,7 @@ pub fn encode_proto_field_tmp(
     Ok(len)
 }
 
-// TODO: remove this function
 pub fn encode_and_update_proto_field(
-    state: &mut blake2b_simd::State,
-    tag: u64,
-    wire_type: u64,
-    value: &[u8],
-) -> Result<(), ParserError> {
-    let mut proto_buf = [0u8; 20];
-
-    let len = encode_proto_field(tag, wire_type, value, &mut proto_buf)?;
-
-    state.update(&proto_buf[..len]);
-    state.update(value);
-    Ok(())
-}
-
-pub fn encode_and_update_proto_field_tmp(
     state: &mut blake2b_simd::State,
     tag: u64,
     wire_type: u64,

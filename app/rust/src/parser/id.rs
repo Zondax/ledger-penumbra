@@ -112,7 +112,6 @@ impl AssetId {
     }
 }
 
-
 #[derive(Clone, Debug, Default)]
 pub struct IdRaw(pub [u8; 32]);
 
