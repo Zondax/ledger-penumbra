@@ -18,18 +18,21 @@ use crate::constants::{MAX_REWARDS, POSITION_WITHDRAWAL_PERSONALIZED};
 use crate::parser::{
     commitment::Commitment,
     effect_hash::{create_personalized_state, EffectHash},
-    id::IdC,
+    id::{IdRaw, IdC},
     reserves::{Reserves, ReservesC},
     trading_pair::{TradingPair, TradingPairC},
     value::{Sign, Value, ValueC},
 };
-use crate::utils::protobuf::encode_varint;
 use crate::ParserError;
 use decaf377::Fr;
+use crate::protobuf_h::dex_pb::{penumbra_core_component_dex_v1_PositionWithdraw_position_id_tag,
+    penumbra_core_component_dex_v1_PositionWithdraw_reserves_commitment_tag, 
+    penumbra_core_component_dex_v1_PositionWithdraw_sequence_tag, PB_LTYPE_UVARINT};
+use crate::utils::protobuf::{encode_and_update_proto_field, encode_and_update_proto_number};
 
 pub struct PositionWithdraw {
     /// The identity key of the validator to undelegate from.
-    pub position_id: [u8; 32],
+    pub position_id: IdRaw,
     /// A transparent (zero blinding factor) commitment to the position's final reserves and fees.
     ///
     /// The chain will check this commitment by recomputing it with the on-chain state.
@@ -63,19 +66,27 @@ impl PositionWithdrawPlanC {
         );
 
         // position_id
-        state.update(&[0x0a, 0x22, 0x0a, 0x20]);
-        state.update(&position_withdraw.position_id);
+        encode_and_update_proto_field(
+            &mut state,
+            penumbra_core_component_dex_v1_PositionWithdraw_position_id_tag as u64,
+            PB_LTYPE_UVARINT as u64,
+            &position_withdraw.position_id.to_proto()?,
+        )?;
 
         // reserves_commitment
-        state.update(&[0x12, 0x22]);
-        state.update(&position_withdraw.reserves_commitment.to_proto()?);
+        encode_and_update_proto_field(
+            &mut state,
+            penumbra_core_component_dex_v1_PositionWithdraw_reserves_commitment_tag as u64,
+            PB_LTYPE_UVARINT as u64,
+            &position_withdraw.reserves_commitment.to_proto()?,
+        )?;
 
         // sequence
-        let mut encoded = [0u8; 11];
-        encoded[0] = 0x18;
-        let pos = 1;
-        let len = encode_varint(position_withdraw.sequence, &mut encoded[pos..])?;
-        state.update(&encoded[..len + 1]);
+        encode_and_update_proto_number(
+            &mut state,
+            penumbra_core_component_dex_v1_PositionWithdraw_sequence_tag as u64,
+            position_withdraw.sequence,
+        )?;
 
         Ok(EffectHash(*state.finalize().as_array()))
     }
@@ -91,7 +102,7 @@ impl PositionWithdrawPlanC {
         let reserves_commitment = self.reserves_commitment()?;
 
         let position_withdraw = PositionWithdraw {
-            position_id,
+            position_id: IdRaw(position_id),
             reserves_commitment,
             sequence: self.sequence,
         };

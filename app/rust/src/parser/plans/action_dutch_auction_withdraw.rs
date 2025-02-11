@@ -66,10 +66,11 @@ impl ActionDutchAuctionWithdrawPlanC {
         state.update(&encoded[..len + 1]);
 
         // reserves_commitment
+        state.update(&[0x1a, 0x22]);
         state.update(
             &action_dutch_auction_withdraw
                 .reserves_commitment
-                .to_proto_action_dutch_auction_withdraw(),
+                .to_proto()?,
         );
 
         Ok(EffectHash(*state.finalize().as_array()))

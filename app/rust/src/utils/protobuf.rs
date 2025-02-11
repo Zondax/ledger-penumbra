@@ -109,6 +109,7 @@ pub fn encode_proto_field_tmp(
     Ok(len)
 }
 
+// TODO: remove this function
 pub fn encode_and_update_proto_field(
     state: &mut blake2b_simd::State,
     tag: u64,

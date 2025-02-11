@@ -79,6 +79,7 @@ impl PartialEq for Id {
 pub struct IdC {
     pub inner: BytesC,
 }
+
 impl IdC {
     pub fn get_inner(&self) -> Result<&[u8], ParserError> {
         self.inner.get_bytes()
@@ -108,5 +109,32 @@ impl AssetId {
 
     pub fn to_bytes(&self) -> [u8; ID_LEN_BYTES] {
         self.0.to_bytes()
+    }
+}
+
+
+#[derive(Clone, Debug, Default)]
+pub struct IdRaw(pub [u8; 32]);
+
+impl IdRaw {
+    pub const PROTO_LEN: usize = ID_LEN_BYTES + 2;
+
+    pub fn to_proto(&self) -> Result<[u8; Self::PROTO_LEN], ParserError> {
+        let mut proto = [0u8; Self::PROTO_LEN];
+
+        let bytes = self.0;
+        let len = encode_proto_field(
+            penumbra_core_asset_v1_AssetId_inner_tag as u64,
+            PB_LTYPE_UVARINT as u64,
+            &bytes,
+            &mut proto,
+        )?;
+
+        if len + bytes.len() != Self::PROTO_LEN {
+            return Err(ParserError::InvalidLength);
+        }
+
+        proto[len..].copy_from_slice(&bytes);
+        Ok(proto)
     }
 }
