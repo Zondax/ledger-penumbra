@@ -35,7 +35,7 @@ impl Rk {
         let len = encode_proto_field(
             penumbra_crypto_decaf377_rdsa_v1_SpendVerificationKey_inner_tag as u64,
             PB_LTYPE_UVARINT as u64,
-            &bytes,
+            bytes.len(),
             &mut proto,
         )?;
 

@@ -25,7 +25,7 @@ use crate::protobuf_h::asset_pb::{
     penumbra_core_asset_v1_Value_amount_tag, penumbra_core_asset_v1_Value_asset_id_tag,
     PB_LTYPE_UVARINT,
 };
-use crate::utils::protobuf::{encode_proto_field_tmp, encode_varint};
+use crate::utils::protobuf::{encode_proto_field, encode_varint};
 
 #[derive(Clone)]
 #[cfg_attr(any(feature = "derive-debug", test), derive(Debug))]
@@ -88,7 +88,7 @@ impl Value {
 
         // Encode the asset ID into the proto buffer
         let asset_id_proto = self.asset_id.to_proto()?;
-        offset += encode_proto_field_tmp(
+        offset += encode_proto_field(
             penumbra_core_asset_v1_Value_asset_id_tag as u64,
             PB_LTYPE_UVARINT as u64,
             asset_id_proto.len(),

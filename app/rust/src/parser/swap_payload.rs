@@ -43,7 +43,7 @@ impl SwapPayload {
         offset += encode_proto_field(
             penumbra_core_component_dex_v1_SwapPayload_commitment_tag as u64,
             PB_LTYPE_UVARINT as u64,
-            &commitment,
+            commitment.len(),
             &mut proto[offset..],
         )?;
         proto[offset..offset + commitment.len()].copy_from_slice(&commitment);
@@ -53,7 +53,7 @@ impl SwapPayload {
         offset += encode_proto_field(
             penumbra_core_component_dex_v1_SwapPayload_encrypted_swap_tag as u64,
             PB_LTYPE_UVARINT as u64,
-            &encrypted_swap,
+            encrypted_swap.len(),
             &mut proto[offset..],
         )?;
         proto[offset..offset + encrypted_swap.len()].copy_from_slice(&encrypted_swap);

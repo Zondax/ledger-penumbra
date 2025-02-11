@@ -222,7 +222,7 @@ impl NoteCiphertext {
         let len = encode_proto_field(
             penumbra_core_component_shielded_pool_v1_NoteCiphertext_inner_tag as u64,
             PB_LTYPE_UVARINT as u64,
-            &self.0,
+            self.0.len(),
             &mut proto,
         )?;
 

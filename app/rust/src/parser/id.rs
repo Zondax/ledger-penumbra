@@ -54,7 +54,7 @@ impl Id {
         let len = encode_proto_field(
             penumbra_core_asset_v1_AssetId_inner_tag as u64,
             PB_LTYPE_UVARINT as u64,
-            &bytes,
+            bytes.len(),
             &mut proto,
         )?;
 
@@ -125,7 +125,7 @@ impl IdRaw {
         let len = encode_proto_field(
             penumbra_core_asset_v1_AssetId_inner_tag as u64,
             PB_LTYPE_UVARINT as u64,
-            &bytes,
+            bytes.len(),
             &mut proto,
         )?;
 

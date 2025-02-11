@@ -22,7 +22,7 @@ use crate::protobuf_h::transaction_pb::{
     penumbra_core_transaction_v1_CluePlan_address_tag,
     penumbra_core_transaction_v1_DetectionData_fmd_clues_tag, PB_LTYPE_UVARINT,
 };
-use crate::utils::protobuf::encode_proto_field_tmp;
+use crate::utils::protobuf::encode_proto_field;
 use crate::ParserError;
 
 #[repr(C)]
@@ -77,7 +77,7 @@ impl DetectionDataPlanC {
 
             // Encode address into protobuf
             let mut address_tag_buf = [0u8; 10];
-            let address_tag_len = encode_proto_field_tmp(
+            let address_tag_len = encode_proto_field(
                 penumbra_core_transaction_v1_CluePlan_address_tag as u64,
                 PB_LTYPE_UVARINT as u64,
                 CLUE_LEN_BYTES,
@@ -85,7 +85,7 @@ impl DetectionDataPlanC {
             )?;
             // Encode clue into protobuf
             let mut clue_tag_buf = [0u8; 10];
-            let clue_tag_len = encode_proto_field_tmp(
+            let clue_tag_len = encode_proto_field(
                 penumbra_core_transaction_v1_DetectionData_fmd_clues_tag as u64,
                 PB_LTYPE_UVARINT as u64,
                 CLUE_LEN_BYTES + address_tag_len,

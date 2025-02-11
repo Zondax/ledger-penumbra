@@ -87,7 +87,7 @@ impl TradingPair {
         offset += encode_proto_field(
             penumbra_core_component_dex_v1_TradingPair_asset_1_tag as u64,
             PB_LTYPE_UVARINT as u64,
-            &asset_1_proto,
+            asset_1_proto.len(),
             &mut proto[offset..],
         )?;
         proto[offset..offset + asset_1_proto.len()].copy_from_slice(&asset_1_proto);
@@ -97,7 +97,7 @@ impl TradingPair {
         offset += encode_proto_field(
             penumbra_core_component_dex_v1_TradingPair_asset_2_tag as u64,
             PB_LTYPE_UVARINT as u64,
-            &asset_2_proto,
+            asset_2_proto.len(),
             &mut proto[offset..],
         )?;
         proto[offset..offset + asset_2_proto.len()].copy_from_slice(&asset_2_proto);

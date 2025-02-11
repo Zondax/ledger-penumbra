@@ -54,7 +54,7 @@ impl Commitment {
         let len = encode_proto_field(
             penumbra_core_asset_v1_BalanceCommitment_inner_tag as u64,
             PB_LTYPE_UVARINT as u64,
-            &bytes,
+            bytes.len(),
             &mut proto,
         )?;
 
@@ -90,7 +90,7 @@ impl StateCommitment {
         let len = encode_proto_field(
             penumbra_crypto_tct_v1_StateCommitment_inner_tag as u64,
             PB_LTYPE_UVARINT as u64,
-            &bytes,
+            bytes.len(),
             &mut proto,
         )?;
 

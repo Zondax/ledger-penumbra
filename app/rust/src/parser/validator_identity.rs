@@ -32,7 +32,7 @@ impl ValidatorIdentity {
         let len = encode_proto_field(
             penumbra_core_keys_v1_IdentityKey_ik_tag as u64,
             PB_LTYPE_UVARINT as u64,
-            &bytes,
+            bytes.len(),
             &mut proto,
         )?;
 

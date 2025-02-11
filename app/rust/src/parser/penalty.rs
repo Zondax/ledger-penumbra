@@ -82,7 +82,7 @@ impl Penalty {
         let len = encode_proto_field(
             penumbra_core_component_stake_v1_Penalty_inner_tag as u64,
             PB_LTYPE_UVARINT as u64,
-            &bytes,
+            bytes.len(),
             &mut proto,
         )?;
 

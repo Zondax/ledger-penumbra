@@ -47,7 +47,7 @@ impl NotePayload {
         offset += encode_proto_field(
             penumbra_core_component_shielded_pool_v1_NotePayload_note_commitment_tag as u64,
             PB_LTYPE_UVARINT as u64,
-            &note_commitment_bytes,
+            note_commitment_bytes.len(),
             &mut proto[offset..offset + 2],
         )?;
         proto[offset..offset + note_commitment_bytes.len()].copy_from_slice(&note_commitment_bytes);
@@ -57,7 +57,7 @@ impl NotePayload {
         offset += encode_proto_field(
             penumbra_core_component_shielded_pool_v1_NotePayload_ephemeral_key_tag as u64,
             PB_LTYPE_UVARINT as u64,
-            &self.ephemeral_key.0,
+            self.ephemeral_key.0.len(),
             &mut proto[offset..offset + 2],
         )?;
         proto[offset..offset + self.ephemeral_key.0.len()].copy_from_slice(&self.ephemeral_key.0);
@@ -68,7 +68,7 @@ impl NotePayload {
         offset += encode_proto_field(
             penumbra_core_component_shielded_pool_v1_NotePayload_encrypted_note_tag as u64,
             PB_LTYPE_UVARINT as u64,
-            &encrypted_note_bytes,
+            encrypted_note_bytes.len(),
             &mut proto[offset..offset + 3],
         )?;
         proto[offset..offset + encrypted_note_bytes.len()].copy_from_slice(&encrypted_note_bytes);
