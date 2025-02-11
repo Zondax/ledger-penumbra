@@ -13,3 +13,4 @@ pub mod sct_pb;
 pub mod shielded_pool_pb;
 pub mod stake_pb;
 pub mod tct_pb;
+pub mod transaction_pb;

@@ -27,6 +27,7 @@ pub const AMOUNT_LEN_BYTES: usize = 16;
 pub const VALIDATOR_IDENTITY_BYTES: usize = 32;
 pub const PENALTY_BYTES: usize = 32;
 pub const RK_LEN_BYTES: usize = 32;
+pub const CLUE_LEN_BYTES: usize = 68;
 
 pub const DETECTION_DATA_QTY: usize = 16;
 pub const ACTION_DATA_QTY: usize = 16;
