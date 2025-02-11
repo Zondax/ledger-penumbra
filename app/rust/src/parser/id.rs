@@ -27,7 +27,7 @@ pub struct Id(pub Fq);
 
 impl Id {
     pub const LEN: usize = ID_LEN_BYTES;
-    pub const PROTO_LEN: usize = Self::LEN + 4;
+    pub const PROTO_LEN: usize = Self::LEN + 2;
 
     /// Compute the value generator   for this asset, used for computing balance commitments.
     pub fn value_generator(&self) -> decaf377::Element {
@@ -47,16 +47,8 @@ impl Id {
         bytes
     }
 
-    // TODO: remove this
-    pub fn to_proto(&self) -> [u8; Self::PROTO_LEN] {
+    pub fn to_proto(&self) -> Result<[u8; Self::PROTO_LEN], ParserError> {
         let mut proto = [0u8; Self::PROTO_LEN];
-        proto[0..4].copy_from_slice(&[0x12, 0x22, 0x0a, 0x20]);
-        proto[4..].copy_from_slice(&self.to_bytes());
-        proto
-    }
-
-    pub fn to_proto_tmp(&self) -> Result<[u8; Self::PROTO_LEN - 2], ParserError> {
-        let mut proto = [0u8; Self::PROTO_LEN - 2];
 
         let bytes = self.to_bytes();
         let len = encode_proto_field(
@@ -66,7 +58,7 @@ impl Id {
             &mut proto,
         )?;
 
-        if len + bytes.len() != Self::PROTO_LEN - 2 {
+        if len + bytes.len() != Self::PROTO_LEN {
             return Err(ParserError::InvalidLength);
         }
 

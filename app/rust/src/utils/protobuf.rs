@@ -85,6 +85,30 @@ pub fn encode_proto_field(
     Ok(len)
 }
 
+pub fn encode_proto_field_tmp(
+    tag: u64,
+    wire_type: u64,
+    size: usize,
+    output: &mut [u8],
+) -> Result<usize, ParserError> {
+    if output.is_empty() {
+        return Err(ParserError::InvalidLength);
+    }
+
+    let tag_and_type = tag << 3 | wire_type;
+    let mut len = encode_varint(tag_and_type, output)?;
+
+    let remaining_buf = &mut output[len..];
+    let varint_len = encode_varint(size as u64, remaining_buf)?;
+    len += varint_len;
+
+    if len > output.len() {
+        return Err(ParserError::InvalidLength);
+    }
+
+    Ok(len)
+}
+
 pub fn encode_and_update_proto_field(
     state: &mut blake2b_simd::State,
     tag: u64,
@@ -97,6 +121,24 @@ pub fn encode_and_update_proto_field(
 
     state.update(&proto_buf[..len]);
     state.update(value);
+    Ok(())
+}
+
+pub fn encode_and_update_proto_field_tmp(
+    state: &mut blake2b_simd::State,
+    tag: u64,
+    wire_type: u64,
+    input: &[u8],
+    size: usize,
+) -> Result<(), ParserError> {
+    if input.is_empty() || size > input.len() {
+        return Err(ParserError::InvalidLength);
+    }
+    let mut proto_buf = [0u8; 20];
+    let len = encode_proto_field_tmp(tag, wire_type, size, &mut proto_buf)?;
+
+    state.update(&proto_buf[..len]);
+    state.update(&input[..size]);
     Ok(())
 }
 

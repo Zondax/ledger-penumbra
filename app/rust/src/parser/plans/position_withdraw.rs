@@ -67,11 +67,8 @@ impl PositionWithdrawPlanC {
         state.update(&position_withdraw.position_id);
 
         // reserves_commitment
-        state.update(
-            &position_withdraw
-                .reserves_commitment
-                .to_proto_position_withdraw(),
-        );
+        state.update(&[0x12, 0x22]);
+        state.update(&position_withdraw.reserves_commitment.to_proto()?);
 
         // sequence
         let mut encoded = [0u8; 11];
