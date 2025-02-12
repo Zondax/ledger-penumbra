@@ -70,7 +70,7 @@ impl UndelegateClaimPlanC {
 
         let mut state = create_personalized_state(
             std::str::from_utf8(UNDELEGATE_CLAIM_PERSONALIZED)
-                .expect("UNDELEGATE_CLAIM_PERSONALIZED must be valid UTF-8"),
+                .map_err(|_| ParserError::InvalidUtf8)?,
         );
 
         // encode validator identity

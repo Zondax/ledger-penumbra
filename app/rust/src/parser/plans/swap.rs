@@ -61,7 +61,7 @@ impl SwapPlanC {
         let body = self.swap_body(fvk)?;
 
         let mut state = create_personalized_state(
-            std::str::from_utf8(SWAP_PERSONALIZED).expect("SWAP_PERSONALIZED must be valid UTF-8"),
+            std::str::from_utf8(SWAP_PERSONALIZED).map_err(|_| ParserError::InvalidUtf8)?,
         );
 
         // encode trading pair

@@ -76,8 +76,7 @@ impl TryFrom<NoteC> for Note {
         let rseed = Rseed::try_from(note_c.rseed)?;
         let address = Address::try_from(note_c.address.inner.get_bytes()?)?;
         let transmission_key_s = Fq::from_bytes_checked(&address.transmission_key().0)
-            .map_err(|_| ParserError::InvalidFvk)
-            .unwrap();
+            .map_err(|_| ParserError::InvalidFvk)?;
 
         Ok(Note {
             value,
@@ -147,7 +146,7 @@ impl Note {
         let key = PayloadKey::derive(&shared_secret, &epk);
 
         let mut encryption_result = [0u8; NOTE_CIPHERTEXT_BYTES];
-        let note_plaintext: [u8; NOTE_LEN_BYTES] = self.into();
+        let note_plaintext: [u8; NOTE_LEN_BYTES] = self.try_into()?;
         encryption_result[..NOTE_LEN_BYTES].copy_from_slice(&note_plaintext);
 
         key.encrypt(&mut encryption_result, PayloadKind::Note, NOTE_LEN_BYTES)
@@ -231,13 +230,15 @@ impl NoteCiphertext {
     }
 }
 
-impl From<&Note> for [u8; NOTE_LEN_BYTES] {
-    fn from(note: &Note) -> [u8; NOTE_LEN_BYTES] {
+impl TryFrom<&Note> for [u8; NOTE_LEN_BYTES] {
+    type Error = ParserError;
+
+    fn try_from(note: &Note) -> Result<[u8; NOTE_LEN_BYTES], Self::Error> {
         let mut bytes = [0u8; NOTE_LEN_BYTES];
-        bytes[0..80].copy_from_slice(&note.address.to_bytes().unwrap());
+        bytes[0..80].copy_from_slice(&note.address.to_bytes()?);
         bytes[80..96].copy_from_slice(&note.value.amount.to_le_bytes());
         bytes[96..128].copy_from_slice(&note.value.asset_id.to_bytes());
-        bytes[128..160].copy_from_slice(&note.rseed.to_bytes().unwrap());
-        bytes
+        bytes[128..160].copy_from_slice(&note.rseed.to_bytes()?);
+        Ok(bytes)
     }
 }

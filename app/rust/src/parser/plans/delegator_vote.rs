@@ -82,7 +82,7 @@ impl DelegatorVotePlanC {
 
         let mut state = create_personalized_state(
             std::str::from_utf8(DELEGATOR_VOTE_PERSONALIZED)
-                .expect("DELEGATOR_VOTE_PERSONALIZED must be valid UTF-8"),
+                .map_err(|_| ParserError::InvalidUtf8)?,
         );
 
         // proposal

@@ -64,7 +64,7 @@ impl PositionWithdrawPlanC {
 
         let mut state = create_personalized_state(
             std::str::from_utf8(POSITION_WITHDRAWAL_PERSONALIZED)
-                .expect("POSITION_WITHDRAWAL_PERSONALIZED must be valid UTF-8"),
+                .map_err(|_| ParserError::InvalidUtf8)?,
         );
 
         // position_id

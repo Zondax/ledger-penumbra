@@ -359,53 +359,55 @@ pub unsafe extern "C" fn rs_generic_action_hash(
     if let Ok(data_to_hash) = data.get_bytes() {
         match action_type {
             ActionPlan::Delegate => {
-                effect_hash = EffectHash::from_proto_effecting_data(
-                    std::str::from_utf8(DELEGATE_PERSONALIZED)
-                        .expect("DELEGATE_PERSONALIZED must be valid UTF-8"),
-                    data_to_hash,
-                );
+                let personalized = match std::str::from_utf8(DELEGATE_PERSONALIZED) {
+                    Ok(s) => s,
+                    Err(_) => return ParserError::InvalidUtf8 as u32,
+                };
+                effect_hash = EffectHash::from_proto_effecting_data(personalized, data_to_hash);
             }
             ActionPlan::Undelegate => {
-                effect_hash = EffectHash::from_proto_effecting_data(
-                    std::str::from_utf8(UNDELEGATE_PERSONALIZED)
-                        .expect("UNDELEGATE_PERSONALIZED must be valid UTF-8"),
-                    data_to_hash,
-                );
+                let personalized = match std::str::from_utf8(UNDELEGATE_PERSONALIZED) {
+                    Ok(s) => s,
+                    Err(_) => return ParserError::InvalidUtf8 as u32,
+                };
+                effect_hash = EffectHash::from_proto_effecting_data(personalized, data_to_hash);
             }
             ActionPlan::Ics20Withdrawal => {
-                effect_hash = EffectHash::from_proto_effecting_data(
-                    std::str::from_utf8(ICS20_WITHDRAWAL_PERSONALIZED)
-                        .expect("ICS20_WITHDRAWAL_PERSONALIZED must be valid UTF-8"),
-                    data_to_hash,
-                );
+                let personalized = match std::str::from_utf8(ICS20_WITHDRAWAL_PERSONALIZED) {
+                    Ok(s) => s,
+                    Err(_) => return ParserError::InvalidUtf8 as u32,
+                };
+                effect_hash = EffectHash::from_proto_effecting_data(personalized, data_to_hash);
             }
             ActionPlan::PositionOpen => {
-                effect_hash = EffectHash::from_proto_effecting_data(
-                    std::str::from_utf8(POSITION_OPEN_PERSONALIZED)
-                        .expect("POSITION_OPEN_PERSONALIZED must be valid UTF-8"),
-                    data_to_hash,
-                );
+                let personalized = match std::str::from_utf8(POSITION_OPEN_PERSONALIZED) {
+                    Ok(s) => s,
+                    Err(_) => return ParserError::InvalidUtf8 as u32,
+                };
+                effect_hash = EffectHash::from_proto_effecting_data(personalized, data_to_hash);
             }
             ActionPlan::PositionClose => {
-                effect_hash = EffectHash::from_proto_effecting_data(
-                    std::str::from_utf8(POSITION_CLOSE_PERSONALIZED)
-                        .expect("POSITION_CLOSE_PERSONALIZED must be valid UTF-8"),
-                    data_to_hash,
-                );
+                let personalized = match std::str::from_utf8(POSITION_CLOSE_PERSONALIZED) {
+                    Ok(s) => s,
+                    Err(_) => return ParserError::InvalidUtf8 as u32,
+                };
+                effect_hash = EffectHash::from_proto_effecting_data(personalized, data_to_hash);
             }
             ActionPlan::ActionDutchAuctionSchedule => {
-                effect_hash = EffectHash::from_proto_effecting_data(
-                    std::str::from_utf8(ACTION_DUTCH_AUCTION_SCHEDULE_PERSONALIZED)
-                        .expect("ACTION_DUTCH_AUCTION_SCHEDULE_PERSONALIZED must be valid UTF-8"),
-                    data_to_hash,
-                );
+                let personalized =
+                    match std::str::from_utf8(ACTION_DUTCH_AUCTION_SCHEDULE_PERSONALIZED) {
+                        Ok(s) => s,
+                        Err(_) => return ParserError::InvalidUtf8 as u32,
+                    };
+                effect_hash = EffectHash::from_proto_effecting_data(personalized, data_to_hash);
             }
             ActionPlan::ActionDutchAuctionEnd => {
-                effect_hash = EffectHash::from_proto_effecting_data(
-                    std::str::from_utf8(ACTION_DUTCH_AUCTION_END_PERSONALIZED)
-                        .expect("ACTION_DUTCH_AUCTION_END_PERSONALIZED must be valid UTF-8"),
-                    data_to_hash,
-                );
+                let personalized = match std::str::from_utf8(ACTION_DUTCH_AUCTION_END_PERSONALIZED)
+                {
+                    Ok(s) => s,
+                    Err(_) => return ParserError::InvalidUtf8 as u32,
+                };
+                effect_hash = EffectHash::from_proto_effecting_data(personalized, data_to_hash);
             }
             _ => {
                 return ParserError::InvalidActionType as u32;

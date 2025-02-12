@@ -59,8 +59,7 @@ impl SpendPlanC {
         let body = self.spend_body(fvk)?;
 
         let mut state = create_personalized_state(
-            std::str::from_utf8(SPEND_PERSONALIZED)
-                .expect("SPEND_PERSONALIZED must be valid UTF-8"),
+            std::str::from_utf8(SPEND_PERSONALIZED).map_err(|_| ParserError::InvalidUtf8)?,
         );
 
         // Encode balance commitment

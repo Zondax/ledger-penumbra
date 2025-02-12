@@ -37,10 +37,8 @@ impl Penalty {
     pub const PROTO_LEN: usize = PENALTY_BYTES + 2;
 
     /// Apply this `Penalty` to an `Amount` of unbonding tokens.
-    pub fn apply_to_amount(&self, amount: Amount) -> Amount {
-        self.0
-            .apply_to_amount(&amount)
-            .expect("should not overflow, because penalty is <= 1")
+    pub fn apply_to_amount(&self, amount: Amount) -> Result<Amount, ParserError> {
+        self.0.apply_to_amount(&amount)
     }
 
     /// Helper method to compute the effect of an UndelegateClaim on the
@@ -67,7 +65,7 @@ impl Penalty {
         })?;
         balance.insert(Imbalance {
             value: Value {
-                amount: self.apply_to_amount(unbonding_amount),
+                amount: self.apply_to_amount(unbonding_amount)?,
                 asset_id: Id(Fq::from_le_bytes_mod_order(&STAKING_TOKEN_ASSET_ID_BYTES)),
             },
             sign: Sign::Provided,

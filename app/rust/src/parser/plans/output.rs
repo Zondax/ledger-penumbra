@@ -70,8 +70,7 @@ impl OutputPlanC {
 
         if let Ok(body) = body {
             let mut state = create_personalized_state(
-                std::str::from_utf8(OUTPUT_PERSONALIZED)
-                    .expect("OUTPUT_PERSONALIZED must be valid UTF-8"),
+                std::str::from_utf8(OUTPUT_PERSONALIZED).map_err(|_| ParserError::InvalidUtf8)?,
             );
 
             // Encode note payload

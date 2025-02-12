@@ -56,7 +56,7 @@ impl ActionDutchAuctionWithdrawPlanC {
 
         let mut state = create_personalized_state(
             std::str::from_utf8(ACTION_DUTCH_AUCTION_WITHDRAWAL_PERSONALIZED)
-                .expect("ACTION_DUTCH_AUCTION_WITHDRAWAL_PERSONALIZED must be valid UTF-8"),
+                .map_err(|_| ParserError::InvalidUtf8)?,
         );
 
         // auction_id

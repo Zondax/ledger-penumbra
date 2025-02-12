@@ -22,7 +22,8 @@ use crate::utils::protobuf::encode_proto_field;
 use crate::ParserError;
 use decaf377::Fq;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Default)]
+#[cfg_attr(any(feature = "derive-debug", test), derive(Debug))]
 pub struct Id(pub Fq);
 
 impl Id {
@@ -112,7 +113,8 @@ impl AssetId {
     }
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Default)]
+#[cfg_attr(any(feature = "derive-debug", test), derive(Debug))]
 pub struct IdRaw(pub [u8; 32]);
 
 impl IdRaw {

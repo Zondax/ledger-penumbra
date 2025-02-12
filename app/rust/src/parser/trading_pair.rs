@@ -23,7 +23,8 @@ use crate::protobuf_h::dex_pb::{
 use crate::utils::protobuf::encode_proto_field;
 use crate::ParserError;
 
-#[derive(Clone, Debug)]
+#[derive(Clone)]
+#[cfg_attr(any(feature = "derive-debug", test), derive(Debug))]
 pub struct TradingPair {
     pub(crate) asset_1: Id,
     pub(crate) asset_2: Id,
