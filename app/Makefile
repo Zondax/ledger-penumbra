@@ -153,3 +153,7 @@ $(info ICONNAME  = [$(ICONNAME)])
 ifeq ($(ICONNAME),)
 $(error ICONNAME is not set)
 endif
+
+.PHONY: version
+version:
+	@echo "v$(APPVERSION)" > app.version
