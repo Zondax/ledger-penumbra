@@ -30,9 +30,7 @@ include $(BOLOS_SDK)/Makefile.defines
 APPNAME = "Penumbra"
 
 # Application version
-APPVERSION_M = 0
-APPVERSION_N = 1
-APPVERSION_P = 3
+include $(CURDIR)/Makefile.version
 APPVERSION = "$(APPVERSION_M).$(APPVERSION_N).$(APPVERSION_P)"
 
 # Application source files
