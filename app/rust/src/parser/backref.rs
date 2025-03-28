@@ -56,7 +56,7 @@ impl Backref {
         if nonce_bytes.len() < NONCE_LEN {
             return Err(ParserError::EncryptionError);
         }
-        let nonce = Nonce::<ChaCha20Poly1305>::from_slice(&nonce_bytes);
+        let nonce = Nonce::<ChaCha20Poly1305>::from_slice(nonce_bytes);
         let mut buffer = [0u8; ENCRYPTED_BACKREF_LEN];
         let commitment_bytes = self.note_commitment.to_bytes();
         let plaintext_len = commitment_bytes.len();
