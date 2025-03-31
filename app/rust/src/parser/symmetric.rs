@@ -99,11 +99,10 @@ impl PayloadKey {
 
         let plaintext_len = plaintext.len();
         let tag = cipher
-            .encrypt_in_place_detached(nonce, b"", &mut plaintext[..text_len])
+            .encrypt_in_place_detached(nonce, &[], &mut plaintext[..text_len])
             .map_err(|_| ParserError::EncryptionError)?;
 
-        // TODO: check size here
-        plaintext[plaintext_len - 16..].copy_from_slice(&tag);
+        plaintext[plaintext_len - tag.len()..].copy_from_slice(&tag);
 
         Ok(())
     }
@@ -132,10 +131,10 @@ impl PayloadKey {
         let plaintext_len = plaintext.len();
 
         let tag = cipher
-            .encrypt_in_place_detached(nonce, b"", &mut plaintext[..text_len])
+            .encrypt_in_place_detached(nonce, &[], &mut plaintext[..text_len])
             .map_err(|_| ParserError::EncryptionError)?;
 
-        plaintext[plaintext_len - 16..].copy_from_slice(&tag);
+        plaintext[plaintext_len - tag.len()..].copy_from_slice(&tag);
 
         Ok(())
     }
@@ -192,9 +191,9 @@ impl OutgoingCipherKey {
         let plaintext_len = plaintext.len();
 
         let tag = cipher
-            .encrypt_in_place_detached(nonce, b"", &mut plaintext[..32])
+            .encrypt_in_place_detached(nonce, &[], &mut plaintext[..32])
             .map_err(|_| ParserError::EncryptionError)?;
-        plaintext[plaintext_len - 16..].copy_from_slice(&tag);
+        plaintext[plaintext_len - tag.len()..].copy_from_slice(&tag);
         Ok(())
     }
 }
