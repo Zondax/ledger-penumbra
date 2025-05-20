@@ -4,7 +4,7 @@
 
 The general structure of commands and responses is as follows:
 
-## Action plan supported
+### Action plan supported
  - Spend
  - Output
  - Ics20 Withdrawal

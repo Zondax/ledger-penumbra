@@ -1,7 +1,7 @@
 # Ledger Penumbra app
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![npm version](https://badge.fury.io/js/%40zondax%2Fledger-penumbra.svg)](https://www.npmjs.com/package/@zondax/ledger-penumbra)
-[![GithubActions](https://github.com/Zondax/ledger-penumbra/actions/workflows/main.yml/badge.svg)](https://github.com/Zondax/ledger-penumbra/blob/main/.github/workflows/main.yaml)
+[![GithubActions](https://github.com/Zondax/ledger-penumbra/actions/workflows/main.yml/badge.svg)](https://github.com/Zondax/ledger-penumbra/blob/main/.github/workflows/main.yml)
 
 ---
 
