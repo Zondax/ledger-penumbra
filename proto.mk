@@ -22,3 +22,4 @@ proto-clean:
 .PHONY: proto
 # Cleans generated files and regenerates everything from scratch
 proto: proto-clean ./app/rust/src/protobuf_h
+	make format
