@@ -31,7 +31,8 @@
 
 uint32_t hdPath[HDPATH_LEN_DEFAULT];
 
-__Z_INLINE zxerr_t copyKeys(keys_t *keys, key_kind_e req_type, uint8_t *output, uint16_t len, uint16_t *cmdResponseLen) {
+__Z_INLINE zxerr_t copyKeys(keys_t *keys, key_kind_e req_type, uint8_t *output, uint16_t len,
+                            uint16_t *cmdResponseLen) {
     if (keys == NULL || output == NULL) {
         return zxerr_no_data;
     }
@@ -169,8 +170,8 @@ zxerr_t crypto_sign(parser_tx_t *tx_obj, uint8_t *signature, uint16_t signatureM
     bytes_t effect_hash = {.ptr = tx_obj->effect_hash, .len = 64};
     for (uint16_t i = 0; i < tx_obj->plan.actions.qty; i++) {
         if (tx_obj->actions_plan[i].action_type == penumbra_core_transaction_v1_ActionPlan_spend_tag) {
-            if (rs_sign_spend(&effect_hash, &tx_obj->actions_plan[i].action.spend.randomizer, &keys.skb, spend_signature,
-                              64) != parser_ok) {
+            if (rs_sign_spend(&effect_hash, &tx_obj->actions_plan[i].action.spend.randomizer, &keys.skb,
+                              spend_signature, 64) != parser_ok) {
                 return zxerr_invalid_crypto_settings;
             }
 
