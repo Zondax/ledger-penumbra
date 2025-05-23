@@ -82,4 +82,4 @@ jobs:
           branch: proto-update-${{ github.run_id }}
           base: dev
           delete-branch: true
-          draft: false
+          draft: true
