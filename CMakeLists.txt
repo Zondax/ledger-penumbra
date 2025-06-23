@@ -52,8 +52,14 @@ string(APPEND CMAKE_LINKER_FLAGS " -fno-omit-frame-pointer -g")
 hunter_add_package(fmt)
 find_package(fmt CONFIG REQUIRED)
 
-hunter_add_package(nlohmann_json)
-find_package(nlohmann_json CONFIG REQUIRED)
+# Use FetchContent to get nlohmann_json 3.12.0 since Hunter doesn't support this version
+include(FetchContent)
+FetchContent_Declare(
+    nlohmann_json
+    URL https://github.com/nlohmann/json/releases/download/v3.12.0/json.tar.xz
+    URL_HASH SHA256=42f6e95cad6ec532fd372391373363b62a14af6d771056dbfc86160e6dfff7aa
+)
+FetchContent_MakeAvailable(nlohmann_json)
 
 hunter_add_package(GTest)
 find_package(GTest CONFIG REQUIRED)
