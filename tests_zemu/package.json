@@ -29,9 +29,9 @@
   },
   "devDependencies": {
     "@ledgerhq/hw-transport-node-hid": "^6.29.7",
-    "@matteoh2o1999/github-actions-jest-reporter": "^3.0.0",
     "@types/jest": "^30.0.0",
     "@types/ledgerhq__hw-transport": "^4.21.8",
+    "@types/node": "^22.10.2",
     "@typescript-eslint/eslint-plugin": "^8.34.1",
     "@typescript-eslint/parser": "^8.34.1",
     "blakejs": "^1.2.1",
@@ -44,12 +44,16 @@
     "eslint-plugin-prettier": "^5.5.0",
     "eslint-plugin-tsdoc": "^0.4.0",
     "eslint-plugin-unused-imports": "^4.1.4",
-    "jest": "30.0.2",
+    "jest": "^30.0.2",
     "jssha": "^3.3.1",
     "prettier": "^3.5.3",
     "sort-package-json": "^3.2.1",
     "ts-jest": "^29.4.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3"
+  },
+  "resolutions": {
+    "axios": "^1.10.0",
+    "glob": "^11.0.3"
   }
 }
