@@ -201,8 +201,6 @@ jobs:
           toolchain: stable
       - name: Install node
         uses: actions/setup-node@v4
-        with:
-          node-version: 18
       - name: Install yarn
         run: |
           npm install -g yarn
