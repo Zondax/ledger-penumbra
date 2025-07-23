@@ -78,6 +78,11 @@ tests_tools/target
 fuzz-*.log
 fuzz/coverage/
 fuzz/logs/
+
+# Python bytecode
+__pycache__/
+*.pyc
+*.pyo
 /scan-build
 app/rust/.cargo/registry
 app/rust/.cargo/.package-cache
